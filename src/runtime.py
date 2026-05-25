@@ -1,0 +1,151 @@
+from __future__ import annotations
+
+import copy
+import json
+import logging
+import os
+import warnings as _warnings_module
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+_pending_log_dir: Path | None = None
+_logging_configured = False
+
+
+def setup_file_logging(log_dir: str | Path) -> None:
+    """Register the log directory; actual handler wiring happens after TinyTroupe import.
+
+    Call this before the first run. The file handlers are attached to the root
+    logger inside configure_tinytroupe_runtime(), which runs after TinyTroupe's
+    start_logger() — preventing TinyTroupe from clearing our handlers.
+    """
+    global _pending_log_dir
+    _pending_log_dir = Path(log_dir)
+
+
+def _apply_file_logging() -> None:
+    """Attach file handlers to the root logger (called after TinyTroupe import).
+
+    Creates two files per session:
+      info_<ts>.log     — INFO+, clean aligned columns, easy to tail
+      warnings_<ts>.log — WARNING+, multi-line verbose format for debugging
+    """
+    global _logging_configured
+    if _logging_configured or _pending_log_dir is None:
+        return
+    _logging_configured = True
+
+    _pending_log_dir.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    info_fmt = logging.Formatter(
+        fmt="%(asctime)s  %(levelname)-7s  %(name)-16s  %(message)s",
+        datefmt="%H:%M:%S",
+    )
+    warn_fmt = logging.Formatter(
+        fmt="%(asctime)s  %(levelname)-8s  %(name)s\n    %(message)s\n",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    info_fh = logging.FileHandler(_pending_log_dir / f"info_{ts}.log", encoding="utf-8")
+    info_fh.setLevel(logging.INFO)
+    info_fh.setFormatter(info_fmt)
+
+    warn_fh = logging.FileHandler(_pending_log_dir / f"warnings_{ts}.log", encoding="utf-8")
+    warn_fh.setLevel(logging.WARNING)
+    warn_fh.setFormatter(warn_fmt)
+
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    root.addHandler(info_fh)
+    root.addHandler(warn_fh)
+
+    # Pydantic / stdlib warnings → warnings.log
+    _warnings_module.filterwarnings("always")
+    logging.captureWarnings(True)
+
+    print(f"  Logs → {_pending_log_dir}/info_{ts}.log  |  warnings_{ts}.log")
+
+
+def ensure_tinytroupe_imports() -> tuple[Any, Any, Any, Any]:
+    try:
+        from tinytroupe import config_manager
+        from tinytroupe.agent import TinyPerson
+        from tinytroupe.environment import TinyWorld
+        from tinytroupe.factory import TinyPersonFactory
+    except ImportError as exc:
+        raise SystemExit(
+            "Missing dependency: tinytroupe. Install with: "
+            "pip install git+https://github.com/microsoft/tinytroupe.git"
+        ) from exc
+
+    return config_manager, TinyPerson, TinyWorld, TinyPersonFactory
+
+
+def configure_tinytroupe_runtime(
+    *,
+    api_key: str,
+    model: str,
+    temperature: float | None,
+    max_completion_tokens: int | None,
+) -> None:
+    config_manager, TinyPerson, TinyWorld, _ = ensure_tinytroupe_imports()
+    _apply_file_logging()  # safe: TinyTroupe's start_logger() has already run
+    os.environ["OPENAI_API_KEY"] = api_key
+    updates: dict[str, Any] = {"model": model}
+    if temperature is not None:
+        updates["temperature"] = float(temperature)
+    if max_completion_tokens is not None:
+        updates["max_completion_tokens"] = int(max_completion_tokens)
+    config_manager.update_multiple(updates)
+    TinyPerson.communication_display = False
+    TinyWorld.communication_display = False
+
+
+def clone_person(person: Any) -> Any:
+    try:
+        cloned = copy.deepcopy(person)
+    except Exception:
+        return person
+
+    for attr in (
+        "environment",
+        "current_messages",
+        "_actions_buffer",
+        "_accessible_agents",
+        "_displayed_communications_buffer",
+    ):
+        if hasattr(cloned, attr):
+            setattr(cloned, attr, None if attr == "environment" else [])
+    for counter in ("actions_count", "stimuli_count", "_current_episode_event_count"):
+        if hasattr(cloned, counter):
+            setattr(cloned, counter, 0)
+
+    return cloned
+
+
+def actions_to_text(actions: list[dict[str, Any]] | None) -> str:
+    if not actions:
+        return ""
+
+    talk_lines: list[str] = []
+    other_lines: list[str] = []
+    for entry in actions:
+        if not isinstance(entry, dict):
+            continue
+        action = entry.get("action", {})
+        if not isinstance(action, dict):
+            continue
+        action_type = str(action.get("type", "")).strip().upper()
+        content = str(action.get("content", "")).strip()
+        if action_type == "TALK" and content:
+            talk_lines.append(content)
+        elif action_type not in {"", "DONE"} and content:
+            other_lines.append(f"[{action_type}] {content}")
+
+    if talk_lines:
+        return "\n".join(talk_lines)
+    if other_lines:
+        return "\n".join(other_lines)
+    return json.dumps(actions, ensure_ascii=True)

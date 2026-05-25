@@ -1,0 +1,162 @@
+{
+  "ENTJ": {
+    "persona_id": "ENTJ",
+    "mbti_type": "ENTJ",
+    "passed": false,
+    "validation_score": 0.8055,
+    "dimension_scores": {
+      "E/I": 1.0,
+      "N/S": 0.2222,
+      "T/F": 1.0,
+      "J/P": 1.0
+    },
+    "attempts": 2,
+    "model": "gpt-4.1-mini",
+    "generated_at": "2026-05-02T13:58:55.166080+00:00",
+    "notes": []
+  },
+  "ESTJ": {
+    "persona_id": "ESTJ",
+    "mbti_type": "ESTJ",
+    "passed": true,
+    "validation_score": 0.9445,
+    "dimension_scores": {
+      "E/I": 1.0,
+      "N/S": 0.8889,
+      "T/F": 0.8889,
+      "J/P": 1.0
+    },
+    "attempts": 1,
+    "model": "gpt-4.1-mini",
+    "generated_at": "2026-05-02T14:00:40.497054+00:00",
+    "notes": []
+  },
+  "INTJ": {
+    "persona_id": "INTJ",
+    "mbti_type": "INTJ",
+    "passed": false,
+    "validation_score": 0.7778,
+    "dimension_scores": {
+      "E/I": 0.1111,
+      "N/S": 1.0,
+      "T/F": 1.0,
+      "J/P": 1.0
+    },
+    "attempts": 1,
+    "model": "gpt-4.1-mini",
+    "generated_at": "2026-05-02T14:02:43.979539+00:00",
+    "notes": []
+  },
+  "ENFJ": {
+    "persona_id": "ENFJ",
+    "mbti_type": "ENFJ",
+    "passed": true,
+    "validation_score": 0.8889,
+    "dimension_scores": {
+      "E/I": 0.8889,
+      "N/S": 0.8889,
+      "T/F": 0.8889,
+      "J/P": 0.8889
+    },
+    "attempts": 2,
+    "model": "gpt-4.1-mini",
+    "generated_at": "2026-05-02T14:08:32.406566+00:00",
+    "notes": []
+  },
+  "ISTJ": {
+    "persona_id": "ISTJ",
+    "mbti_type": "ISTJ",
+    "passed": false,
+    "validation_score": 0.75,
+    "dimension_scores": {
+      "E/I": 0.2222,
+      "N/S": 0.7778,
+      "T/F": 1.0,
+      "J/P": 1.0
+    },
+    "attempts": 2,
+    "model": "gpt-4.1-mini",
+    "generated_at": "2026-05-02T14:12:01.867149+00:00",
+    "notes": []
+  },
+  "ENTP": {
+    "persona_id": "ENTP",
+    "mbti_type": "ENTP",
+    "passed": true,
+    "validation_score": 0.9445,
+    "dimension_scores": {
+      "E/I": 1.0,
+      "N/S": 1.0,
+      "T/F": 1.0,
+      "J/P": 0.7778
+    },
+    "attempts": 2,
+    "model": "gpt-4.1-mini",
+    "generated_at": "2026-05-02T14:15:42.177480+00:00",
+    "notes": []
+  },
+  "INFJ": {
+    "persona_id": "INFJ",
+    "mbti_type": "INFJ",
+    "passed": false,
+    "validation_score": 0.6945,
+    "dimension_scores": {
+      "E/I": 0.1111,
+      "N/S": 1.0,
+      "T/F": 0.7778,
+      "J/P": 0.8889
+    },
+    "attempts": 2,
+    "model": "gpt-4.1-mini",
+    "generated_at": "2026-05-02T14:19:06.926133+00:00",
+    "notes": []
+  },
+  "ESFJ": {
+    "persona_id": "ESFJ",
+    "mbti_type": "ESFJ",
+    "passed": true,
+    "validation_score": 0.75,
+    "dimension_scores": {
+      "E/I": 0.7778,
+      "N/S": 0.8889,
+      "T/F": 0.4444,
+      "J/P": 0.8889
+    },
+    "attempts": 1,
+    "model": "gpt-4.1-mini",
+    "generated_at": "2026-05-02T14:21:26.077791+00:00",
+    "notes": []
+  },
+  "ISFP": {
+    "persona_id": "ISFP",
+    "mbti_type": "ISFP",
+    "passed": false,
+    "validation_score": 0.3333,
+    "dimension_scores": {
+      "E/I": 0.0,
+      "N/S": 0.8889,
+      "T/F": 0.3333,
+      "J/P": 0.1111
+    },
+    "attempts": 1,
+    "model": "gpt-4.1-mini",
+    "generated_at": "2026-05-02T14:23:07.792583+00:00",
+    "notes": []
+  },
+  "INFP": {
+    "persona_id": "INFP",
+    "mbti_type": "INFP",
+    "passed": false,
+    "validation_score": 0.6945,
+    "dimension_scores": {
+      "E/I": 0.0,
+      "N/S": 1.0,
+      "T/F": 0.8889,
+      "J/P": 0.8889
+    },
+    "attempts": 1,
+    "model": "gpt-4.1-mini",
+    "generated_at": "2026-05-02T14:26:28.780433+00:00",
+    "notes": []
+  }
+}

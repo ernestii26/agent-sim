@@ -1,0 +1,47 @@
+{
+  "step": 1,
+  "runs": 5,
+  "rounds": 5,
+  "speech_rate": {
+    "ENTJ": 0.52,
+    "ESTJ": 0.68,
+    "ENFJ": 0.88,
+    "ENTP": 0.88,
+    "ESFJ": 0.96,
+    "INTJ": 0.32,
+    "ISTJ": 0.64,
+    "INFJ": 0.64,
+    "ISFP": 0.4,
+    "INFP": 0.6
+  },
+  "mean_words_when_speaking": {
+    "ENTJ": 30.846153846153847,
+    "ESTJ": 33.588235294117645,
+    "ENFJ": 33.59090909090909,
+    "ENTP": 30.40909090909091,
+    "ESFJ": 32.666666666666664,
+    "INTJ": 27.625,
+    "ISTJ": 30.5,
+    "INFJ": 30.625,
+    "ISFP": 29.3,
+    "INFP": 29.933333333333334
+  },
+  "e_mean_speech_rate": 0.784,
+  "i_mean_speech_rate": 0.52,
+  "gap": 0.264,
+  "i_below_70_count": 5,
+  "e_above_50_count": 5,
+  "passed": true,
+  "names": {
+    "ENTJ": "Adrian Lawrence Whitmore",
+    "ESTJ": "Margaret Sinclair Bennett",
+    "INTJ": "Benjamin Arthur Harrington",
+    "ENFJ": "William Alexander Pembroke",
+    "ISTJ": "Samuel Gregory Ashford",
+    "ENTP": "Christopher Henry Blackwood",
+    "INFJ": "Victoria Isabelle Davenport",
+    "ESFJ": "Elizabeth Marianne Ashcroft Sinclair",
+    "ISFP": "Catherine Amelia Kingsley Hawthorne",
+    "INFP": "Nicholas Andrew Harrington-Seymour"
+  }
+}
