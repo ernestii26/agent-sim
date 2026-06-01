@@ -1,0 +1,349 @@
+{
+  "run_no": 6,
+  "p_id": "P2",
+  "d_id": "D3",
+  "p_votes": 4,
+  "d_votes": 5,
+  "vote_counts": {
+    "P2": 4,
+    "D3": 5,
+    "N1": 0,
+    "N2": 1,
+    "N3": 0,
+    "N4": 0,
+    "N5": 0,
+    "N6": 0,
+    "N7": 0,
+    "N8": 0
+  },
+  "p_speech_rate": 1.0,
+  "d_speech_rate": 1.0,
+  "p_words_per_turn": 38.0,
+  "d_words_per_turn": 28.666666666666668,
+  "speech_rate_by_type": {
+    "P2": 1.0,
+    "D3": 1.0,
+    "N1": 0.3333333333333333,
+    "N2": 0.6666666666666666,
+    "N3": 0.6666666666666666,
+    "N4": 1.0,
+    "N5": 0.6666666666666666,
+    "N6": 0.6666666666666666,
+    "N7": 1.0,
+    "N8": 0.3333333333333333
+  },
+  "transcript": [
+    {
+      "round": 1,
+      "name": "Marcus Webb",
+      "persona_type": "D3",
+      "spoke": true,
+      "word_count": 29,
+      "text": "Alright, let's stop spinning our wheels. We need one clear pitch, one leader. I’ll do it unless someone can convince me they’ll get better results. Otherwise, we’re wasting time."
+    },
+    {
+      "round": 1,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 26,
+      "text": "Can we just pause for a second? I think we need to hear from everyone before deciding who leads. Otherwise, we risk missing something important. Thoughts?"
+    },
+    {
+      "round": 1,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 40,
+      "text": "I think it would help to just hear from everyone, even if it's quick. Maybe people have ideas we haven’t heard. I’m okay with someone taking the lead, but I’d like us all to be clear on who’s doing what."
+    },
+    {
+      "round": 1,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 28,
+      "text": "Maybe we should hear from people who haven’t spoken yet. Sometimes the quiet ideas are the ones that save us. Just saying. Can we get everyone’s quick take?"
+    },
+    {
+      "round": 1,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 30,
+      "text": "I think it makes sense for us to stick with our usual strengths. If we’re pitching, maybe Marcus leads, but I’d like to double-check the compliance details before we finalize."
+    },
+    {
+      "round": 1,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 38,
+      "text": "I think it’s good we’re asking everyone for input, but we really need to decide who’s taking the lead today. Otherwise, we might fall into the same trap as before. Maybe we can hear ideas quickly and vote?"
+    },
+    {
+      "round": 1,
+      "name": "James Thornton",
+      "persona_type": "P2",
+      "spoke": true,
+      "word_count": 45,
+      "text": "I’ll jump in. If we’re serious about keeping this team, we need to be brutally clear on who’s leading and why. Happy to make my case, but I want to hear concise pitches from anyone interested—right now, no hedging. Let’s not repeat the last mess."
+    },
+    {
+      "round": 1,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": true,
+      "word_count": 29,
+      "text": "I’m fine with Marcus leading the pitch, as long as we double-check the data set we’re using. Last time there was confusion. I can help review that if needed."
+    },
+    {
+      "round": 1,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 34,
+      "text": "I don't have a strong preference for who leads, but I think Marcus has handled pitches well before. I can help with the backend details, just let me know what you need from me."
+    },
+    {
+      "round": 1,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 33,
+      "text": "I’m fine with Marcus leading, but we need the technical details locked down this time. I’ll double-check the control system specs before we hand anything over. Don’t want a repeat of last quarter."
+    },
+    {
+      "round": 2,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 2,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 24,
+      "text": "Alright, I’ll focus on backend checks and make sure the APIs are clean before we finalize. Just ping me if anything urgent pops up."
+    },
+    {
+      "round": 2,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 2,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 53,
+      "text": "Sounds like Marcus will take the lead then. I just want to make sure we keep the backend and compliance checks in the loop—so there aren't any surprises. If anyone sees a gap, say so now or as soon as you spot it. No point in keeping quiet and hoping it works out."
+    },
+    {
+      "round": 2,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 36,
+      "text": "Just making sure—we’re all clear on who’s doing what, right? If there’s any doubt or someone feels uncomfortable, maybe say so now. I’m fine with Marcus leading and can help with anything HR or onboarding related."
+    },
+    {
+      "round": 2,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 30,
+      "text": "Alright, I’ll focus on reviewing the data, and if anyone notices a gap or needs support, let me know. I’d rather catch any issues early than scramble later. Sound good?"
+    },
+    {
+      "round": 2,
+      "name": "Marcus Webb",
+      "persona_type": "D3",
+      "spoke": true,
+      "word_count": 32,
+      "text": "Alright, that's it. I’m leading the pitch. If you’ve got concerns or see a hole, speak up now—otherwise, lock in your piece and move. We’re not losing another deal because we hesitated."
+    },
+    {
+      "round": 2,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 29,
+      "text": "Okay, I’ll take another look at the user flows to make sure nothing’s missing. If anyone needs a second set of eyes on their section, just let me know."
+    },
+    {
+      "round": 2,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 26,
+      "text": "Alright, I’ll double-check the compliance side. If anything looks off, I’ll flag it right away. Let me know if you need a second look at anything."
+    },
+    {
+      "round": 2,
+      "name": "James Thornton",
+      "persona_type": "P2",
+      "spoke": true,
+      "word_count": 33,
+      "text": "Quick reminder—if you hit a snag or something doesn't add up, say so straight away. I'd much rather have an awkward interruption now than a crisis later. We can't afford any blind spots."
+    },
+    {
+      "round": 3,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Marcus Webb",
+      "persona_type": "D3",
+      "spoke": true,
+      "word_count": 25,
+      "text": "If anyone's confused or holding back, say it now. Otherwise, you know what you’re responsible for. Let’s get this done. I’m not repeating myself again."
+    },
+    {
+      "round": 3,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "James Thornton",
+      "persona_type": "P2",
+      "spoke": true,
+      "word_count": 36,
+      "text": "Alright, last call—if anyone’s got doubts, let’s hear them now. It’s not a sign of weakness to flag a problem before we’re on the spot. I’d rather be embarrassed here than blindsided in front of leadership."
+    },
+    {
+      "round": 3,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 25,
+      "text": "No issues from me. I'll keep an eye on the API side, but everything looks set. If anything crops up, I’ll flag it right away."
+    },
+    {
+      "round": 3,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 24,
+      "text": "Alright, I’m set on my side. If anything pops up, just shout and I’ll jump in. Otherwise, I’ll keep an eye on the details."
+    },
+    {
+      "round": 3,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    }
+  ],
+  "votes": [
+    {
+      "voter_name": "James Thornton",
+      "voter_type": "P2",
+      "voted_for_name": "Marcus Webb",
+      "voted_for_type": "D3",
+      "reason": "Marcus took clear ownership, pushed for accountability, and made sure everyone knew their responsibilities without dodging tough conversations."
+    },
+    {
+      "voter_name": "Marcus Webb",
+      "voter_type": "D3",
+      "voted_for_name": "James Thornton",
+      "voted_for_type": "P2",
+      "reason": "James was the first to say he'd rather have an awkward interruption now than a crisis later—he's not afraid to call things out directly."
+    },
+    {
+      "voter_name": "Trang Nguyen",
+      "voter_type": "N1",
+      "voted_for_name": "Marcus Webb",
+      "voted_for_type": "D3",
+      "reason": "He was direct about leading, set clear expectations, and made sure everyone knew their responsibilities during the discussion."
+    },
+    {
+      "voter_name": "Erik Lundström",
+      "voter_type": "N2",
+      "voted_for_name": "James Thornton",
+      "voted_for_type": "P2",
+      "reason": "James repeatedly encouraged the team to speak up about any doubts or issues, making sure no one felt pressured to stay silent."
+    },
+    {
+      "voter_name": "Lilian Njoroge",
+      "voter_type": "N3",
+      "voted_for_name": "James Thornton",
+      "voted_for_type": "P2",
+      "reason": "James consistently encouraged open communication and made it clear he values catching problems early, which helps build trust in the team."
+    },
+    {
+      "voter_name": "Amitesh Iyer",
+      "voter_type": "N4",
+      "voted_for_name": "Marcus Webb",
+      "voted_for_type": "D3",
+      "reason": "Marcus stepped up to take responsibility, pushed for clarity, and made sure everyone knew their role during the discussion."
+    },
+    {
+      "voter_name": "Lucía Mendoza",
+      "voter_type": "N5",
+      "voted_for_name": "Erik Lundström",
+      "voted_for_type": "N2",
+      "reason": "He made sure everyone had a chance to speak and stressed the importance of keeping everyone in the loop."
+    },
+    {
+      "voter_name": "Wei Zhou",
+      "voter_type": "N6",
+      "voted_for_name": "Marcus Webb",
+      "voted_for_type": "D3",
+      "reason": "Marcus stepped up to take responsibility, set clear expectations, and pushed the team to speak up if there were any concerns."
+    },
+    {
+      "voter_name": "Élise Moreau",
+      "voter_type": "N7",
+      "voted_for_name": "James Thornton",
+      "voted_for_type": "P2",
+      "reason": "He encouraged everyone to flag problems early and made it clear he values open communication to avoid surprises."
+    },
+    {
+      "voter_name": "Todd Ramsey",
+      "voter_type": "N8",
+      "voted_for_name": "Marcus Webb",
+      "voted_for_type": "D3",
+      "reason": "He took clear ownership of the pitch, pushed for accountability, and made sure everyone knew their role during the discussion."
+    }
+  ]
+}

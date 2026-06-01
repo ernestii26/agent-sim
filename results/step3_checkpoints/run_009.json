@@ -1,0 +1,349 @@
+{
+  "run_no": 9,
+  "p_id": "P3",
+  "d_id": "D2",
+  "p_votes": 7,
+  "d_votes": 2,
+  "vote_counts": {
+    "P3": 7,
+    "D2": 2,
+    "N1": 0,
+    "N2": 1,
+    "N3": 0,
+    "N4": 0,
+    "N5": 0,
+    "N6": 0,
+    "N7": 0,
+    "N8": 0
+  },
+  "p_speech_rate": 1.0,
+  "d_speech_rate": 1.0,
+  "p_words_per_turn": 39.333333333333336,
+  "d_words_per_turn": 25.666666666666668,
+  "speech_rate_by_type": {
+    "P3": 1.0,
+    "D2": 1.0,
+    "N1": 0.3333333333333333,
+    "N2": 0.6666666666666666,
+    "N3": 0.6666666666666666,
+    "N4": 0.6666666666666666,
+    "N5": 0.3333333333333333,
+    "N6": 0.3333333333333333,
+    "N7": 0.3333333333333333,
+    "N8": 0.6666666666666666
+  },
+  "transcript": [
+    {
+      "round": 1,
+      "name": "Natasha Volkov",
+      "persona_type": "D2",
+      "spoke": true,
+      "word_count": 31,
+      "text": "We’re wasting time. I’m leading the pitch. I want Bennett on numbers, Priya on client research, and everyone else focused on execution. If you disagree, say so now—otherwise, that’s the plan."
+    },
+    {
+      "round": 1,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 30,
+      "text": "Can we just pause a second? I want to make sure everyone’s okay with this plan. If someone has a concern, better to say it now than let it fester."
+    },
+    {
+      "round": 1,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 22,
+      "text": "Could we quickly clarify who's handling the data analysis? I just want to be sure we're not missing any gaps this time."
+    },
+    {
+      "round": 1,
+      "name": "Fatima Al-Rashid",
+      "persona_type": "P3",
+      "spoke": true,
+      "word_count": 57,
+      "text": "If I’m hearing everyone right, Natasha’s proposing to lead and has assigned some clear roles. Erik, you’re checking if anyone has concerns before we move. Lilian, you want to clarify who’s on data. Does anyone feel uneasy about what’s been suggested? If so, please just say. Otherwise, let’s confirm who’s doing what, so no one’s left wondering."
+    },
+    {
+      "round": 1,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": true,
+      "word_count": 29,
+      "text": "Just to check, if Bennett’s on numbers, who’s backing him up on the data side? Last time, we had some confusion and I want to be sure we’re covered."
+    },
+    {
+      "round": 1,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 26,
+      "text": "Can I just check—who’s supporting Bennett on the data work? I want to be sure we’re covered this time, just in case something unexpected comes up."
+    },
+    {
+      "round": 1,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 29,
+      "text": "Just to be sure—does everyone feel clear about their role? If anyone's not sure, maybe we should iron it out now. I'd rather we all know exactly what's expected."
+    },
+    {
+      "round": 1,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 29,
+      "text": "Just to clarify—am I supporting Bennett on the backend integration, or is someone else covering that? I want to make sure we’re not missing anything on the API side."
+    },
+    {
+      "round": 1,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 29,
+      "text": "Could we maybe go through the assignments one more time, just so we're all clear? I just want to make sure no one's missing anything or feeling left out."
+    },
+    {
+      "round": 1,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 25,
+      "text": "Just to be clear, is anyone officially backing Bennett up on the data? I don't want us scrambling if he gets pulled onto something else."
+    },
+    {
+      "round": 2,
+      "name": "Natasha Volkov",
+      "persona_type": "D2",
+      "spoke": true,
+      "word_count": 25,
+      "text": "Bennett owns the numbers. Amitesh, you’re his backup—full stop. If anything happens, Amitesh steps in. Priya, client research. If anyone’s unclear, speak now. Otherwise, move."
+    },
+    {
+      "round": 2,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 15,
+      "text": "All right, got it—I'll back Bennett up on the data side. No issues from me."
+    },
+    {
+      "round": 2,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 8,
+      "text": "All right, sounds settled. No issues from me."
+    },
+    {
+      "round": 2,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 2,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 15,
+      "text": "All right, sounds clear to me. I’m good with the assignments. Let’s get to it."
+    },
+    {
+      "round": 2,
+      "name": "Fatima Al-Rashid",
+      "persona_type": "P3",
+      "spoke": true,
+      "word_count": 38,
+      "text": "All right, I just want to make sure—if anyone’s still unsure or wants to flag anything before we dive in, now’s the time. Otherwise, let’s get moving. We can check in along the way if anything crops up."
+    },
+    {
+      "round": 2,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 2,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 18,
+      "text": "All right, I’m clear on my part and happy to help if anything comes up. Let’s get started."
+    },
+    {
+      "round": 2,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 2,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Fatima Al-Rashid",
+      "persona_type": "P3",
+      "spoke": true,
+      "word_count": 23,
+      "text": "Okay, let’s get started then. If anything crops up, just shout. I’ll be around if anyone wants to check something along the way."
+    },
+    {
+      "round": 3,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Natasha Volkov",
+      "persona_type": "D2",
+      "spoke": true,
+      "word_count": 21,
+      "text": "All right, that's settled. Everyone knows their part. If you hit a roadblock, come straight to me—no detours. Otherwise, get moving."
+    },
+    {
+      "round": 3,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    }
+  ],
+  "votes": [
+    {
+      "voter_name": "Fatima Al-Rashid",
+      "voter_type": "P3",
+      "voted_for_name": "Erik Lundström",
+      "voted_for_type": "N2",
+      "reason": "He paused the discussion to check if everyone was comfortable with the plan, showing he values consensus and team input."
+    },
+    {
+      "voter_name": "Natasha Volkov",
+      "voter_type": "D2",
+      "voted_for_name": "Fatima Al-Rashid",
+      "voted_for_type": "P3",
+      "reason": "Fatima summarized the discussion, pushed for clarity, and kept the team focused on action when others hesitated."
+    },
+    {
+      "voter_name": "Trang Nguyen",
+      "voter_type": "N1",
+      "voted_for_name": "Fatima Al-Rashid",
+      "voted_for_type": "P3",
+      "reason": "She listened to everyone, summarized concerns clearly, and made sure no one was left out before moving forward."
+    },
+    {
+      "voter_name": "Erik Lundström",
+      "voter_type": "N2",
+      "voted_for_name": "Natasha Volkov",
+      "voted_for_type": "D2",
+      "reason": "Natasha took charge, assigned roles clearly, and kept the team focused when decisions needed to be made quickly."
+    },
+    {
+      "voter_name": "Lilian Njoroge",
+      "voter_type": "N3",
+      "voted_for_name": "Fatima Al-Rashid",
+      "voted_for_type": "P3",
+      "reason": "Fatima made sure everyone had a chance to speak up and checked that roles were clear before moving forward."
+    },
+    {
+      "voter_name": "Amitesh Iyer",
+      "voter_type": "N4",
+      "voted_for_name": "Fatima Al-Rashid",
+      "voted_for_type": "P3",
+      "reason": "Fatima made sure everyone had a chance to speak up and clarified roles before moving forward, which keeps the team on the same page."
+    },
+    {
+      "voter_name": "Lucía Mendoza",
+      "voter_type": "N5",
+      "voted_for_name": "Fatima Al-Rashid",
+      "voted_for_type": "P3",
+      "reason": "She made sure everyone had a chance to voice concerns and encouraged open communication before moving forward."
+    },
+    {
+      "voter_name": "Wei Zhou",
+      "voter_type": "N6",
+      "voted_for_name": "Fatima Al-Rashid",
+      "voted_for_type": "P3",
+      "reason": "Fatima made sure everyone could voice concerns and confirmed clarity before moving forward, which helps the team stay aligned."
+    },
+    {
+      "voter_name": "Élise Moreau",
+      "voter_type": "N7",
+      "voted_for_name": "Fatima Al-Rashid",
+      "voted_for_type": "P3",
+      "reason": "She made sure everyone had a chance to speak up and clearly summarized the plan before moving forward."
+    },
+    {
+      "voter_name": "Todd Ramsey",
+      "voter_type": "N8",
+      "voted_for_name": "Natasha Volkov",
+      "voted_for_type": "D2",
+      "reason": "Natasha set clear roles, made decisions quickly, and kept the group focused when things could have stalled."
+    }
+  ]
+}

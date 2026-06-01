@@ -1,0 +1,349 @@
+{
+  "run_no": 4,
+  "p_id": "P5",
+  "d_id": "D3",
+  "p_votes": 2,
+  "d_votes": 0,
+  "vote_counts": {
+    "P5": 2,
+    "D3": 0,
+    "N1": 0,
+    "N2": 0,
+    "N3": 0,
+    "N4": 0,
+    "N5": 0,
+    "N6": 0,
+    "N7": 8,
+    "N8": 0
+  },
+  "p_speech_rate": 1.0,
+  "d_speech_rate": 1.0,
+  "p_words_per_turn": 30.0,
+  "d_words_per_turn": 38.666666666666664,
+  "speech_rate_by_type": {
+    "P5": 1.0,
+    "D3": 1.0,
+    "N1": 1.0,
+    "N2": 0.6666666666666666,
+    "N3": 1.0,
+    "N4": 1.0,
+    "N5": 1.0,
+    "N6": 0.6666666666666666,
+    "N7": 1.0,
+    "N8": 1.0
+  },
+  "transcript": [
+    {
+      "round": 1,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 41,
+      "text": "Look, I think what tripped us up before was not being clear on who owns what. Maybe before we pick a lead, we should map out the main pieces and who's best for each. Otherwise, we'll just repeat the same problems."
+    },
+    {
+      "round": 1,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 31,
+      "text": "I agree with Lilian. Maybe we should list out what actually needs to get done first, then see who feels comfortable taking which part. That way we avoid confusion like before."
+    },
+    {
+      "round": 1,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 23,
+      "text": "Breaking it all down first makes sense. I can help list what needs doing, just so we’re all looking at the same thing."
+    },
+    {
+      "round": 1,
+      "name": "Marcus Webb",
+      "persona_type": "D3",
+      "spoke": true,
+      "word_count": 51,
+      "text": "Enough. We already know the stakes. I’m not interested in another round of ‘who wants what’—I’ll take point, and I want Todd and Lilian on the pitch team. É lise, you handle the breakdown, but I’m making the calls. Anyone got a better plan, say it now. Otherwise, we move. Fast."
+    },
+    {
+      "round": 1,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": true,
+      "word_count": 25,
+      "text": "If we just list out the main parts first, it could help avoid confusion. I can help with the data-related stuff, if that makes sense."
+    },
+    {
+      "round": 1,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 32,
+      "text": "Marcus, if we’re deciding now, could we just list out who’s handling what first? It might make it easier for everyone to get started—and less likely we step on each other’s toes."
+    },
+    {
+      "round": 1,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 31,
+      "text": "Just to be clear, do we want Elise to list out the main pieces first, or are we deciding roles right now? I can help with backend stuff wherever it's needed."
+    },
+    {
+      "round": 1,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 24,
+      "text": "Maybe before we decide, we could just jot down the main tasks first—just so everyone’s clear. I think that worked well for us before."
+    },
+    {
+      "round": 1,
+      "name": "Anna Kovačević",
+      "persona_type": "P5",
+      "spoke": true,
+      "word_count": 33,
+      "text": "Quick check—before we name leads, can we list the main pieces? Just five minutes to get it clear. Last time, we tripped over who was doing what. I'd rather not see that again."
+    },
+    {
+      "round": 1,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 23,
+      "text": "Before we lock in roles, can we just get the list down? It only takes a minute. That way everyone knows what's covered."
+    },
+    {
+      "round": 2,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 26,
+      "text": "If we just jot down the main buckets—presentation, data, client questions—then we can match people to what fits best. Marcus, maybe you can guide from there?"
+    },
+    {
+      "round": 2,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 19,
+      "text": "So, just to be sure, Elise—you’re noting the main pieces, right? Once that’s up, we can sort ourselves out."
+    },
+    {
+      "round": 2,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": true,
+      "word_count": 21,
+      "text": "Sounds good to me. Once we have the list, just let me know where I can help with the data side."
+    },
+    {
+      "round": 2,
+      "name": "Marcus Webb",
+      "persona_type": "D3",
+      "spoke": true,
+      "word_count": 35,
+      "text": "Elise, put up the list. You’ve got three minutes—no debates, just bullet points. Once it’s up, I’ll call the shots on assignments and we move. Anyone not ready, speak up now or get on board."
+    },
+    {
+      "round": 2,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 13,
+      "text": "Fine with me. Once the list's up, I’ll jump in wherever backend’s needed."
+    },
+    {
+      "round": 2,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 24,
+      "text": "I’m good to take whatever piece you hand me, Marcus. Once Elise posts the list, just let me know where you want me focused."
+    },
+    {
+      "round": 2,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 2,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 30,
+      "text": "Okay, here’s my quick breakdown—presentation design, data gathering, client Q&A prep, backend setup, and timeline management. That’s the core stuff we need to cover. If I missed anything, just shout."
+    },
+    {
+      "round": 2,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 17,
+      "text": "Looks good to me. If there's anything on compliance or documentation, I'm happy to pick that up."
+    },
+    {
+      "round": 2,
+      "name": "Anna Kovačević",
+      "persona_type": "P5",
+      "spoke": true,
+      "word_count": 33,
+      "text": "Elise, that's a solid breakdown. One thing—can we tie each item to a single owner? Just so everyone knows who’s on the hook if it slips. That’s where we tripped up last time."
+    },
+    {
+      "round": 3,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 30,
+      "text": "Assigning a clear owner for every part makes sense. I’ll take whatever you put me on, but it’ll help if we all know who’s on the hook for each piece."
+    },
+    {
+      "round": 3,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 21,
+      "text": "Sounds good—let's just be clear who owns each piece. I can help with timeline management or wherever else it makes sense."
+    },
+    {
+      "round": 3,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": true,
+      "word_count": 23,
+      "text": "I’m ready to own the data gathering part, if that works. Just let me know if you want me to cover anything else."
+    },
+    {
+      "round": 3,
+      "name": "Anna Kovačević",
+      "persona_type": "P5",
+      "spoke": true,
+      "word_count": 24,
+      "text": "Glad you’re taking data, Trang. Can we go through the rest now—just give each task a single name? Makes it straightforward if something stalls."
+    },
+    {
+      "round": 3,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 21,
+      "text": "If no one else is on it, I can handle presentation design. Just let me know if you want me elsewhere."
+    },
+    {
+      "round": 3,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 14,
+      "text": "I’ll take backend setup. Just tag me for anything else if it comes up."
+    },
+    {
+      "round": 3,
+      "name": "Marcus Webb",
+      "persona_type": "D3",
+      "spoke": true,
+      "word_count": 30,
+      "text": "Everyone clear? If your name’s on a piece, you own it—period. No passing the buck if something misses. If you’re stuck, speak up now. Otherwise, I expect results, not stories."
+    },
+    {
+      "round": 3,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 14,
+      "text": "I’m set on my end. If anything comes up, I’ll say so right away."
+    },
+    {
+      "round": 3,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 30,
+      "text": "Alright, I’ve got everyone’s names next to their parts. If anything’s unclear or you need a swap, just say so now. Otherwise, I’ll send this out right after the call."
+    }
+  ],
+  "votes": [
+    {
+      "voter_name": "Anna Kovačević",
+      "voter_type": "P5",
+      "voted_for_name": "Élise Moreau",
+      "voted_for_type": "N7",
+      "reason": "Élise broke down the tasks clearly, assigned owners, and made sure everyone could speak up if anything was unclear."
+    },
+    {
+      "voter_name": "Marcus Webb",
+      "voter_type": "D3",
+      "voted_for_name": "Anna Kovačević",
+      "voted_for_type": "P5",
+      "reason": "She pushed for clear ownership on every task and made sure no one could dodge responsibility."
+    },
+    {
+      "voter_name": "Trang Nguyen",
+      "voter_type": "N1",
+      "voted_for_name": "Élise Moreau",
+      "voted_for_type": "N7",
+      "reason": "She organized the task breakdown and made sure everyone was clear on their responsibilities during the discussion."
+    },
+    {
+      "voter_name": "Erik Lundström",
+      "voter_type": "N2",
+      "voted_for_name": "Élise Moreau",
+      "voted_for_type": "N7",
+      "reason": "Élise broke down the main tasks clearly and made sure everyone had ownership, which kept the group organized."
+    },
+    {
+      "voter_name": "Lilian Njoroge",
+      "voter_type": "N3",
+      "voted_for_name": "Élise Moreau",
+      "voted_for_type": "N7",
+      "reason": "She listened to everyone, organized the task breakdown, and made sure each person was clear on their responsibilities."
+    },
+    {
+      "voter_name": "Amitesh Iyer",
+      "voter_type": "N4",
+      "voted_for_name": "Élise Moreau",
+      "voted_for_type": "N7",
+      "reason": "She quickly broke down the main tasks and assigned owners, which helped everyone know their responsibilities."
+    },
+    {
+      "voter_name": "Lucía Mendoza",
+      "voter_type": "N5",
+      "voted_for_name": "Élise Moreau",
+      "voted_for_type": "N7",
+      "reason": "Élise quickly organized the task breakdown and made sure everyone’s roles were clear, which helped the group move forward without confusion."
+    },
+    {
+      "voter_name": "Wei Zhou",
+      "voter_type": "N6",
+      "voted_for_name": "Élise Moreau",
+      "voted_for_type": "N7",
+      "reason": "Élise calmly organized the task breakdown and made sure everyone had clear ownership, which helped the group move forward."
+    },
+    {
+      "voter_name": "Élise Moreau",
+      "voter_type": "N7",
+      "voted_for_name": "Anna Kovačević",
+      "voted_for_type": "P5",
+      "reason": "Anna emphasized clear task ownership and practical solutions, helping the group avoid past confusion."
+    },
+    {
+      "voter_name": "Todd Ramsey",
+      "voter_type": "N8",
+      "voted_for_name": "Élise Moreau",
+      "voted_for_type": "N7",
+      "reason": "Élise organized the task breakdown, assigned owners, and made sure everyone had a chance to clarify their roles."
+    }
+  ]
+}

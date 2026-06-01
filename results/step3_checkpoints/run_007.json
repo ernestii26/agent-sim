@@ -1,0 +1,349 @@
+{
+  "run_no": 7,
+  "p_id": "P4",
+  "d_id": "D1",
+  "p_votes": 6,
+  "d_votes": 0,
+  "vote_counts": {
+    "P4": 6,
+    "D1": 0,
+    "N1": 2,
+    "N2": 1,
+    "N3": 1,
+    "N4": 0,
+    "N5": 0,
+    "N6": 0,
+    "N7": 0,
+    "N8": 0
+  },
+  "p_speech_rate": 1.0,
+  "d_speech_rate": 1.0,
+  "p_words_per_turn": 36.0,
+  "d_words_per_turn": 32.333333333333336,
+  "speech_rate_by_type": {
+    "P4": 1.0,
+    "D1": 1.0,
+    "N1": 0.6666666666666666,
+    "N2": 1.0,
+    "N3": 1.0,
+    "N4": 0.6666666666666666,
+    "N5": 1.0,
+    "N6": 1.0,
+    "N7": 1.0,
+    "N8": 0.6666666666666666
+  },
+  "transcript": [
+    {
+      "round": 1,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 29,
+      "text": "Do we actually have enough details to pick a pitch right now? I just want to be sure we aren't missing something that's going to trip us up later."
+    },
+    {
+      "round": 1,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 29,
+      "text": "I agree, Lilian. Maybe let's put down the facts we have first, and see if anything's missing before we lock in a direction. It might help us move forward."
+    },
+    {
+      "round": 1,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": true,
+      "word_count": 26,
+      "text": "Quick check—do we know which datasets we can pull for the pitch? It got confusing last time. Just want to be clear before we decide anything."
+    },
+    {
+      "round": 1,
+      "name": "Robert Hartmann",
+      "persona_type": "D1",
+      "spoke": true,
+      "word_count": 30,
+      "text": "This is dragging on. We have what we need. I'm making the call: we pitch the automation upgrade, I lead, and I'm accountable. Objections? Speak now. Otherwise, we're moving ahead."
+    },
+    {
+      "round": 1,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 35,
+      "text": "I get that we need to decide, Robert, but Trang's point about the datasets is worth checking. Just so we're not caught out—can we confirm which ones we actually have before we lock this in?"
+    },
+    {
+      "round": 1,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 24,
+      "text": "Before we decide, can we just confirm which datasets we actually have access to? I think it’ll help us avoid surprises. Shouldn’t take long."
+    },
+    {
+      "round": 1,
+      "name": "Rafael Carvalho",
+      "persona_type": "P4",
+      "spoke": true,
+      "word_count": 29,
+      "text": "Okay, let’s pause for ten seconds and just list—out loud—which datasets we actually have. No theories, just what’s in front of us. Trang, Lucía, can you kick us off?"
+    },
+    {
+      "round": 1,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 25,
+      "text": "I'm with Trang and Lucía—let's just say out loud which datasets we actually have access to, so no one's guessing. Should only take a minute."
+    },
+    {
+      "round": 1,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 31,
+      "text": "I think Trang and Lucía are right. If we don’t double-check which datasets are actually available, we could run into a wall halfway through the pitch. Shouldn’t take long to confirm."
+    },
+    {
+      "round": 1,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 24,
+      "text": "I think it makes sense to quickly confirm which datasets we have access to. Won’t take much time, and we’ll avoid last minute surprises."
+    },
+    {
+      "round": 2,
+      "name": "Robert Hartmann",
+      "persona_type": "D1",
+      "spoke": true,
+      "word_count": 21,
+      "text": "Stop. We're not wasting another minute. Trang, Lucía—list the datasets now. Out loud. The rest—listen. When they're done, I'll decide. Move."
+    },
+    {
+      "round": 2,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": true,
+      "word_count": 33,
+      "text": "We have the shipment logs from Q1 and Q2, the live fleet tracker, and the incident reports up to last Friday. The client feedback dataset is still pending access. That’s what I’ve got."
+    },
+    {
+      "round": 2,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 27,
+      "text": "Just noting, the client feedback dataset is still pending. If that’s important for the pitch, we might need a backup plan in case we don’t get it."
+    },
+    {
+      "round": 2,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 32,
+      "text": "If the client feedback dataset is important for the pitch, maybe we should have a quick backup plan, just in case we can't get it in time. Otherwise, I think we're set."
+    },
+    {
+      "round": 2,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 28,
+      "text": "We also have the compliance audit files and the maintenance logs from last month. That’s everything on my side. If anyone else remembers something, please say it now."
+    },
+    {
+      "round": 2,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 35,
+      "text": "So, just to be clear—if we don't get the client feedback dataset in time, are we still confident about this pitch? I just want to make sure we're not setting ourselves up for a surprise."
+    },
+    {
+      "round": 2,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 35,
+      "text": "If we can't get the client feedback dataset, do we have enough to make a strong case, or should we tweak the pitch a bit? Just want to be sure we're not missing something obvious."
+    },
+    {
+      "round": 2,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 35,
+      "text": "If we’re still waiting on that client feedback file, maybe we just call out that gap in the pitch up front. We can show we’ve done our homework, but we’re not pretending to have everything."
+    },
+    {
+      "round": 2,
+      "name": "Rafael Carvalho",
+      "persona_type": "P4",
+      "spoke": true,
+      "word_count": 48,
+      "text": "Alright, so here’s where we stand: we’re missing that client feedback file. I actually think it’s smart to call that out up front. Shows we’re thorough and not pretending to have all the answers. Anyone got a creative way to spin that, or do we tweak the pitch?"
+    },
+    {
+      "round": 2,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 33,
+      "text": "If we’re flagging that the client feedback file isn’t in yet, we should also be clear we’ve reviewed everything else and know where the gaps are. That way, we look thorough, not unprepared."
+    },
+    {
+      "round": 3,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 25,
+      "text": "We’ve double-checked all the files we do have. I’m fine with mentioning the client feedback gap upfront—shows we’re being honest, not just glossing over it."
+    },
+    {
+      "round": 3,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 28,
+      "text": "We've checked everything we've got. If we just mention the client feedback gap upfront, I think it shows we're doing our homework, not just missing something by accident."
+    },
+    {
+      "round": 3,
+      "name": "Rafael Carvalho",
+      "persona_type": "P4",
+      "spoke": true,
+      "word_count": 31,
+      "text": "Perfect. We’re all on the same page—let’s be upfront about what we’ve got and what’s still missing. Thanks for flagging the gap, seriously. Shows we’re thinking ahead, not just ticking boxes."
+    },
+    {
+      "round": 3,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 25,
+      "text": "Sounds good to me. If anyone needs help pulling the other files together for the pitch, just let me know. I’m happy to pitch in."
+    },
+    {
+      "round": 3,
+      "name": "Robert Hartmann",
+      "persona_type": "D1",
+      "spoke": true,
+      "word_count": 46,
+      "text": "Alright, it's settled. We're pitching the automation upgrade, I’m leading, and we’re upfront about the missing feedback file. Lucía and Trang—pull all the other files together now. I want numbers checked twice. If anyone hits a snag, speak up immediately. We don’t have time for slip-ups."
+    },
+    {
+      "round": 3,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 24,
+      "text": "Alright. Sounds like we know what we're doing. If anything crops up as we pull the files, just shout. Otherwise, let's get this done."
+    },
+    {
+      "round": 3,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 21,
+      "text": "Alright, if you need another set of eyes on anything, just let me know. Happy to jump in if it helps."
+    }
+  ],
+  "votes": [
+    {
+      "voter_name": "Rafael Carvalho",
+      "voter_type": "P4",
+      "voted_for_name": "Lilian Njoroge",
+      "voted_for_type": "N3",
+      "reason": "Lilian consistently pushed for clarity and made sure we addressed potential gaps before committing, which kept the team focused and thorough."
+    },
+    {
+      "voter_name": "Robert Hartmann",
+      "voter_type": "D1",
+      "voted_for_name": "Trang Nguyen",
+      "voted_for_type": "N1",
+      "reason": "Trang provided a clear, factual summary of available datasets without wasting time or hedging, which is exactly what this team needs."
+    },
+    {
+      "voter_name": "Trang Nguyen",
+      "voter_type": "N1",
+      "voted_for_name": "Erik Lundström",
+      "voted_for_type": "N2",
+      "reason": "He listened to concerns about missing data and made sure we confirmed what we actually had before moving forward."
+    },
+    {
+      "voter_name": "Erik Lundström",
+      "voter_type": "N2",
+      "voted_for_name": "Rafael Carvalho",
+      "voted_for_type": "P4",
+      "reason": "Rafael listened to concerns, summarized the team's position, and encouraged honest discussion about the missing dataset."
+    },
+    {
+      "voter_name": "Lilian Njoroge",
+      "voter_type": "N3",
+      "voted_for_name": "Rafael Carvalho",
+      "voted_for_type": "P4",
+      "reason": "Rafael suggested we be transparent about the missing client feedback file and asked for creative input, showing both thoroughness and openness to ideas."
+    },
+    {
+      "voter_name": "Amitesh Iyer",
+      "voter_type": "N4",
+      "voted_for_name": "Rafael Carvalho",
+      "voted_for_type": "P4",
+      "reason": "He summarized the team's position, encouraged open discussion about the missing dataset, and helped everyone align on the next steps."
+    },
+    {
+      "voter_name": "Lucía Mendoza",
+      "voter_type": "N5",
+      "voted_for_name": "Trang Nguyen",
+      "voted_for_type": "N1",
+      "reason": "Trang made sure we clarified which datasets were available before deciding, showing attention to detail and concern for the team's preparation."
+    },
+    {
+      "voter_name": "Wei Zhou",
+      "voter_type": "N6",
+      "voted_for_name": "Rafael Carvalho",
+      "voted_for_type": "P4",
+      "reason": "Rafael summarized the group's position clearly and encouraged honest discussion about the missing dataset, which helped everyone align."
+    },
+    {
+      "voter_name": "Élise Moreau",
+      "voter_type": "N7",
+      "voted_for_name": "Rafael Carvalho",
+      "voted_for_type": "P4",
+      "reason": "Rafael calmly summarized the group's position, encouraged input, and helped move us to consensus without pushing his own agenda."
+    },
+    {
+      "voter_name": "Todd Ramsey",
+      "voter_type": "N8",
+      "voted_for_name": "Rafael Carvalho",
+      "voted_for_type": "P4",
+      "reason": "Rafael listened to concerns, summarized the group's position clearly, and suggested a practical way to address the missing dataset."
+    }
+  ]
+}

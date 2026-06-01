@@ -1,0 +1,349 @@
+{
+  "run_no": 11,
+  "p_id": "P1",
+  "d_id": "D1",
+  "p_votes": 6,
+  "d_votes": 3,
+  "vote_counts": {
+    "P1": 6,
+    "D1": 3,
+    "N1": 1,
+    "N2": 0,
+    "N3": 0,
+    "N4": 0,
+    "N5": 0,
+    "N6": 0,
+    "N7": 0,
+    "N8": 0
+  },
+  "p_speech_rate": 1.0,
+  "d_speech_rate": 1.0,
+  "p_words_per_turn": 29.666666666666668,
+  "d_words_per_turn": 34.333333333333336,
+  "speech_rate_by_type": {
+    "P1": 1.0,
+    "D1": 1.0,
+    "N1": 1.0,
+    "N2": 1.0,
+    "N3": 1.0,
+    "N4": 1.0,
+    "N5": 1.0,
+    "N6": 1.0,
+    "N7": 1.0,
+    "N8": 1.0
+  },
+  "transcript": [
+    {
+      "round": 1,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 25,
+      "text": "Sorry, just—can we quickly recap what the other team pitched? I want to make sure we’re all clear before we decide who’s leading our response."
+    },
+    {
+      "round": 1,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 31,
+      "text": "I’m not sure I caught all the details either. Does anyone have a summary of what the other team proposed? Just so we’re on the same page before we decide anything."
+    },
+    {
+      "round": 1,
+      "name": "Robert Hartmann",
+      "persona_type": "D1",
+      "spoke": true,
+      "word_count": 29,
+      "text": "Stop. If you don't know what the other team pitched by now, you haven't been paying attention. Recap's over. We're here to decide who leads—nothing else. Who's stepping up?"
+    },
+    {
+      "round": 1,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 33,
+      "text": "I’d like us to agree on this, not just pick someone because we’re rushed. Maybe we can talk through what each of us would bring if we led? I’ll start if that helps."
+    },
+    {
+      "round": 1,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 28,
+      "text": "If it helps, I can try to recap what I remember from the other team’s pitch. Maybe that’ll clear things up before we talk about who should lead."
+    },
+    {
+      "round": 1,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 32,
+      "text": "If it helps, I’m good to work with whoever the group decides. I just want to be clear on what we’re pitching and who’s handling which part, so there’s no confusion later."
+    },
+    {
+      "round": 1,
+      "name": "Dr. Mei-Ling Chen",
+      "persona_type": "P1",
+      "spoke": true,
+      "word_count": 30,
+      "text": "Before we decide, is there anyone here who hasn’t had a chance to share? I want to make sure we hear from everyone, even if it’s just a quick thought."
+    },
+    {
+      "round": 1,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 35,
+      "text": "From what I recall, the other team's pitch focused a lot on automated reporting and client dashboards. They also mentioned faster turnaround times. That's mostly what stuck with me—does that match what everyone else heard?"
+    },
+    {
+      "round": 1,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": true,
+      "word_count": 28,
+      "text": "Can we talk through what makes our approach different from theirs? I just want to make sure we’re not missing a key point before we pick who’s leading."
+    },
+    {
+      "round": 1,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 41,
+      "text": "If it helps, I’m happy to outline what I’d focus on if I took point—mainly reliability and making sure we actually deliver what we promise. But I’ll support whoever we pick, as long as we’re clear on who’s responsible for what."
+    },
+    {
+      "round": 2,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 37,
+      "text": "Feels like we keep coming back to what makes us different. Maybe we just put it up on the board—what sets our pitch apart? Then whoever’s got the clearest view on that, maybe that’s who should lead."
+    },
+    {
+      "round": 2,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 28,
+      "text": "I think our biggest strength has always been consistent accuracy. Maybe it’s not as flashy as dashboards, but clients trust us to get the details right every time."
+    },
+    {
+      "round": 2,
+      "name": "Dr. Mei-Ling Chen",
+      "persona_type": "P1",
+      "spoke": true,
+      "word_count": 30,
+      "text": "If we want to stand out, I think we need one clear example—maybe a story from a past project—where our accuracy caught something others missed. Anyone have one in mind?"
+    },
+    {
+      "round": 2,
+      "name": "Robert Hartmann",
+      "persona_type": "D1",
+      "spoke": true,
+      "word_count": 36,
+      "text": "Enough. We know our edge is accuracy—clients trust us because we don't miss. If no one else is willing, I’ll lead and take full accountability. Anyone have an actual objection, say it now. Otherwise, we move."
+    },
+    {
+      "round": 2,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": true,
+      "word_count": 24,
+      "text": "Does anyone have concerns about Robert leading? If not, I’m fine with it. Just want to be sure everyone’s comfortable before we say yes."
+    },
+    {
+      "round": 2,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 28,
+      "text": "I'm okay with Robert leading if that works for everyone. If anyone's got doubts, maybe just say so now? Better to get it out than keep it in."
+    },
+    {
+      "round": 2,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 20,
+      "text": "No objections from me. As long as we split up the tasks clearly, I think it’ll work. Happy to support."
+    },
+    {
+      "round": 2,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 21,
+      "text": "No objections from me either. Just want to make sure we’re all clear who’s handling what, so things don’t get tangled."
+    },
+    {
+      "round": 2,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 20,
+      "text": "No issues from me. As long as we all know exactly what we’re responsible for, I’m good with Robert leading."
+    },
+    {
+      "round": 2,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 32,
+      "text": "If Robert's leading, can we quickly list out who’s handling each part? Just so we don’t run into any crossed wires later. I’d rather spell it out now than have doubts later."
+    },
+    {
+      "round": 3,
+      "name": "Dr. Mei-Ling Chen",
+      "persona_type": "P1",
+      "spoke": true,
+      "word_count": 29,
+      "text": "If it helps, I can take notes right now while we list who's responsible for which part. Once we agree, I’ll send it to everyone so there’s no confusion."
+    },
+    {
+      "round": 3,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 19,
+      "text": "I can take care of the backend integration piece. If there’s overlap with anyone else, just let me know."
+    },
+    {
+      "round": 3,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 26,
+      "text": "I can handle the documentation and onboarding checklist if no one else wants that part. Just let me know if someone else had it in mind."
+    },
+    {
+      "round": 3,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 25,
+      "text": "I’ll take the QA checks and deployment steps. That’s usually where I fit. If anyone else wants a piece of that, just let me know."
+    },
+    {
+      "round": 3,
+      "name": "Robert Hartmann",
+      "persona_type": "D1",
+      "spoke": true,
+      "word_count": 38,
+      "text": "We're not leaving this room with any confusion. Dr. Chen, send out the list as soon as we're done. If anyone's got a problem with their piece, say it now. Otherwise, you own it. No complaints later. Understood?"
+    },
+    {
+      "round": 3,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 19,
+      "text": "I’ll take the client communication updates—unless someone else wanted that. Just let me know, otherwise I’m good with it."
+    },
+    {
+      "round": 3,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 28,
+      "text": "I’ll cover the user experience and front-end design. If anyone needs feedback or has input, just let me know. I’d rather catch anything now than after we start."
+    },
+    {
+      "round": 3,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 27,
+      "text": "I can take the data validation and the final report checks. If anyone sees overlap with what they're doing, just mention it so we don't double up."
+    },
+    {
+      "round": 3,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": true,
+      "word_count": 27,
+      "text": "I can take the pipeline monitoring and handle any troubleshooting that comes up. If anyone else wanted that bit, let me know, but I’m good with it."
+    },
+    {
+      "round": 3,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 25,
+      "text": "Just to make sure, should I take care of the compliance checks and regulatory review? I can double-check our documentation before we send anything out."
+    }
+  ],
+  "votes": [
+    {
+      "voter_name": "Dr. Mei-Ling Chen",
+      "voter_type": "P1",
+      "voted_for_name": "Trang Nguyen",
+      "voted_for_type": "N1",
+      "reason": "Trang checked that everyone was comfortable with the decision before moving forward, showing care for team consensus."
+    },
+    {
+      "voter_name": "Robert Hartmann",
+      "voter_type": "D1",
+      "voted_for_name": "Dr. Mei-Ling Chen",
+      "voted_for_type": "P1",
+      "reason": "She immediately volunteered to document and clarify everyone's responsibilities, showing initiative and a focus on eliminating confusion."
+    },
+    {
+      "voter_name": "Trang Nguyen",
+      "voter_type": "N1",
+      "voted_for_name": "Robert Hartmann",
+      "voted_for_type": "D1",
+      "reason": "He made sure everyone was clear on their responsibilities and pushed for accountability during the meeting."
+    },
+    {
+      "voter_name": "Erik Lundström",
+      "voter_type": "N2",
+      "voted_for_name": "Dr. Mei-Ling Chen",
+      "voted_for_type": "P1",
+      "reason": "She volunteered to keep track of responsibilities and ensure everyone was clear, showing strong organization and support for the team."
+    },
+    {
+      "voter_name": "Lilian Njoroge",
+      "voter_type": "N3",
+      "voted_for_name": "Dr. Mei-Ling Chen",
+      "voted_for_type": "P1",
+      "reason": "She made sure everyone had a chance to speak and offered to organize the task list so nothing would be missed."
+    },
+    {
+      "voter_name": "Amitesh Iyer",
+      "voter_type": "N4",
+      "voted_for_name": "Dr. Mei-Ling Chen",
+      "voted_for_type": "P1",
+      "reason": "She stepped up to take notes and organize everyone's responsibilities, which helped the group stay clear and focused."
+    },
+    {
+      "voter_name": "Lucía Mendoza",
+      "voter_type": "N5",
+      "voted_for_name": "Dr. Mei-Ling Chen",
+      "voted_for_type": "P1",
+      "reason": "She stepped up to organize responsibilities and offered to send out a clear summary so no one would be confused."
+    },
+    {
+      "voter_name": "Wei Zhou",
+      "voter_type": "N6",
+      "voted_for_name": "Robert Hartmann",
+      "voted_for_type": "D1",
+      "reason": "He made sure everyone was clear on their responsibilities and pushed for immediate feedback, which helped the group organize quickly."
+    },
+    {
+      "voter_name": "Élise Moreau",
+      "voter_type": "N7",
+      "voted_for_name": "Dr. Mei-Ling Chen",
+      "voted_for_type": "P1",
+      "reason": "She volunteered to take notes and make sure everyone was clear on their responsibilities, which helped the group stay organized."
+    },
+    {
+      "voter_name": "Todd Ramsey",
+      "voter_type": "N8",
+      "voted_for_name": "Robert Hartmann",
+      "voted_for_type": "D1",
+      "reason": "He made sure everyone was clear on their responsibilities and insisted we address any issues now, not later."
+    }
+  ]
+}

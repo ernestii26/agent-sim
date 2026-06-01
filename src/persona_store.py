@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 from typing import Any
 
@@ -9,40 +8,20 @@ from runtime import ensure_tinytroupe_imports
 
 _PROJECT_DIR = Path(__file__).resolve().parent.parent
 
-FIELDS_TO_STRIP = frozenset([
-    "mbti_type",
-    "mbti_dimensions",
-    "cognitive_functions",
-    "enriched_bio",
-    "discussion_constraints",
-])
-
-_MBTI_TYPE_RE = re.compile(
-    r"\b(ENTJ|ESTJ|INTJ|ENFJ|ISTJ|ENTP|INFJ|ESFJ|ISFP|INFP|MBTI)\b"
-)
-
-E_TYPES = ["ENTJ", "ESTJ", "ENFJ", "ENTP", "ESFJ"]
-I_TYPES = ["INTJ", "ISTJ", "INFJ", "ISFP", "INFP"]
-ALL_TYPES = E_TYPES + I_TYPES
+PRESTIGE_TYPES = ["P1", "P2", "P3", "P4", "P5"]
+DOMINANCE_TYPES = ["D1", "D2", "D3", "D4", "D5"]
+NEUTRAL_TYPES = ["N1", "N2", "N3", "N4", "N5", "N6", "N7", "N8"]
+ALL_TYPES = PRESTIGE_TYPES + DOMINANCE_TYPES + NEUTRAL_TYPES
 
 
-def _check_no_mbti_leak(spec: dict[str, Any], mbti_type: str) -> None:
-    spec_str = json.dumps(spec)
-    m = _MBTI_TYPE_RE.search(spec_str)
-    if m:
-        raise ValueError(
-            f"MBTI type label '{m.group()}' still present in {mbti_type} spec after strip"
-        )
-
-
-def load_stripped_personas(
+def load_personas(
     personas_dir: Path | str | None = None,
 ) -> tuple[dict[str, Any], dict[str, str]]:
-    """Load all MBTI personas, strip MBTI-identifying fields.
+    """Load all personas from the personas directory.
 
     Returns:
-        agents_by_type: dict mapping MBTI type code → TinyPerson agent
-        names_by_type:  dict mapping MBTI type code → persona name string
+        agents_by_id: dict mapping persona_id → TinyPerson agent
+        names_by_id:  dict mapping persona_id → persona name string
     """
     if personas_dir is None:
         target_dir = _PROJECT_DIR / "personas"
@@ -60,25 +39,20 @@ def load_stripped_personas(
     agents: dict[str, Any] = {}
     names: dict[str, str] = {}
 
-    for mbti_type in manifest["types"]:
-        agent_path = target_dir / f"{mbti_type}.agent.json"
+    for pid in manifest["all_ids"]:
+        agent_path = target_dir / f"{pid}.agent.json"
         if not agent_path.exists():
             raise SystemExit(f"Agent file not found: {agent_path}")
 
         spec = json.loads(agent_path.read_text(encoding="utf-8"))
-        persona = spec.get("persona", {})
-        for field in FIELDS_TO_STRIP:
-            persona.pop(field, None)
-
-        _check_no_mbti_leak(spec, mbti_type)
-
         agent = TinyPerson.load_specification(
             path_or_dict=spec,
             suppress_mental_faculties=False,
             suppress_memory=True,
             suppress_mental_state=True,
         )
-        agents[mbti_type] = agent
-        names[mbti_type] = str(persona.get("name", mbti_type))
+        agents[pid] = agent
+        persona = spec.get("persona", {})
+        names[pid] = str(persona.get("name", pid))
 
     return agents, names

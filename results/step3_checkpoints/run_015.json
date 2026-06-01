@@ -1,0 +1,349 @@
+{
+  "run_no": 15,
+  "p_id": "P4",
+  "d_id": "D5",
+  "p_votes": 7,
+  "d_votes": 3,
+  "vote_counts": {
+    "P4": 7,
+    "D5": 3,
+    "N1": 0,
+    "N2": 0,
+    "N3": 0,
+    "N4": 0,
+    "N5": 0,
+    "N6": 0,
+    "N7": 0,
+    "N8": 0
+  },
+  "p_speech_rate": 1.0,
+  "d_speech_rate": 1.0,
+  "p_words_per_turn": 31.333333333333332,
+  "d_words_per_turn": 32.333333333333336,
+  "speech_rate_by_type": {
+    "P4": 1.0,
+    "D5": 1.0,
+    "N1": 1.0,
+    "N2": 1.0,
+    "N3": 0.3333333333333333,
+    "N4": 0.6666666666666666,
+    "N5": 1.0,
+    "N6": 1.0,
+    "N7": 1.0,
+    "N8": 1.0
+  },
+  "transcript": [
+    {
+      "round": 1,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 32,
+      "text": "I'm concerned we might miss something if we try to settle this too quickly. Maybe we should look at recent feedback—see what actually worked for our clients and where we slipped up."
+    },
+    {
+      "round": 1,
+      "name": "Rafael Carvalho",
+      "persona_type": "P4",
+      "spoke": true,
+      "word_count": 33,
+      "text": "I like Wei’s idea. Let’s take ten minutes, pull up the last client feedback—good and bad. No overthinking, just the main themes. Then we use that as the backbone for our pitch. Fair?"
+    },
+    {
+      "round": 1,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": true,
+      "word_count": 20,
+      "text": "Do we have the most recent client feedback on hand? I can open up the shared folder if that's easier."
+    },
+    {
+      "round": 1,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 16,
+      "text": "Makes sense to me. Looking at feedback keeps things focused. How recent are those files, Trang?"
+    },
+    {
+      "round": 1,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": true,
+      "word_count": 23,
+      "text": "Pulling up the latest feedback’s a good idea. But let’s make sure we don’t gloss over any big patterns—sometimes little complaints add up."
+    },
+    {
+      "round": 1,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 23,
+      "text": "I’m good with scanning the feedback, but let’s watch out for getting stuck on the outliers. Patterns matter more than the odd complaint."
+    },
+    {
+      "round": 1,
+      "name": "Helena Baxter",
+      "persona_type": "D5",
+      "spoke": true,
+      "word_count": 32,
+      "text": "Enough. Trang, open the feedback folder. Rafael, you and Wei skim for patterns. I want three bullet points that set us apart—ten minutes, tops. We pick a lead after. No more circling."
+    },
+    {
+      "round": 1,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 36,
+      "text": "Okay, so once Rafael and Wei have those points from the feedback, do we want to talk through who feels comfortable leading the pitch? I just want to make sure we’re clear before we move on."
+    },
+    {
+      "round": 1,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 37,
+      "text": "I think looking at the feedback is smart. Can we make sure we cover both what we did well and where clients thought we missed the mark? Sometimes the less obvious stuff is what trips us up."
+    },
+    {
+      "round": 1,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 28,
+      "text": "If we're looking for themes, maybe someone can call them out as you spot them? I can help jot down points if that's useful. Just let me know."
+    },
+    {
+      "round": 2,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 2,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": true,
+      "word_count": 16,
+      "text": "Folder’s open now—let me know if you have trouble finding anything. Rafael, Wei, it’s all yours."
+    },
+    {
+      "round": 2,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 26,
+      "text": "Maybe as we read through, if something jumps out, just say it out loud. That way we don't miss a point and can spot patterns faster."
+    },
+    {
+      "round": 2,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 2,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 31,
+      "text": "If people start spotting themes, maybe we should take a pause every few minutes. Just to make sure everyone’s had a chance to speak up or add something we might’ve missed."
+    },
+    {
+      "round": 2,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 29,
+      "text": "If anyone’s worried about missing a point, just say it out loud—even if it feels small. I’ll keep a list too, just in case. That way, nobody’s left out."
+    },
+    {
+      "round": 2,
+      "name": "Helena Baxter",
+      "persona_type": "D5",
+      "spoke": true,
+      "word_count": 36,
+      "text": "Enough with the lists and pauses. Rafael and Wei, call out patterns as you see them. Amitesh, jot them down. We don’t need a group hug—just results. Ten minutes, then we pick a lead. That’s it."
+    },
+    {
+      "round": 2,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 25,
+      "text": "Alright, I’ll listen in for anything that jumps out. If something feels off or repeats, I’ll call it out. Let’s try to keep it moving."
+    },
+    {
+      "round": 2,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 11,
+      "text": "Heard. I’ll listen for repeats or anything odd as you go."
+    },
+    {
+      "round": 2,
+      "name": "Rafael Carvalho",
+      "persona_type": "P4",
+      "spoke": true,
+      "word_count": 28,
+      "text": "Alright, jumping in—first thing I’m seeing from feedback: clients liked how responsive we were when things changed last minute. That comes up a lot. Anyone else spot something?"
+    },
+    {
+      "round": 3,
+      "name": "Lucía Mendoza",
+      "persona_type": "N5",
+      "spoke": true,
+      "word_count": 22,
+      "text": "Being quick to adapt is great. Has anyone seen feedback on what tripped us up, too? Just so we cover both sides."
+    },
+    {
+      "round": 3,
+      "name": "Lilian Njoroge",
+      "persona_type": "N3",
+      "spoke": false,
+      "word_count": 0,
+      "text": ""
+    },
+    {
+      "round": 3,
+      "name": "Erik Lundström",
+      "persona_type": "N2",
+      "spoke": true,
+      "word_count": 33,
+      "text": "I keep seeing that being flexible is a plus for us. But if there’s a snag that keeps repeating, we should probably call that out, too. Anyone notice a pattern on the downside?"
+    },
+    {
+      "round": 3,
+      "name": "Amitesh Iyer",
+      "persona_type": "N4",
+      "spoke": true,
+      "word_count": 26,
+      "text": "One thing I’ve seen pop up—some clients said handovers between our teams got messy, especially when timelines shifted. Maybe that’s something we should own up to?"
+    },
+    {
+      "round": 3,
+      "name": "Helena Baxter",
+      "persona_type": "D5",
+      "spoke": true,
+      "word_count": 29,
+      "text": "Handovers have been sloppy—no point sugarcoating it. We own that in the pitch and say what we’re fixing. That’s how we show we’re not blind to our own gaps."
+    },
+    {
+      "round": 3,
+      "name": "Todd Ramsey",
+      "persona_type": "N8",
+      "spoke": true,
+      "word_count": 27,
+      "text": "Yeah, no use pretending handovers weren't a problem. If we’re putting that out front, let’s be specific about what’s changing—not just ‘we’ll do better.’ People want details."
+    },
+    {
+      "round": 3,
+      "name": "Élise Moreau",
+      "persona_type": "N7",
+      "spoke": true,
+      "word_count": 28,
+      "text": "If we’re naming the handover problem, maybe we should mention one thing we’ve changed already—like that new checklist, or the buddy system between teams. Just so it’s concrete."
+    },
+    {
+      "round": 3,
+      "name": "Wei Zhou",
+      "persona_type": "N6",
+      "spoke": true,
+      "word_count": 22,
+      "text": "We could point to the new handover checklist. It’s not perfect yet, but at least we can show we’re trying something concrete."
+    },
+    {
+      "round": 3,
+      "name": "Trang Nguyen",
+      "persona_type": "N1",
+      "spoke": true,
+      "word_count": 27,
+      "text": "Yeah, the checklist helps. Should we also check if anything else keeps popping up in the feedback? Just to be sure we catch all the big stuff."
+    },
+    {
+      "round": 3,
+      "name": "Rafael Carvalho",
+      "persona_type": "P4",
+      "spoke": true,
+      "word_count": 33,
+      "text": "Let’s make it concrete. We call out the handover mess, show we’ve started fixing it—checklist, maybe pairing folks from both sides. If anyone thinks that’s not enough, now’s the time to say it."
+    }
+  ],
+  "votes": [
+    {
+      "voter_name": "Rafael Carvalho",
+      "voter_type": "P4",
+      "voted_for_name": "Helena Baxter",
+      "voted_for_type": "D5",
+      "reason": "Helena pushed us to be direct, set a clear deadline, and made sure we focused on concrete results during the discussion."
+    },
+    {
+      "voter_name": "Helena Baxter",
+      "voter_type": "D5",
+      "voted_for_name": "Rafael Carvalho",
+      "voted_for_type": "P4",
+      "reason": "He cut through the noise, named the main client win, and pushed for specifics when others hesitated."
+    },
+    {
+      "voter_name": "Trang Nguyen",
+      "voter_type": "N1",
+      "voted_for_name": "Rafael Carvalho",
+      "voted_for_type": "P4",
+      "reason": "Rafael kept the group focused on concrete actions and suggested we directly address the handover problem with specific solutions."
+    },
+    {
+      "voter_name": "Erik Lundström",
+      "voter_type": "N2",
+      "voted_for_name": "Rafael Carvalho",
+      "voted_for_type": "P4",
+      "reason": "Rafael kept the group focused on concrete feedback and pushed for specific, actionable points during the discussion."
+    },
+    {
+      "voter_name": "Lilian Njoroge",
+      "voter_type": "N3",
+      "voted_for_name": "Rafael Carvalho",
+      "voted_for_type": "P4",
+      "reason": "He kept the group focused on concrete feedback and pushed for clear, actionable points during the discussion."
+    },
+    {
+      "voter_name": "Amitesh Iyer",
+      "voter_type": "N4",
+      "voted_for_name": "Helena Baxter",
+      "voted_for_type": "D5",
+      "reason": "She set clear deadlines, assigned tasks, and pushed the group to focus on concrete results during the discussion."
+    },
+    {
+      "voter_name": "Lucía Mendoza",
+      "voter_type": "N5",
+      "voted_for_name": "Rafael Carvalho",
+      "voted_for_type": "P4",
+      "reason": "He focused the team on client feedback and encouraged everyone to contribute specific points."
+    },
+    {
+      "voter_name": "Wei Zhou",
+      "voter_type": "N6",
+      "voted_for_name": "Rafael Carvalho",
+      "voted_for_type": "P4",
+      "reason": "Rafael kept the discussion on track and pushed for specific, actionable points from the feedback."
+    },
+    {
+      "voter_name": "Élise Moreau",
+      "voter_type": "N7",
+      "voted_for_name": "Rafael Carvalho",
+      "voted_for_type": "P4",
+      "reason": "Rafael kept the group focused on client feedback, encouraged input from everyone, and pushed for concrete solutions."
+    },
+    {
+      "voter_name": "Todd Ramsey",
+      "voter_type": "N8",
+      "voted_for_name": "Helena Baxter",
+      "voted_for_type": "D5",
+      "reason": "She pushed us to be specific and kept the group on track when we started drifting."
+    }
+  ]
+}

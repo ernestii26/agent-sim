@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import json
+import math
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from persona_store import ALL_TYPES, E_TYPES, I_TYPES
+from persona_store import ALL_TYPES, PRESTIGE_TYPES, DOMINANCE_TYPES, NEUTRAL_TYPES
 
 
 # --------------------------------------------------------------------------- #
@@ -18,27 +19,36 @@ def print_step1_report(result: dict[str, Any]) -> None:
     names = result.get("names", {})
 
     print()
-    print("=" * 65)
-    print("MBTI BASELINE — STEP 1: SILENCE MECHANISM VALIDATION")
-    print("=" * 65)
+    print("=" * 70)
+    print("PRESTIGE vs DOMINANCE — STEP 1: SILENCE MECHANISM VALIDATION")
+    print("=" * 70)
     print(f"Runs: {result['runs']}  Rounds per run: {result['rounds']}")
+    print(f"Design: 1P + 1D sampled per run, 8N fixed")
     print()
-    print(f"{'Type':<6}  {'Name':<35}  {'Speech Rate':>12}  {'Avg Words':>10}")
-    print("-" * 70)
+    print(f"{'ID':<4}  {'Group':<10}  {'Name':<32}  {'Speech Rate':>12}  {'Avg Words':>10}")
+    print("-" * 74)
+
+    def _fmt(v: float) -> str:
+        return f"{v:.3f}" if not math.isnan(v) else "  n/a"
+
     for t in ALL_TYPES:
-        group = "E" if t in E_TYPES else "I"
+        if t in PRESTIGE_TYPES:
+            group = "Prestige"
+        elif t in DOMINANCE_TYPES:
+            group = "Dominance"
+        else:
+            group = "Neutral"
         name = names.get(t, t)
-        print(f"{t}({group}) {name:<35}  {sr[t]:>11.3f}  {mw[t]:>10.1f}")
+        print(f"{t:<4}  {group:<10}  {name:<32}  {_fmt(sr[t]):>12}  {_fmt(mw[t]):>10}")
+
     print()
-    print(f"  E mean speech rate : {result['e_mean_speech_rate']:.3f}")
-    print(f"  I mean speech rate : {result['i_mean_speech_rate']:.3f}")
-    print(f"  E − I gap          : {result['gap']:+.3f}  (need ≥ 0.10)")
-    print(f"  I-types < 0.70     : {result['i_below_70_count']} / 5  (need ≥ 3)")
-    print(f"  E-types > 0.50     : {result['e_above_50_count']} / 5  (need ≥ 3)")
+    print(f"  Neutral mean speech rate  : {result['n_mean_speech_rate']:.3f}")
+    print(f"  Neutral-types < 0.80      : {result['n_some_silence_count']} / {len(NEUTRAL_TYPES)}  (need ≥ 3)")
+    print(f"  (P/D shown above; sparse data because sampled 1-per-run)")
     print()
-    verdict = "PASSED ✓ — proceed to Step 2" if result["passed"] else "FAILED ✗ — fall back to forced turns"
-    print(f"  Step 1 verdict     : {verdict}")
-    print("=" * 65)
+    verdict = "PASSED ✓ — silence mechanism works" if result["passed"] else "FAILED ✗ — all agents speak every turn"
+    print(f"  Step 1 verdict : {verdict}")
+    print("=" * 70)
 
 
 def save_step1_result(result: dict[str, Any], output_dir: str) -> Path:
@@ -63,36 +73,26 @@ def plot_step1(result: dict[str, Any], output_dir: str) -> None:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     sr = result["speech_rate"]
-    labels = [f"{t}\n({'E' if t in E_TYPES else 'I'})" for t in ALL_TYPES]
-    values = [sr[t] for t in ALL_TYPES]
-    colors = ["#4C72B0" if t in E_TYPES else "#DD8452" for t in ALL_TYPES]
+    names = result.get("names", {})
 
-    from matplotlib.patches import Patch
+    # Only show N types (have full data); P/D are sparse
+    labels_n = [f"{t}\n{names.get(t,'').split()[0]}" for t in NEUTRAL_TYPES]
+    values_n = [sr[t] if not math.isnan(sr[t]) else 0 for t in NEUTRAL_TYPES]
 
-    fig, ax = plt.subplots(figsize=(12, 5))
-    bars = ax.bar(labels, values, color=colors, alpha=0.85)
-    threshold_i = ax.axhline(0.70, color="red", linestyle="--", linewidth=0.9, label="I threshold (0.70)")
-    threshold_e = ax.axhline(0.50, color="green", linestyle="--", linewidth=0.9, label="E threshold (0.50)")
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.bar(labels_n, values_n, color="#888888", alpha=0.75)
+    ax.axhline(0.80, color="red", linestyle="--", linewidth=0.9, label="Silence threshold (0.80)")
     ax.set_ylim(0, 1.05)
     ax.set_ylabel("Speech Rate (proportion of turns spoken)")
-    ax.set_title("Step 1: Speech Rate by Persona\n(Blue=Extraverted, Orange=Introverted)")
+    ax.set_title("Step 1: Neutral Agents Speech Rate\n(P/D omitted — sparse because sampled 1-per-run)")
+    ax.legend(fontsize=9)
 
-    legend_elements = [
-        Patch(facecolor="#4C72B0", alpha=0.85, label="E-type"),
-        Patch(facecolor="#DD8452", alpha=0.85, label="I-type"),
-        threshold_i,
-        threshold_e,
-    ]
-    ax.legend(handles=legend_elements, fontsize=9)
-
-    for bar, val in zip(bars, values):
+    for i, (val, bar) in enumerate(zip(values_n, ax.patches)):
         ax.text(
             bar.get_x() + bar.get_width() / 2,
             val + 0.01,
             f"{val:.2f}",
-            ha="center",
-            va="bottom",
-            fontsize=8,
+            ha="center", va="bottom", fontsize=8,
         )
 
     plt.tight_layout()
@@ -108,8 +108,6 @@ def plot_step1(result: dict[str, Any], output_dir: str) -> None:
 
 def _paired_ttest_onesided(a: list[float], b: list[float]) -> tuple[float, float]:
     """One-sided paired t-test for H1: mean(a) > mean(b). NaN pairs are skipped."""
-    import math
-
     pairs = [(x, y) for x, y in zip(a, b) if not (math.isnan(x) or math.isnan(y))]
     n = len(pairs)
     if n < 2:
@@ -119,7 +117,7 @@ def _paired_ttest_onesided(a: list[float], b: list[float]) -> tuple[float, float
     var_d = sum((d - mean_d) ** 2 for d in diffs) / (n - 1)
     if var_d == 0:
         return float("nan"), float("nan")
-    se = math.sqrt(var_d / n)
+    se = (var_d / n) ** 0.5
     t = mean_d / se
 
     try:
@@ -132,50 +130,72 @@ def _paired_ttest_onesided(a: list[float], b: list[float]) -> tuple[float, float
 
 def print_step2_report(result: dict[str, Any]) -> None:
     runs = result["run_results"]
-
-    e_votes_per_run = [r["e_votes"] for r in runs]
-    i_votes_per_run = [r["i_votes"] for r in runs]
-    e_sr_per_run = [r["e_speech_rate"] for r in runs]
-    i_sr_per_run = [r["i_speech_rate"] for r in runs]
-    e_wpt_per_run = [r["e_words_per_turn"] for r in runs]
-    i_wpt_per_run = [r["i_words_per_turn"] for r in runs]
-
     n = len(runs)
 
     def mean(lst: list[float]) -> float:
-        return sum(lst) / len(lst) if lst else 0.0
+        valid = [x for x in lst if not math.isnan(x)]
+        return sum(valid) / len(valid) if valid else float("nan")
 
-    t_votes, p_votes = _paired_ttest_onesided(e_votes_per_run, i_votes_per_run)
-    t_sr, p_sr = _paired_ttest_onesided(e_sr_per_run, i_sr_per_run)
-    t_wpt, p_wpt = _paired_ttest_onesided(e_wpt_per_run, i_wpt_per_run)
+    p_votes_per_run = [r["p_votes"] for r in runs]
+    d_votes_per_run = [r["d_votes"] for r in runs]
+    p_sr_per_run = [r["p_speech_rate"] for r in runs]
+    d_sr_per_run = [r["d_speech_rate"] for r in runs]
+    p_wpt_per_run = [r["p_words_per_turn"] for r in runs]
+    d_wpt_per_run = [r["d_words_per_turn"] for r in runs]
+
+    t_votes, p_votes_stat = _paired_ttest_onesided(p_votes_per_run, d_votes_per_run)
+    t_sr, p_sr_stat = _paired_ttest_onesided(p_sr_per_run, d_sr_per_run)
+    t_wpt, p_wpt_stat = _paired_ttest_onesided(p_wpt_per_run, d_wpt_per_run)
 
     print()
-    print("=" * 65)
-    print("MBTI BASELINE — STEP 2: E vs I LEADERSHIP HYPOTHESIS TEST")
-    print("=" * 65)
+    print("=" * 70)
+    print("PRESTIGE vs DOMINANCE — STEP 2: LEADERSHIP HYPOTHESIS TEST")
+    print("=" * 70)
     print(f"Runs: {n}  Rounds per run: {result['rounds']}")
-    print(f"H1: E-types receive more peer votes than I-types")
+    print(f"Design: per run, 1P sampled from {{P1–P5}}, 1D from {{D1–D5}}, 8N fixed")
+    print(f"H1: Prestige-type receives more peer votes than Dominance-type")
     print()
-    print(f"{'Metric':<30}  {'E mean':>8}  {'I mean':>8}  {'t':>7}  {'p':>8}")
+
+    # Per-run table
+    print(f"  {'Run':>3}  {'P':>3}  {'D':>3}  {'P votes':>8}  {'D votes':>8}  {'Diff':>6}")
+    print("  " + "-" * 42)
+    for r in runs:
+        diff = r["p_votes"] - r["d_votes"]
+        sign = "+" if diff >= 0 else ""
+        print(f"  {r['run_no']:>3}  {r['p_id']:>3}  {r['d_id']:>3}  "
+              f"{r['p_votes']:>8}  {r['d_votes']:>8}  {sign}{diff:>5}")
+    print()
+
+    # Summary stats
+    print(f"{'Metric':<30}  {'P mean':>8}  {'D mean':>8}  {'t':>7}  {'p':>8}")
     print("-" * 65)
     print(
-        f"{'Votes per run':<30}  {mean(e_votes_per_run):>8.2f}  {mean(i_votes_per_run):>8.2f}"
-        f"  {t_votes:>7.3f}  {_fmt_p(p_votes):>8}"
+        f"{'Votes per run':<30}  {mean(p_votes_per_run):>8.2f}  {mean(d_votes_per_run):>8.2f}"
+        f"  {t_votes:>7.3f}  {_fmt_p(p_votes_stat):>8}"
     )
     print(
-        f"{'Speech rate':<30}  {mean(e_sr_per_run):>8.3f}  {mean(i_sr_per_run):>8.3f}"
-        f"  {t_sr:>7.3f}  {_fmt_p(p_sr):>8}"
+        f"{'Speech rate':<30}  {mean(p_sr_per_run):>8.3f}  {mean(d_sr_per_run):>8.3f}"
+        f"  {t_sr:>7.3f}  {_fmt_p(p_sr_stat):>8}"
     )
     print(
-        f"{'Words per spoken turn':<30}  {mean(e_wpt_per_run):>8.1f}  {mean(i_wpt_per_run):>8.1f}"
-        f"  {t_wpt:>7.3f}  {_fmt_p(p_wpt):>8}"
+        f"{'Words per spoken turn':<30}  {mean(p_wpt_per_run):>8.1f}  {mean(d_wpt_per_run):>8.1f}"
+        f"  {t_wpt:>7.3f}  {_fmt_p(p_wpt_stat):>8}"
     )
     print()
-    h1_supported = mean(e_votes_per_run) > mean(i_votes_per_run) and (not _is_nan(p_votes)) and p_votes < 0.05
-    print(f"  H1 verdict: {'SUPPORTED' if h1_supported else 'NOT SUPPORTED'} "
-          f"(E votes {'>' if mean(e_votes_per_run) > mean(i_votes_per_run) else '≤'} I votes, "
-          f"p = {_fmt_p(p_votes)})")
-    print("=" * 65)
+
+    p_wins = sum(1 for r in runs if r["p_votes"] > r["d_votes"])
+    h1_supported = (
+        mean(p_votes_per_run) > mean(d_votes_per_run)
+        and not math.isnan(p_votes_stat)
+        and p_votes_stat < 0.05
+    )
+    direction = ">" if mean(p_votes_per_run) > mean(d_votes_per_run) else "≤"
+    print(f"  P wins in {p_wins}/{n} runs")
+    print(
+        f"  H1 verdict: {'SUPPORTED' if h1_supported else 'NOT SUPPORTED'} "
+        f"(Prestige {direction} Dominance in votes, p = {_fmt_p(p_votes_stat)})"
+    )
+    print("=" * 70)
 
 
 def save_step2_result(result: dict[str, Any], output_dir: str) -> Path:
@@ -201,35 +221,41 @@ def plot_step2(result: dict[str, Any], output_dir: str) -> None:
     runs = result["run_results"]
 
     def mean(lst: list[float]) -> float:
-        return sum(lst) / len(lst) if lst else 0.0
+        valid = [x for x in lst if not math.isnan(x)]
+        return sum(valid) / len(valid) if valid else 0.0
 
     def std(lst: list[float]) -> float:
-        m = mean(lst)
-        return (sum((x - m) ** 2 for x in lst) / max(len(lst) - 1, 1)) ** 0.5
+        valid = [x for x in lst if not math.isnan(x)]
+        if len(valid) < 2:
+            return 0.0
+        m = mean(valid)
+        return (sum((x - m) ** 2 for x in valid) / (len(valid) - 1)) ** 0.5
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
     metrics = [
-        ("Votes per run", [r["e_votes"] for r in runs], [r["i_votes"] for r in runs]),
-        ("Speech rate", [r["e_speech_rate"] for r in runs], [r["i_speech_rate"] for r in runs]),
-        ("Words per spoken turn", [r["e_words_per_turn"] for r in runs], [r["i_words_per_turn"] for r in runs]),
+        ("Votes per run", [r["p_votes"] for r in runs], [r["d_votes"] for r in runs]),
+        ("Speech rate", [r["p_speech_rate"] for r in runs], [r["d_speech_rate"] for r in runs]),
+        ("Words per spoken turn", [r["p_words_per_turn"] for r in runs], [r["d_words_per_turn"] for r in runs]),
     ]
 
-    for ax, (title, e_vals, i_vals) in zip(axes, metrics):
-        e_m, e_s = mean(e_vals), std(e_vals)
-        i_m, i_s = mean(i_vals), std(i_vals)
-        ax.bar(["E-types", "I-types"], [e_m, i_m], yerr=[e_s, i_s],
+    for ax, (title, p_vals, d_vals) in zip(axes, metrics):
+        p_m, p_s = mean(p_vals), std(p_vals)
+        d_m, d_s = mean(d_vals), std(d_vals)
+        ax.bar(["Prestige", "Dominance"], [p_m, d_m], yerr=[p_s, d_s],
                color=["#4C72B0", "#DD8452"], alpha=0.85, capsize=6, width=0.5)
         ax.set_ylim(bottom=0)
         ax.set_title(title, fontsize=11)
         ax.set_ylabel(title)
-        label_offset = max(e_s, i_s) * 0.1 + 0.05 * max(e_m, i_m, 1)
-        for x, (m, s) in enumerate([(e_m, e_s), (i_m, i_s)]):
-            ax.text(x, m + s + label_offset, f"{m:.2f}", ha="center", va="bottom", fontsize=10, fontweight="bold")
+        label_offset = max(p_s, d_s) * 0.1 + 0.05 * max(p_m, d_m, 1)
+        for x, (m, s) in enumerate([(p_m, p_s), (d_m, d_s)]):
+            ax.text(x, m + s + label_offset, f"{m:.2f}",
+                    ha="center", va="bottom", fontsize=10, fontweight="bold")
 
     plt.suptitle(
-        f"MBTI Baseline Step 2: E vs I Leadership\n(n={len(runs)} runs, error bars = ±1 SD)",
-        fontsize=12,
+        f"Prestige vs Dominance: Leadership Emergence\n"
+        f"(n={len(runs)} runs, 1P+1D sampled per run + 8N fixed, error bars = ±1 SD)",
+        fontsize=11,
     )
     plt.tight_layout()
     path = out / f"baseline_step2_{timestamp}.png"
@@ -239,13 +265,8 @@ def plot_step2(result: dict[str, Any], output_dir: str) -> None:
 
 
 def _fmt_p(p: float) -> str:
-    if _is_nan(p):
+    if math.isnan(p):
         return "n/a"
     if p < 0.001:
         return "< .001"
     return f"{p:.3f}"
-
-
-def _is_nan(x: float) -> bool:
-    import math
-    return math.isnan(x)

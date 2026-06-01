@@ -3,14 +3,23 @@ from __future__ import annotations
 import json
 import random
 import textwrap
+import time
 from itertools import count
 from typing import Any
 
 import openai
 
 from runtime import actions_to_text, configure_tinytroupe_runtime, ensure_tinytroupe_imports
+from persona_store import PRESTIGE_TYPES, DOMINANCE_TYPES
 
 _WORLD_COUNTER = count(1)
+_consecutive_api_failures = 0
+_MAX_CONSECUTIVE_FAILURES = 5
+
+
+class APIQuotaExhausted(RuntimeError):
+    """Raised when the API appears to have no remaining quota (billing exhausted)."""
+
 
 SCENARIO = (
     "Your team has been missing key deliverables for two consecutive quarters. "
@@ -19,26 +28,75 @@ SCENARIO = (
     "everyone in the room can commit to implementing."
 )
 
+SCENARIO_FRICTION = (
+    "[Meeting context: This group has attempted to address performance issues before. "
+    "A previous initiative stalled halfway through and was quietly dropped. "
+    "People in this room have different — and sometimes conflicting — views on "
+    "what actually went wrong and who was responsible. Not everyone trusts the "
+    "last diagnosis that was made.]"
+)
 
-def _safe_listen_and_act(agent: Any, prompt: str) -> list[dict[str, Any]]:
-    try:
-        result = agent.listen_and_act(
-            prompt,
-            return_actions=True,
-            communication_display=False,
+SCENARIO_THREAT = (
+    "Your division is under review. Senior leadership will retain only one of two "
+    "competing teams — yours or the other. The decision will be made in 48 hours. "
+    "Your group must agree right now on a single pitch: what you deliver, who leads it, "
+    "and who is accountable. If you cannot agree among yourselves, leadership will "
+    "make the decision for you — and people may lose their positions."
+)
+
+SCENARIO_THREAT_FRICTION = (
+    "[Meeting context: Two months ago, the rival team landed a major client your "
+    "division had been pursuing for a year. Some people here believe your group lost "
+    "because of indecision and unclear ownership. Others think it was a resourcing "
+    "failure. Either way, you are now in direct competition for survival. "
+    "Not everyone in this room agrees on who should be leading the response — "
+    "and some people are wondering whether they have a future here at all.]"
+)
+
+
+def _safe_listen_and_act(agent: Any, prompt: str, retries: int = 3) -> list[dict[str, Any]]:
+    global _consecutive_api_failures
+    for attempt in range(1, retries + 1):
+        try:
+            result = agent.listen_and_act(
+                prompt,
+                return_actions=True,
+                communication_display=False,
+            )
+            _consecutive_api_failures = 0
+            return result or []
+        except (TypeError, AttributeError) as exc:
+            if attempt < retries:
+                delay = 2 ** attempt
+                print(f"  [warn] listen_and_act failed (attempt {attempt}/{retries}, retrying in {delay}s): {exc}")
+                time.sleep(delay)
+            else:
+                _consecutive_api_failures += 1
+                print(f"  [warn] listen_and_act failed after {retries} attempts ({type(exc).__name__}: {exc}) — treating as silence")
+                _check_quota()
+                return []
+        except openai.OpenAIError as exc:
+            if attempt < retries:
+                delay = 2 ** attempt
+                print(f"  [warn] OpenAI error (attempt {attempt}/{retries}, retrying in {delay}s): {exc}")
+                time.sleep(delay)
+            else:
+                _consecutive_api_failures += 1
+                print(f"  [warn] OpenAI error after {retries} attempts ({type(exc).__name__}: {exc}) — treating as silence")
+                _check_quota()
+                return []
+        except Exception as exc:
+            print(f"  [warn] Unexpected error ({type(exc).__name__}: {exc}) — treating as silence")
+            return []
+    return []
+
+
+def _check_quota() -> None:
+    if _consecutive_api_failures >= _MAX_CONSECUTIVE_FAILURES:
+        raise APIQuotaExhausted(
+            f"API failed {_consecutive_api_failures} times in a row — "
+            "likely billing quota exhausted. Stopping simulation."
         )
-        return result or []
-    except (TypeError, AttributeError) as exc:
-        # TinyTroupe bug: send_message returned None (e.g. after 429 exhaustion)
-        print(f"  [warn] listen_and_act failed ({type(exc).__name__}: {exc}) — treating as silence")
-        return []
-    except openai.OpenAIError as exc:
-        # LengthFinishReasonError, RateLimitError, APIStatusError, etc.
-        print(f"  [warn] OpenAI error ({type(exc).__name__}: {exc}) — treating as silence")
-        return []
-    except Exception as exc:
-        print(f"  [warn] Unexpected error ({type(exc).__name__}: {exc}) — treating as silence")
-        return []
 
 
 def _extract_json(text: str) -> dict[str, Any]:
@@ -56,8 +114,9 @@ def run_discussion(
     *,
     agents: list[Any],
     names: list[str],
-    mbti_types: list[str],
+    persona_types: list[str],
     scenario: str,
+    friction: str,
     rounds: int,
     api_key: str,
     model: str,
@@ -71,7 +130,7 @@ def run_discussion(
     Agents may respond with THINK+TALK+DONE (speaking) or just DONE (silence).
 
     Returns a list of per-turn records:
-        round, name, mbti_type, spoke (bool), word_count (int), text (str)
+        round, name, persona_type, spoke (bool), word_count (int), text (str)
     """
     configure_tinytroupe_runtime(
         api_key=api_key,
@@ -90,6 +149,7 @@ def run_discussion(
         world.make_everyone_accessible()
 
     world.broadcast(f"Team meeting scenario:\n{scenario}")
+    world.broadcast(friction)
 
     transcript: list[dict[str, Any]] = []
     n = len(agents)
@@ -104,23 +164,39 @@ def run_discussion(
         for idx in order:
             agent = agents[idx]
             name = names[idx]
-            mbti_type = mbti_types[idx]
+            persona_type = persona_types[idx]
 
             prompt = textwrap.dedent(
                 f"""
-                You are {name}, in a team meeting.
+                You are {name}, in a live team meeting.
 
-                If you have something meaningful to add RIGHT NOW, respond with:
-                - one THINK action (private, not spoken aloud)
-                - one TALK action in <= 40 words
+                SPEAK LIKE A REAL PERSON TALKING, not writing a report.
+
+                Rules for your TALK content:
+                - Vary your length freely: sometimes 3-6 words ("That won't work."),
+                  sometimes a full thought (20-35 words). Not every turn is a paragraph.
+                - Use natural spoken rhythm. Incomplete sentences are fine.
+                - Do NOT open with the same phrase you used before.
+                - Do NOT use corporate filler: no "action required", "let's align",
+                  "I'll volunteer to steward", "going forward", "key deliverable".
+                  Say what you mean directly.
+                - You are allowed to disagree, push back, or say something isn't working.
+                  Real meetings have friction. A blunt challenge is fine.
+                - You are also allowed to say something brief or even obvious — real
+                  people repeat themselves, ask for clarification, or just confirm they heard.
+
+                If you have something to say RIGHT NOW, respond with:
+                - one THINK action (private — your honest internal reaction)
+                - one TALK action (what you actually say out loud)
                 - one DONE action
 
-                If you would rather listen for now, respond with JUST:
+                If you would rather stay quiet for now, respond with JUST:
                 DONE
                 """
             ).strip()
 
             actions = _safe_listen_and_act(agent, prompt)
+            time.sleep(1)
 
             did_speak = any(
                 a.get("action", {}).get("type", "").upper() == "TALK"
@@ -132,7 +208,7 @@ def run_discussion(
             entry: dict[str, Any] = {
                 "round": round_no,
                 "name": name,
-                "mbti_type": mbti_type,
+                "persona_type": persona_type,
                 "spoke": did_speak,
                 "word_count": word_count,
                 "text": text,
@@ -141,9 +217,14 @@ def run_discussion(
 
             if on_progress:
                 first = name.split()[0]
-                group = "E" if mbti_type.startswith("E") else "I"
+                if persona_type in PRESTIGE_TYPES:
+                    group = "P"
+                elif persona_type in DOMINANCE_TYPES:
+                    group = "D"
+                else:
+                    group = "N"
                 status = f"✓  {word_count:>3}w" if did_speak else "·"
-                on_progress(f"    {first:<14} {mbti_type} {group}   {status}")
+                on_progress(f"    {first:<14} {persona_type} {group}   {status}")
 
             if did_speak and text:
                 world.broadcast(text, source=agent)
@@ -155,7 +236,7 @@ def run_vote(
     *,
     agents: list[Any],
     names: list[str],
-    mbti_types: list[str],
+    persona_types: list[str],
     transcript: list[dict[str, Any]],
     api_key: str,
     model: str,
@@ -174,10 +255,10 @@ def run_vote(
         max_completion_tokens=max_tokens,
     )
 
-    name_to_type = dict(zip(names, mbti_types))
+    name_to_type = dict(zip(names, persona_types))
     votes: list[dict[str, Any]] = []
 
-    for agent, name, mbti_type in zip(agents, names, mbti_types):
+    for agent, name, persona_type in zip(agents, names, persona_types):
         candidates = [n for n in names if n != name]
         name_list = ", ".join(candidates)
 
@@ -212,7 +293,7 @@ def run_vote(
         votes.append(
             {
                 "voter_name": name,
-                "voter_type": mbti_type,
+                "voter_type": persona_type,
                 "voted_for_name": leader_name,
                 "voted_for_type": voted_type,
                 "reason": reason,
