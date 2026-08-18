@@ -4,16 +4,10 @@ __pycache__/
 *.egg-info/
 .venv/
 
-# Results & logs (large / ephemeral)
-results/logs/
-results/step1_checkpoints/
-results/step2_checkpoints/
-
-# Keep final summary outputs
-!results/baseline_step1_*.json
-!results/baseline_step1_*.png
-!results/baseline_step2_*.json
-!results/baseline_step2_*.png
-
-# API key is in config.ini — do NOT commit it
+# Secrets — never commit
 config.ini
+
+# Per-run artifacts: logs and raw transcripts are large and regenerable.
+# Final summaries and charts (results/<study>/<condition>/*.json|png) stay tracked.
+results/**/checkpoints/
+results/**/logs/

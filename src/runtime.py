@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-import copy
 import json
 import logging
 import os
 import warnings as _warnings_module
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from config import ModelSettings
 
 _pending_log_dir: Path | None = None
 _logging_configured = False
@@ -83,46 +85,19 @@ def ensure_tinytroupe_imports() -> tuple[Any, Any, Any, Any]:
     return config_manager, TinyPerson, TinyWorld, TinyPersonFactory
 
 
-def configure_tinytroupe_runtime(
-    *,
-    api_key: str,
-    model: str,
-    temperature: float | None,
-    max_completion_tokens: int | None,
-) -> None:
+def configure_tinytroupe_runtime(settings: "ModelSettings") -> None:
+    """Point TinyTroupe's global client at these settings. Safe to call repeatedly —
+    the discussion and vote phases use different models and re-configure between them."""
     config_manager, TinyPerson, TinyWorld, _ = ensure_tinytroupe_imports()
     _apply_file_logging()  # safe: TinyTroupe's start_logger() has already run
-    os.environ["OPENAI_API_KEY"] = api_key
-    updates: dict[str, Any] = {"model": model}
-    if temperature is not None:
-        updates["temperature"] = float(temperature)
-    if max_completion_tokens is not None:
-        updates["max_completion_tokens"] = int(max_completion_tokens)
-    config_manager.update_multiple(updates)
+    os.environ["OPENAI_API_KEY"] = settings.api_key
+    config_manager.update_multiple({
+        "model": settings.model,
+        "temperature": float(settings.temperature),
+        "max_completion_tokens": int(settings.max_tokens),
+    })
     TinyPerson.communication_display = False
     TinyWorld.communication_display = False
-
-
-def clone_person(person: Any) -> Any:
-    try:
-        cloned = copy.deepcopy(person)
-    except Exception:
-        return person
-
-    for attr in (
-        "environment",
-        "current_messages",
-        "_actions_buffer",
-        "_accessible_agents",
-        "_displayed_communications_buffer",
-    ):
-        if hasattr(cloned, attr):
-            setattr(cloned, attr, None if attr == "environment" else [])
-    for counter in ("actions_count", "stimuli_count", "_current_episode_event_count"):
-        if hasattr(cloned, counter):
-            setattr(cloned, counter, 0)
-
-    return cloned
 
 
 def actions_to_text(actions: list[dict[str, Any]] | None) -> str:

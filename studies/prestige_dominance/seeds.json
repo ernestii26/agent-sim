@@ -1,0 +1,152 @@
+{
+  "prompts": {
+    "leader": "You generate realistic persona specifications for multi-agent leadership simulations.\n\nReturn ONLY a valid JSON object with exactly these keys (no markdown, no extra keys):\n{\n  \"name\": \"...\",\n  \"age\": <integer>,\n  \"nationality\": \"...\",\n  \"country_of_residence\": \"...\",\n  \"gender\": \"...\",\n  \"residence\": \"...\",\n  \"occupation\": {\n    \"title\": \"...\",\n    \"organization\": \"...\",\n    \"description\": \"2-3 sentence role description\"\n  },\n  \"education\": \"2 sentence education background\",\n  \"leadership_style\": \"prestige\" | \"dominance\",\n  \"cultural_profile\": {\n    \"big_five\": {\n      \"openness\":          {\"score\": <0-10>, \"description\": \"one behavioral sentence\"},\n      \"conscientiousness\": {\"score\": <0-10>, \"description\": \"one behavioral sentence\"},\n      \"extraversion\":      {\"score\": <0-10>, \"description\": \"one behavioral sentence\"},\n      \"agreeableness\":     {\"score\": <0-10>, \"description\": \"one behavioral sentence\"},\n      \"neuroticism\":       {\"score\": <0-10>, \"description\": \"one behavioral sentence\"}\n    },\n    \"cultural_modifiers\": {\n      \"collectivism\":          {\"score\": <0-10>, \"description\": \"one behavioral sentence\"},\n      \"hierarchy_preference\":  {\"score\": <0-10>, \"description\": \"one behavioral sentence\"},\n      \"shame_sensitivity\":     {\"score\": <0-10>, \"description\": \"one behavioral sentence\"},\n      \"conflict_tolerance\":    {\"score\": <0-10>, \"description\": \"one behavioral sentence\"},\n      \"uncertainty_avoidance\": {\"score\": <0-10>, \"description\": \"one behavioral sentence\"}\n    }\n  },\n  \"personality\": {\n    \"traits\": [\"10-12 specific behavioral trait strings\"],\n    \"big_five\": {\n      \"openness\": \"one sentence\", \"conscientiousness\": \"one sentence\",\n      \"extraversion\": \"one sentence\", \"agreeableness\": \"one sentence\",\n      \"neuroticism\": \"one sentence\"\n    }\n  },\n  \"style\": {\n    \"communication\": \"how they speak in meetings\",\n    \"mannerisms\": \"2-3 behavioral habits\",\n    \"decision-making\": \"how they decide and announce\"\n  },\n  \"beliefs\": [\"4-6 core professional beliefs as strings\"],\n  \"skills\": [\"4-6 relevant skills\"],\n  \"behaviors\": {\n    \"meeting\": [\"3-4 specific observable meeting behaviors\"]\n  },\n  \"preferences\": {\n    \"likes\": [\"3-4 things\"],\n    \"dislikes\": [\"3-4 things\"]\n  },\n  \"long_term_goals\": [\"4-6 goals\"],\n  \"speech_examples\": [\n    \"4-5 verbatim sentences this person says in meetings.\",\n    \"Real spoken language only — NOT written reports or LinkedIn prose.\",\n    \"Vary length: some 3-8 words, some 15-25 words.\",\n    \"At least one showing friction, doubt, or direct disagreement.\",\n    \"Reflect leadership style and cultural profile concretely.\"\n  ]\n}\n\nRULES:\n- No MBTI labels (ENTJ etc.) or cognitive function codes (Te, Fi etc.) anywhere.\n- Prestige: earns influence through expertise/knowledge-sharing, not authority or fear.\n- Dominance: claims influence through authority, agenda control, making dissent costly.\n- Cultural modifiers shape HOW the style expresses (high-hierarchy dominance uses formal\n  status; low-hierarchy dominance uses raw assertiveness).\n- speech_examples must sound spoken. Bad: \"I'll volunteer to steward this.\"\n  Good: \"I can take that — two days.\" or \"That's not going to work. We tried it in Q2.\"\n",
+    "neutral": "You generate realistic persona specifications for multi-agent workplace simulations.\n\nThis persona is NEUTRAL — competent but not leadership-seeking. Neither prestige-type\n(expertise-based influence) nor dominance-type (authority-based influence). They\nparticipate naturally in group discussions without driving the agenda.\n\nReturn ONLY a valid JSON object with exactly these keys (no markdown, no extra keys):\n{\n  \"name\": \"...\",\n  \"age\": <integer>,\n  \"nationality\": \"...\",\n  \"country_of_residence\": \"...\",\n  \"gender\": \"...\",\n  \"residence\": \"...\",\n  \"occupation\": {\n    \"title\": \"...\",\n    \"organization\": \"...\",\n    \"description\": \"2 sentence role description\"\n  },\n  \"education\": \"1-2 sentence education background\",\n  \"leadership_style\": \"neutral\",\n  \"personality\": {\n    \"traits\": [\"6-8 specific behavioral traits\"],\n    \"big_five\": {\n      \"openness\": \"one sentence\", \"conscientiousness\": \"one sentence\",\n      \"extraversion\": \"one sentence\", \"agreeableness\": \"one sentence\",\n      \"neuroticism\": \"one sentence\"\n    }\n  },\n  \"style\": {\n    \"communication\": \"how they speak in meetings — ordinary, not commanding\",\n    \"mannerisms\": \"1-2 habits\",\n    \"decision-making\": \"how they approach group decisions\"\n  },\n  \"beliefs\": [\"3-4 professional beliefs\"],\n  \"skills\": [\"3-4 skills\"],\n  \"behaviors\": {\n    \"meeting\": [\"2-3 observable meeting behaviors\"]\n  },\n  \"preferences\": {\n    \"likes\": [\"2-3 things\"],\n    \"dislikes\": [\"2-3 things\"]\n  },\n  \"long_term_goals\": [\"3-4 goals\"],\n  \"speech_examples\": [\n    \"4 verbatim sentences this person says in meetings.\",\n    \"Ordinary participation: questions, confirmations, brief opinions.\",\n    \"One mild disagreement or uncertainty is fine.\",\n    \"Sound like a real person talking, not writing.\"\n  ]\n}\n\nRULES:\n- No MBTI labels or cognitive function codes anywhere.\n- Big Five scores should be MODERATE (extraversion 3-6, others avoid extremes).\n- Not passive or incompetent — just not spotlight-seeking.\n- speech_examples: \"Can you say more about that?\", \"I'm not sure we've ruled out X.\",\n  \"Yeah that tracks for me.\" — ordinary meeting language.\n- Make this a distinct individual with real cultural texture, not a generic 'average'.\n"
+  },
+  "personas": [
+    {
+      "persona_id": "P1",
+      "group": "P",
+      "label": "Dr. Mei-Ling Chen",
+      "prompt": "leader",
+      "temperature": 0.8,
+      "user": "Generate a full persona for:\n- Name: Dr. Mei-Ling Chen, Age: 45, Gender: Female, Nationality: Taiwanese-American\n- Residence: Seattle, USA\n- Occupation: Director of Research Analytics at Pacific Analytics Institute\n- Leadership style: PRESTIGE\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 9, 'extraversion': 5, 'agreeableness': 8, 'neuroticism': 2}\n- Cultural modifiers (0-10): {'collectivism': 8, 'hierarchy_preference': 5, 'shame_sensitivity': 7, 'conflict_tolerance': 3, 'uncertainty_avoidance': 6}\n- Key behavioral pattern: Earns trust through precise, openly-shared analysis. Patient listener who synthesizes before speaking. Avoids self-promotion; lets data and outcomes speak.\n\nUse the exact scores. All traits, style, and speech examples must reflect BOTH the leadership style AND the cultural scores."
+    },
+    {
+      "persona_id": "P2",
+      "group": "P",
+      "label": "James Thornton",
+      "prompt": "leader",
+      "temperature": 0.8,
+      "user": "Generate a full persona for:\n- Name: James Thornton, Age: 52, Gender: Male, Nationality: British\n- Residence: Edinburgh, UK\n- Occupation: Principal Systems Architect at Thornton & Partners Consulting\n- Leadership style: PRESTIGE\n- Big Five (0-10): {'openness': 9, 'conscientiousness': 8, 'extraversion': 6, 'agreeableness': 7, 'neuroticism': 2}\n- Cultural modifiers (0-10): {'collectivism': 3, 'hierarchy_preference': 2, 'shame_sensitivity': 2, 'conflict_tolerance': 7, 'uncertainty_avoidance': 2}\n- Key behavioral pattern: Shares deep technical expertise openly and generously. Comfortable challenging or being challenged on substance. Builds credibility through demonstrated accuracy.\n\nUse the exact scores. All traits, style, and speech examples must reflect BOTH the leadership style AND the cultural scores."
+    },
+    {
+      "persona_id": "P3",
+      "group": "P",
+      "label": "Fatima Al-Rashid",
+      "prompt": "leader",
+      "temperature": 0.8,
+      "user": "Generate a full persona for:\n- Name: Fatima Al-Rashid, Age: 41, Gender: Female, Nationality: Jordanian\n- Residence: Dubai, UAE\n- Occupation: Senior Strategy Consultant at Meridian Strategy Group\n- Leadership style: PRESTIGE\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 8, 'extraversion': 6, 'agreeableness': 8, 'neuroticism': 3}\n- Cultural modifiers (0-10): {'collectivism': 7, 'hierarchy_preference': 6, 'shame_sensitivity': 6, 'conflict_tolerance': 4, 'uncertainty_avoidance': 5}\n- Key behavioral pattern: Synthesizes competing perspectives into workable frameworks. Builds consensus by demonstrating she has understood everyone's position before proposing a path.\n\nUse the exact scores. All traits, style, and speech examples must reflect BOTH the leadership style AND the cultural scores."
+    },
+    {
+      "persona_id": "P4",
+      "group": "P",
+      "label": "Rafael Carvalho",
+      "prompt": "leader",
+      "temperature": 0.8,
+      "user": "Generate a full persona for:\n- Name: Rafael Carvalho, Age: 39, Gender: Male, Nationality: Brazilian\n- Residence: São Paulo, Brazil\n- Occupation: Head of Product Innovation at Votorantim Digital Ventures\n- Leadership style: PRESTIGE\n- Big Five (0-10): {'openness': 9, 'conscientiousness': 7, 'extraversion': 7, 'agreeableness': 8, 'neuroticism': 3}\n- Cultural modifiers (0-10): {'collectivism': 6, 'hierarchy_preference': 4, 'shame_sensitivity': 4, 'conflict_tolerance': 6, 'uncertainty_avoidance': 5}\n- Key behavioral pattern: Earns followership through contagious enthusiasm and inclusive vision. Quick to credit others, translates abstract strategy into tangible possibilities.\n\nUse the exact scores. All traits, style, and speech examples must reflect BOTH the leadership style AND the cultural scores."
+    },
+    {
+      "persona_id": "P5",
+      "group": "P",
+      "label": "Anna Kovačević",
+      "prompt": "leader",
+      "temperature": 0.8,
+      "user": "Generate a full persona for:\n- Name: Anna Kovačević, Age: 47, Gender: Female, Nationality: Croatian\n- Residence: Zagreb, Croatia\n- Occupation: Chief Knowledge Officer at Adriatic Technology Group\n- Leadership style: PRESTIGE\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 9, 'extraversion': 4, 'agreeableness': 7, 'neuroticism': 2}\n- Cultural modifiers (0-10): {'collectivism': 5, 'hierarchy_preference': 4, 'shame_sensitivity': 5, 'conflict_tolerance': 5, 'uncertainty_avoidance': 7}\n- Key behavioral pattern: Speaks rarely but with high precision. Earns trust by having thought through issues more deeply than others. Methodical and consistent.\n\nUse the exact scores. All traits, style, and speech examples must reflect BOTH the leadership style AND the cultural scores."
+    },
+    {
+      "persona_id": "D1",
+      "group": "D",
+      "label": "Robert Hartmann",
+      "prompt": "leader",
+      "temperature": 0.8,
+      "user": "Generate a full persona for:\n- Name: Robert Hartmann, Age: 54, Gender: Male, Nationality: German\n- Residence: Munich, Germany\n- Occupation: Vice President of Operations at KronbergTech AG\n- Leadership style: DOMINANCE\n- Big Five (0-10): {'openness': 4, 'conscientiousness': 9, 'extraversion': 8, 'agreeableness': 2, 'neuroticism': 1}\n- Cultural modifiers (0-10): {'collectivism': 2, 'hierarchy_preference': 9, 'shame_sensitivity': 1, 'conflict_tolerance': 9, 'uncertainty_avoidance': 1}\n- Key behavioral pattern: Commands through structural authority and procedure. Sets the agenda, controls the pace, dismisses tangents. Uses impersonal procedural language ('the correct process', 'per standard') rather than personal authority claims.\n\nUse the exact scores. All traits, style, and speech examples must reflect BOTH the leadership style AND the cultural scores."
+    },
+    {
+      "persona_id": "D2",
+      "group": "D",
+      "label": "Natasha Volkov",
+      "prompt": "leader",
+      "temperature": 0.8,
+      "user": "Generate a full persona for:\n- Name: Natasha Volkov, Age: 48, Gender: Female, Nationality: Russian\n- Residence: London, UK\n- Occupation: Director of Corporate Strategy at Albion Capital Partners\n- Leadership style: DOMINANCE\n- Big Five (0-10): {'openness': 6, 'conscientiousness': 8, 'extraversion': 8, 'agreeableness': 2, 'neuroticism': 2}\n- Cultural modifiers (0-10): {'collectivism': 3, 'hierarchy_preference': 8, 'shame_sensitivity': 2, 'conflict_tolerance': 8, 'uncertainty_avoidance': 2}\n- Key behavioral pattern: Seizes conversational control through confident framing and rapid restatement. Redefines problems to position herself as indispensable. Intellectual dominance, not bluster — outpaces challengers before they can respond.\n\nUse the exact scores. All traits, style, and speech examples must reflect BOTH the leadership style AND the cultural scores."
+    },
+    {
+      "persona_id": "D3",
+      "group": "D",
+      "label": "Marcus Webb",
+      "prompt": "leader",
+      "temperature": 0.8,
+      "user": "Generate a full persona for:\n- Name: Marcus Webb, Age: 44, Gender: Male, Nationality: American\n- Residence: Chicago, USA\n- Occupation: Regional General Manager at Webb Industrial Solutions\n- Leadership style: DOMINANCE\n- Big Five (0-10): {'openness': 6, 'conscientiousness': 7, 'extraversion': 9, 'agreeableness': 3, 'neuroticism': 2}\n- Cultural modifiers (0-10): {'collectivism': 2, 'hierarchy_preference': 4, 'shame_sensitivity': 1, 'conflict_tolerance': 9, 'uncertainty_avoidance': 2}\n- Key behavioral pattern: Claims leadership through high-energy assertiveness and bravado. No formal authority needed — pure social aggression and volume. Challenges weak arguments loudly. Frames decisions as obvious once he has weighed in.\n\nUse the exact scores. All traits, style, and speech examples must reflect BOTH the leadership style AND the cultural scores."
+    },
+    {
+      "persona_id": "D4",
+      "group": "D",
+      "label": "Park Jae-Won",
+      "prompt": "leader",
+      "temperature": 0.8,
+      "user": "Generate a full persona for:\n- Name: Park Jae-Won, Age: 50, Gender: Male, Nationality: South Korean\n- Residence: Seoul, South Korea\n- Occupation: Executive Director of Finance at Hyeonsung Holdings\n- Leadership style: DOMINANCE\n- Big Five (0-10): {'openness': 4, 'conscientiousness': 9, 'extraversion': 7, 'agreeableness': 2, 'neuroticism': 2}\n- Cultural modifiers (0-10): {'collectivism': 6, 'hierarchy_preference': 9, 'shame_sensitivity': 7, 'conflict_tolerance': 4, 'uncertainty_avoidance': 8}\n- Key behavioral pattern: Dominates through positional authority and shame/loss framing. Uses phrases like 'this reflects poorly on the team', 'if we fail to meet standards'. Controls through implicit threat of social consequence, not open confrontation.\n\nUse the exact scores. All traits, style, and speech examples must reflect BOTH the leadership style AND the cultural scores."
+    },
+    {
+      "persona_id": "D5",
+      "group": "D",
+      "label": "Helena Baxter",
+      "prompt": "leader",
+      "temperature": 0.8,
+      "user": "Generate a full persona for:\n- Name: Helena Baxter, Age: 46, Gender: Female, Nationality: Australian\n- Residence: Sydney, Australia\n- Occupation: Chief Operations Officer at Southern Cross Infrastructure Group\n- Leadership style: DOMINANCE\n- Big Five (0-10): {'openness': 6, 'conscientiousness': 8, 'extraversion': 8, 'agreeableness': 3, 'neuroticism': 3}\n- Cultural modifiers (0-10): {'collectivism': 2, 'hierarchy_preference': 3, 'shame_sensitivity': 1, 'conflict_tolerance': 9, 'uncertainty_avoidance': 2}\n- Key behavioral pattern: Controls the agenda through speed and blunt directness. No formal authority needed — uses impatience as a social signal that hesitation implies incompetence.\n\nUse the exact scores. All traits, style, and speech examples must reflect BOTH the leadership style AND the cultural scores."
+    },
+    {
+      "persona_id": "N1",
+      "group": "N",
+      "label": "Female, early 30s, Vietnamese or Thai, mid-level data analyst or engineer",
+      "prompt": "neutral",
+      "temperature": 1.0,
+      "user": "Generate a neutral persona with these demographics:\n  Female, early 30s, Vietnamese or Thai, mid-level data analyst or engineer\n\nNames already in this simulation (avoid similarity): {existing_names}\n\nChoose name, occupation, personality, and cultural texture freely. This person is NOT a natural leader — neither prestige nor dominance oriented."
+    },
+    {
+      "persona_id": "N2",
+      "group": "N",
+      "label": "Male, mid 40s, Dutch or Swedish, project manager or operations coordinator",
+      "prompt": "neutral",
+      "temperature": 1.0,
+      "user": "Generate a neutral persona with these demographics:\n  Male, mid 40s, Dutch or Swedish, project manager or operations coordinator\n\nNames already in this simulation (avoid similarity): {existing_names}\n\nChoose name, occupation, personality, and cultural texture freely. This person is NOT a natural leader — neither prestige nor dominance oriented."
+    },
+    {
+      "persona_id": "N3",
+      "group": "N",
+      "label": "Female, late 40s, Nigerian or Kenyan, senior individual contributor in a business function",
+      "prompt": "neutral",
+      "temperature": 1.0,
+      "user": "Generate a neutral persona with these demographics:\n  Female, late 40s, Nigerian or Kenyan, senior individual contributor in a business function\n\nNames already in this simulation (avoid similarity): {existing_names}\n\nChoose name, occupation, personality, and cultural texture freely. This person is NOT a natural leader — neither prestige nor dominance oriented."
+    },
+    {
+      "persona_id": "N4",
+      "group": "N",
+      "label": "Male, late 20s, Indian, software developer or backend engineer",
+      "prompt": "neutral",
+      "temperature": 1.0,
+      "user": "Generate a neutral persona with these demographics:\n  Male, late 20s, Indian, software developer or backend engineer\n\nNames already in this simulation (avoid similarity): {existing_names}\n\nChoose name, occupation, personality, and cultural texture freely. This person is NOT a natural leader — neither prestige nor dominance oriented."
+    },
+    {
+      "persona_id": "N5",
+      "group": "N",
+      "label": "Female, mid 40s, Mexican, HR, communications, or people operations",
+      "prompt": "neutral",
+      "temperature": 1.0,
+      "user": "Generate a neutral persona with these demographics:\n  Female, mid 40s, Mexican, HR, communications, or people operations\n\nNames already in this simulation (avoid similarity): {existing_names}\n\nChoose name, occupation, personality, and cultural texture freely. This person is NOT a natural leader — neither prestige nor dominance oriented."
+    },
+    {
+      "persona_id": "N6",
+      "group": "N",
+      "label": "Male, early 50s, Chinese, finance, accounting, or compliance",
+      "prompt": "neutral",
+      "temperature": 1.0,
+      "user": "Generate a neutral persona with these demographics:\n  Male, early 50s, Chinese, finance, accounting, or compliance\n\nNames already in this simulation (avoid similarity): {existing_names}\n\nChoose name, occupation, personality, and cultural texture freely. This person is NOT a natural leader — neither prestige nor dominance oriented."
+    },
+    {
+      "persona_id": "N7",
+      "group": "N",
+      "label": "Female, early 30s, French or Spanish, product manager or UX designer",
+      "prompt": "neutral",
+      "temperature": 1.0,
+      "user": "Generate a neutral persona with these demographics:\n  Female, early 30s, French or Spanish, product manager or UX designer\n\nNames already in this simulation (avoid similarity): {existing_names}\n\nChoose name, occupation, personality, and cultural texture freely. This person is NOT a natural leader — neither prestige nor dominance oriented."
+    },
+    {
+      "persona_id": "N8",
+      "group": "N",
+      "label": "Male, mid 40s, American (Midwest), engineering or technical team lead",
+      "prompt": "neutral",
+      "temperature": 1.0,
+      "user": "Generate a neutral persona with these demographics:\n  Male, mid 40s, American (Midwest), engineering or technical team lead\n\nNames already in this simulation (avoid similarity): {existing_names}\n\nChoose name, occupation, personality, and cultural texture freely. This person is NOT a natural leader — neither prestige nor dominance oriented."
+    }
+  ]
+}

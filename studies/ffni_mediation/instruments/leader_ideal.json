@@ -1,0 +1,49 @@
+{
+  "key": "leader_ideal",
+  "title": "Leadership ideals (prototype ratings)",
+  "instructions": "Think about leaders in general — not anyone in this meeting. Rate how characteristic each trait is of a leader.",
+  "scale": [
+    1,
+    10
+  ],
+  "anchors": [
+    "not at all characteristic of a leader",
+    "extremely characteristic of a leader"
+  ],
+  "about": "prototype",
+  "targets": [
+    "N"
+  ],
+  "timing": [
+    "post"
+  ],
+  "citation": "Adjectives are the 'Leadership ideals' column of Table 1 in Sheng, Andrews & van Vugt (2026), which pairs each fundamental follower need with its predicted leader prototype. Response format follows the ILT measure they used (Offermann & Coats, 2018): 10-point, 1 = not at all characteristic of a leader, 10 = extremely characteristic.",
+  "license": "",
+  "note": "This is NOT the 51-item Offermann & Coats ILT scale. It uses the source paper's own need-to-ideal mapping, so each dimension here corresponds one-to-one with an FFNI subscale, which is what H4 predicts. Dual model alignment (Cheng et al., 2013): protection_ideal and status_ideal are the dominance side; affiliation_ideal, vision_ideal, expertise_ideal and fairness_ideal are the prestige side. Scores are not comparable to published ILT norms.",
+  "subscales": {
+    "protection_ideal": [
+      "strong",
+      "tough"
+    ],
+    "affiliation_ideal": [
+      "compassionate",
+      "friendly"
+    ],
+    "status_ideal": [
+      "domineering",
+      "power-hungry"
+    ],
+    "vision_ideal": [
+      "charismatic",
+      "courageous"
+    ],
+    "expertise_ideal": [
+      "educated",
+      "intelligent"
+    ],
+    "fairness_ideal": [
+      "honest",
+      "ethical"
+    ]
+  }
+}

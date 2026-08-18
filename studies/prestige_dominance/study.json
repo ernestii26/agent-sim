@@ -1,0 +1,66 @@
+{
+  "name": "prestige_dominance",
+  "title": "Prestige vs Dominance Leadership Emergence",
+  "description": "Do prestige-type agents (influence via expertise) receive more peer leadership votes than dominance-type agents (influence via authority)?",
+  "groups": {
+    "P": {
+      "label": "Prestige",
+      "sample": 1,
+      "ids": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5"
+      ]
+    },
+    "D": {
+      "label": "Dominance",
+      "sample": 1,
+      "ids": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5"
+      ]
+    },
+    "N": {
+      "label": "Neutral",
+      "sample": null,
+      "ids": [
+        "N1",
+        "N2",
+        "N3",
+        "N4",
+        "N5",
+        "N6",
+        "N7",
+        "N8"
+      ]
+    }
+  },
+  "contrast": [
+    "P",
+    "D"
+  ],
+  "vote_prompt": "Based on what you observed, who do you most trust to lead this team?",
+  "conditions": {
+    "collaborative": {
+      "label": "Collaborative",
+      "hypothesis": "H1: Prestige receives more peer votes than Dominance",
+      "scenario": "Your team has been missing key deliverables for two consecutive quarters. Leadership has granted your group full autonomy to diagnose the root cause and commit to one concrete change. You must reach a shared decision that everyone in the room can commit to implementing.",
+      "friction": "[Meeting context: This group has attempted to address performance issues before. A previous initiative stalled halfway through and was quietly dropped. People in this room have different — and sometimes conflicting — views on what actually went wrong and who was responsible. Not everyone trusts the last diagnosis that was made.]"
+    },
+    "threat": {
+      "label": "Threat",
+      "hypothesis": "H2: Dominance receives more peer votes than Prestige under resource scarcity",
+      "contrast": [
+        "D",
+        "P"
+      ],
+      "scenario": "Your division is under review. Senior leadership will retain only one of two competing teams — yours or the other. The decision will be made in 48 hours. Your group must agree right now on a single pitch: what you deliver, who leads it, and who is accountable. If you cannot agree among yourselves, leadership will make the decision for you — and people may lose their positions.",
+      "friction": "[Meeting context: Two months ago, the rival team landed a major client your division had been pursuing for a year. Some people here believe your group lost because of indecision and unclear ownership. Others think it was a resourcing failure. Either way, you are now in direct competition for survival. Not everyone in this room agrees on who should be leading the response — and some people are wondering whether they have a future here at all.]"
+    }
+  }
+}

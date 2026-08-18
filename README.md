@@ -1,218 +1,188 @@
-# Prestige vs Dominance Leadership Simulation
+# agent-sim
 
-A multi-agent simulation study using [TinyTroupe](https://github.com/microsoft/TinyTroupe) + GPT-4.1 to investigate whether **prestige-based** and **dominance-based** leadership styles produce different peer-vote outcomes in group decision-making.
+Multi-agent social simulation on [TinyTroupe](https://github.com/microsoft/TinyTroupe): a room of
+LLM personas discusses a scenario, may stay silent, then votes. The framework measures how the
+groups you define differ in votes received, speech rate, and verbosity.
 
-## Research Question
-
-> In a group discussion where agents must reach a shared decision, do prestige-type agents (who earn influence through expertise and knowledge-sharing) receive more leadership votes than dominance-type agents (who claim influence through authority and agenda control)?
-
-This design follows evolutionary psychology research on two evolutionarily distinct paths to social rank (Henrich & Gil-White, 2001; Cheng et al., 2013). Unlike extraversion-based studies, the prestige/dominance split is theoretically predicted to interact with environmental conditions — making it a richer target for simulation.
-
----
-
-## Design
-
-### Two-step pipeline
-
-| Step | Purpose | Runs | Rounds |
-|---|---|---|---|
-| Step 1 | Validate the silence mechanism — confirm that the optional-speech design produces meaningful variation across personas | 5 | 5 |
-| Step 2 | Main hypothesis test — compare peer votes between Prestige and Dominance groups | 20 | 3 |
-
-### Personas
-
-13 agents total, generated via GPT-4.1 using Big Five + cultural modifier profiles:
-
-**Prestige pool (5) — tightly specified seeds:**
-
-| ID | Name | Nationality |
-|---|---|---|
-| P1 | Dr. Mei-Ling Chen | Taiwanese-American |
-| P2 | James Thornton | British |
-| P3 | Fatima Al-Rashid | Jordanian |
-| P4 | Rafael Carvalho | Brazilian |
-| P5 | Anna Kovačević | Croatian |
-
-**Dominance pool (5) — tightly specified seeds:**
-
-| ID | Name | Nationality |
-|---|---|---|
-| D1 | Robert Hartmann | German |
-| D2 | Natasha Volkov | Russian |
-| D3 | Marcus Webb | American |
-| D4 | Park Jae-Won | South Korean |
-| D5 | Helena Baxter | Australian |
-
-**Neutral group (8) — demographics only, LLM generates freely:**
-
-N1–N8: diverse professionals (Southeast Asian, European, African, Indian, Latin American, Chinese, French/Spanish, American) generated with minimal constraints. They participate in discussions without seeking to lead.
-
-**Per-run sampling:** each run randomly draws 1P from {P1–P5} and 1D from {D1–D5}, plus all 8N agents, for a 10-person group. Over 20 runs, different P/D combinations are tested, making the result generalizable to the prestige/dominance construct rather than any specific individual.
-
-Each P/D persona has a full psychological profile: Big Five scores, five cultural modifiers (collectivism, hierarchy preference, shame sensitivity, conflict tolerance, uncertainty avoidance), behavioral traits, communication style, and speech examples that anchor the agent's spoken register. N personas are generated freely within the neutral constraint.
-
-### Hypothesis (Step 2)
-
-**H1:** Prestige-type agents receive more peer votes than Dominance-type agents.
-
-### DVs
-
-| Variable | Measure | Notes |
-|---|---|---|
-| DV1 (primary) | Peer votes per run (Prestige vs Dominance) | Main leadership emergence metric |
-| DV2 (behavioral) | Speech rate per run | Validates that behavioral patterns differ |
-| DV3 (behavioral) | Words per spoken turn | Secondary behavioral check |
-
-### Statistics
-
-20 paired observations (one per run):
-
-```
-Per run → P_votes = sum(votes for 5 Prestige agents)
-          D_votes = sum(votes for 5 Dominance agents)
-→ 20 pairs → one-sided paired t-test (H1: P > D)
-```
-
----
+**The framework knows nothing about any particular research theme.** Groups, personas, scenarios,
+and hypotheses all live in `studies/<name>/`. Adding a new theme means adding a directory, never
+editing `src/`.
 
 ## Setup
 
-### Requirements
+```bash
+pip install -r requirements.txt
+cp config.ini.example config.ini      # then paste your API key
+python3 test_core.py                  # fast self-check, no API calls
+```
 
-- Python 3.10+
-- conda environment: `social-sim`
-- TinyTroupe 0.7.0
-- OpenAI API key with access to `gpt-4.1`
-
-### Install
+## Running
 
 ```bash
-conda activate social-sim
-pip install tinytroupe openai scipy matplotlib
+python3 run.py list                                        # studies + conditions
+python3 run.py validate      prestige_dominance            # do agents ever stay silent?
+python3 run.py measure-check ffni_mediation                # is the rating scale usable at all?
+python3 run.py run           ffni_mediation collaborative
+python3 run.py run           ffni_mediation threat --runs 20 --rounds 3
+python3 run.py report        ffni_mediation threat         # re-report, no API calls
+python3 run.py mediate       ffni_mediation --need protection --group D
 ```
 
-### Config
+Run `measure-check` before paying for a study that uses instruments. It administers the
+self-report scale twice per persona (no discussion, no votes) and fails loudly if the agents
+straight-line the scale, answer it differently every time, or give subscales that do not
+differentiate. That costs a couple of dollars; discovering it 40 runs in does not.
 
-Copy the template and add your API key:
+Every run is checkpointed to `results/<study>/<condition>/checkpoints/run_NNN.json`. Re-running the
+same command reuses them, so an interrupted study — or one stopped by an exhausted API quota —
+resumes where it left off. Delete the checkpoint directory to start fresh.
+
+Output lands in `results/<study>/<condition>/`: checkpoints and logs (gitignored, regenerable) plus
+a summary JSON and chart (tracked).
+
+## Adding a study
+
+Create `studies/<name>/` with two files:
+
+**`study.json`** — the whole design.
+
+```jsonc
+{
+  "title": "...",
+  "groups": {
+    "A": {"label": "Prestige",  "ids": ["A1", "A2"], "sample": 1},   // 1 drawn per run
+    "N": {"label": "Neutral",   "ids": ["N1", "N2"], "sample": null} // all, every run
+  },
+  "contrast": ["A", "B"],          // the two groups compared statistically
+  "vote_prompt": "Who do you most trust to lead this team?",
+  "instruments": ["ffni"],         // optional: files under instruments/
+  "personas_from": "other_study",  // optional: borrow personas instead of copying them
+  "conditions": {
+    "collaborative": {
+      "label": "Collaborative",
+      "hypothesis": "H1: A receives more votes than B",
+      "scenario": "The situation put to the room.",
+      "friction": "[Optional background tension broadcast after the scenario.]",
+      "contrast": ["B", "A"]       // optional: flip the direction for this condition
+    }
+  }
+}
+```
+
+Sampled groups draw from a balanced sampler — every id appears once per cycle before any repeats,
+so no persona is over-represented. `sample: null` means the whole group is in every run.
+
+**`seeds.json`** — the persona generation prompts.
+
+```jsonc
+{
+  "prompts": {"leader": "<system prompt>", "neutral": "<system prompt>"},
+  "personas": [
+    {"persona_id": "A1", "group": "A", "prompt": "leader", "temperature": 0.8,
+     "user": "Generate a persona for: ...  {existing_names}"}
+  ]
+}
+```
+
+`{existing_names}` is replaced with the names generated so far — useful for telling the model to
+avoid near-duplicates. Then:
 
 ```bash
-cp config.ini.example config.ini   # if it exists, otherwise edit config.ini directly
+python3 tools/gen_personas.py <name>     # writes studies/<name>/personas/*.agent.json
+python3 test_core.py                     # verifies study.json and seeds.json agree
 ```
 
-`config.ini` is gitignored — never commit it. Key settings:
+`test_core.py` checks every study in `studies/` — a persona id declared in `study.json` but missing
+from `seeds.json` or from disk fails the check.
 
-```ini
-[OpenAI]
-API_KEY = sk-...
+## Layout
 
-[Baseline]
-DISCUSSION_MODEL      = gpt-4.1
-STEP1_RUNS            = 5
-STEP1_ROUNDS          = 5
-STEP2_RUNS            = 20
-STEP2_ROUNDS          = 3
+| Path | Role |
+|---|---|
+| `run.py` | CLI: `list` / `validate` / `run` / `report` |
+| `src/study.py` | Loads and validates `study.json` |
+| `src/instrument.py` | Loads a rating scale from `instruments/*.json`; subscale scoring |
+| `src/config.py` | `config.ini` → `RunConfig` |
+| `src/pipeline.py` | Composes each run, executes, checkpoints |
+| `src/discussion.py` | One discussion, one vote, one survey administration; retries and quota detection |
+| `src/persona_store.py` | Persona spec → TinyTroupe agent |
+| `src/reporting.py` | Metrics and paired t-tests (`summarize_*`), then rendering (`render_*`, `plot_*`) |
+| `src/runtime.py` | TinyTroupe wiring and logging |
+| `tools/gen_personas.py` | Generates a study's personas from `seeds.json` |
+| `studies/` | One directory per research theme |
+| `docs/` | Design notes, prior results, debugging log |
+
+## Instruments
+
+A study may administer rating scales during a run. Each one is a file under
+`studies/<name>/instruments/<key>.json`:
+
+```jsonc
+{
+  "scale": [1, 7],
+  "anchors": ["strongly disagree", "strongly agree"],
+  "about": "self",              // "self" | "prototype" | "each_candidate"
+  "targets": ["N"],             // which groups answer it
+  "timing": ["baseline", "post"],
+  "subscales": {"protection": ["item text", "..."]}
+}
 ```
 
----
+The whole battery goes out in one call per administration, with item order shuffled per
+respondent. Ratings outside the scale, or items the model skipped, are stored as `null` and
+flagged — never imputed, so a parse failure reads as missing data rather than fake moderation.
 
-## Usage
+**Measurement never contaminates the discussion.** The baseline administration runs on a
+throwaway fork of each agent, so the agents who actually discuss have never seen the items —
+a 22-item battery about what you want from a leader is a powerful prime. After the discussion,
+each post measure branches from the same post-discussion state, so the survey does not prime the
+vote and the vote does not prime the survey, yet all of them reflect the same conversation. This
+is one thing a simulation can do that a human study cannot.
 
-### Step 0 — Generate personas (run once)
+## Method notes
 
-```bash
-python3 gen_personas.py
-```
+Agents may answer a turn with `DONE` alone, which counts as silence — speech rate is a real
+dependent variable, not an artifact of everyone always talking. `run.py validate` confirms that
+mechanism still works before you spend a full study on it. Invitation order is reshuffled every
+round to remove position bias, and agents are deep-copied per run so no state leaks between runs.
 
-Calls GPT-4.1 to generate 10 persona JSON files in `personas/`. Already-existing files are skipped, so re-running is safe. Takes ~5 minutes.
+Hypothesis tests are one-sided paired t-tests over per-run values, testing
+`contrast[0] > contrast[1]`. `scipy` supplies the p-value; without it the t statistic still prints.
 
-### Step 1 — Validate silence mechanism
+## Studies
 
-```bash
-python3 run.py --step1
-```
+### `prestige_dominance`
 
-Checks whether the optional-speech design produces meaningful speech rate variation. Passes if:
+Do prestige-type agents (influence earned through expertise) receive more peer leadership votes
+than dominance-type agents (influence claimed through authority)? Follows Henrich & Gil-White
+(2001) and Cheng et al. (2013). H1: Prestige wins in the collaborative condition. H2: Dominance
+wins under threat. Charts from the original pipeline are in `results/archive_prestige_dominance/`
+and the write-up is `docs/result.md`; those predate the 2026-08 restructure and use the old record
+format, so `run.py report` cannot read them.
 
-1. Prestige mean speech rate − Dominance mean ≥ 0.10
-2. At least 3 Dominance agents have speech rate < 0.70
-3. At least 3 Prestige agents have speech rate > 0.50
+### `ffni_mediation`
 
-If Step 1 fails, the silence mechanism is not working and Step 2 results should be interpreted with caution.
+Adds the Fundamental Follower Needs Inventory as a **mediator** between context and endorsement,
+reusing the same 18 personas (`personas_from`). Sheng, Andrews & van Vugt (2026, *JAP* 111(6),
+768-801; `docs/ffni-paper.pdf`) validated the FFNI and left two questions open, both of which this
+study is shaped to answer:
 
-### Step 2 — Main experiment
+- follower needs are *assumed* to mediate the known conflict-to-dominant-leader effect, but were
+  never measured (p.45-46)
+- would intergroup conflict strengthen the protection-to-dominance link (p.42)?
 
-```bash
-python3 run.py --step2
-```
+The pivot is that the paper's own results split across two psychological layers. In Study 5 the
+protection and status needs predicted **leadership prototypes** (Strength, Tyranny, Masculinity,
+Well-Groomed — the dominance side of the dual model) but did **not** predict **perceived
+effectiveness** of dominance-based leadership. Wanting to be protected is not the same as judging
+an authoritarian boss effective: classification and association are one process, substantive
+evaluation is another. So this study measures both layers, and H5's dominance half is expected to
+possibly come back null — that is a result, not a bug.
 
-Runs 20 full discussions + post-vote rounds. Outputs:
+H1 and H2 carry over unchanged; H3 (threat raises protection/status), H4 (cognition layer), H5
+(evaluation layer), H6 (mediation) and H7 (threat moderates, narrowing the layer gap) are new.
+All seven are listed in `studies/ffni_mediation/study.json`.
 
-- Console report with t-test results
-- `results/baseline_step2_<timestamp>.json`
-- `results/baseline_step2_<timestamp>.png`
-
-Checkpoints are written after each run — interrupted runs can be resumed without restarting.
-
----
-
-## Project Structure
-
-```
-mbti_baseline/
-├── run.py                  ← CLI entry point (--step1 / --step2)
-├── gen_personas.py         ← Persona generator (calls GPT-4.1)
-├── config.ini              ← API key + settings (gitignored)
-├── plan.md                 ← Research design notes
-├── src/
-│   ├── runtime.py          ← TinyTroupe utilities + file logging
-│   ├── persona_store.py    ← load_personas(), PRESTIGE_TYPES, DOMINANCE_TYPES
-│   ├── discussion.py       ← run_discussion() + run_vote()
-│   ├── pipeline.py         ← step1_validate_silence() + step2_run_simulation()
-│   └── reporting.py        ← Statistics, console reports, bar charts
-├── personas/
-│   ├── manifest.json       ← Generated by gen_personas.py
-│   ├── P1.agent.json … P5.agent.json   ← Prestige personas
-│   └── D1.agent.json … D5.agent.json   ← Dominance personas
-└── results/
-    ├── step1_checkpoints/  ← Per-run JSON (gitignored)
-    ├── step2_checkpoints/  ← Per-run JSON (gitignored)
-    ├── logs/               ← info_*.log + warnings_*.log (gitignored)
-    ├── baseline_step1_*.json   ← Final Step 1 summary (kept)
-    └── baseline_step2_*.json   ← Final Step 2 summary (kept)
-```
-
----
-
-## Design Notes
-
-### Why Prestige vs Dominance?
-
-The extraversion/introversion axis (the original design) produces results that are too predictable — E-types speak more, therefore get more votes. The Prestige/Dominance axis is more interesting because:
-
-- Both types are behaviorally active and assertive in different ways
-- Human research predicts Prestige wins in information-rich environments, Dominance wins under resource scarcity or threat
-- The result is not obvious to human intuition
-
-### Realism mechanisms
-
-Three features improve conversation quality over a naïve design:
-
-1. **Speech examples in personas** — each agent has 4–5 example sentences in their own spoken voice, anchoring register and preventing the LLM from defaulting to corporate/LinkedIn language.
-2. **Friction seed** — every run begins with a broadcast informing agents that a previous initiative failed and that people disagree about why, giving agents concrete grounds for disagreement.
-3. **Anti-jargon prompt** — per-turn instructions explicitly forbid corporate filler phrases and require varied sentence length and natural spoken rhythm.
-
-### Silence mechanism
-
-Each round, agents are invited to speak in randomized order. They may respond with THINK + TALK + DONE (speaking) or just DONE (silence). Order is reshuffled every round (not just per run) to eliminate position bias.
-
-### Checkpoint / resume
-
-After each run, a checkpoint JSON is written to `results/step1_checkpoints/` or `results/step2_checkpoints/`. On restart, completed runs are loaded from checkpoint and skipped. This means a 20-run Step 2 job can be safely interrupted and continued.
-
----
-
-## References
-
-- Henrich, J., & Gil-White, F. J. (2001). The evolution of prestige. *Evolution and Human Behavior*, 22(3), 165–196.
-- Cheng, J. T., Tracy, J. L., Foulsham, T., Kingstone, A., & Henrich, J. (2013). Two ways to the top. *Journal of Personality and Social Psychology*, 104(1), 103–125.
-- Park, G., et al. (2020). TinyTroupe: LLM-powered multi-agent persona simulation. Microsoft Research.
+The FFNI is reproduced verbatim under CC BY-NC-ND 4.0 — attribution and licence travel with the
+items in `instruments/ffni.json`, and NoDerivatives means they must not be reworded, abridged, or
+translated.

@@ -1,0 +1,27 @@
+; Copy to config.ini and fill in your key. config.ini is gitignored.
+[OpenAI]
+API_KEY = sk-...
+
+[Simulation]
+DISCUSSION_MODEL = gpt-4.1
+VOTE_MODEL = gpt-4.1
+DISCUSSION_TEMPERATURE = 0.7
+VOTE_TEMPERATURE = 0.2
+DISCUSSION_MAX_TOKENS = 3000
+VOTE_MAX_TOKENS = 3000
+
+; Survey instruments (FFNI, ILT, effectiveness ratings).
+; A 22-item battery is answered in one call, so keep the token ceiling high.
+SURVEY_MODEL = gpt-4.1
+SURVEY_TEMPERATURE = 0.2
+SURVEY_MAX_TOKENS = 3000
+
+; Main run
+RUNS = 20
+ROUNDS = 3
+
+; `run.py validate`
+VALIDATE_RUNS = 5
+VALIDATE_ROUNDS = 5
+
+OUTPUT_DIR = results

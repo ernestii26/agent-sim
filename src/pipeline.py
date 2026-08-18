@@ -1,66 +1,23 @@
+"""Run a study condition: compose runs, discuss, vote, checkpoint.
+
+One execution path for every step. What used to be "step 1 / step 2 / step 3" is now
+a condition from the study definition plus `with_votes` on or off — all aggregation
+and reporting happens afterwards in reporting.py from the saved run records.
+"""
 from __future__ import annotations
 
-import configparser
 import json
-import math
 import random
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
-from runtime import clone_person
-from discussion import (
-    SCENARIO, SCENARIO_FRICTION,
-    SCENARIO_THREAT, SCENARIO_THREAT_FRICTION,
-    APIQuotaExhausted, run_discussion, run_vote,
-)
-from persona_store import (
-    ALL_TYPES, PRESTIGE_TYPES, DOMINANCE_TYPES, NEUTRAL_TYPES, load_personas
-)
+from config import RunConfig
+from instrument import BASELINE, POST
+from persona_store import Participant
+from study import Condition, Study
 
 
-@dataclass
-class BaselineConfig:
-    api_key: str
-    discussion_model: str = "gpt-4.1"
-    vote_model: str = "gpt-4.1"
-    discussion_temperature: float = 0.7
-    vote_temperature: float = 0.2
-    discussion_max_tokens: int = 3000
-    vote_max_tokens: int = 3000
-    step1_runs: int = 5
-    step1_rounds: int = 5
-    step2_runs: int = 20
-    step2_rounds: int = 3
-    personas_dir: str = "personas"
-    output_dir: str = "results"
-
-    @staticmethod
-    def from_ini(path: Path) -> "BaselineConfig":
-        cfg = configparser.ConfigParser()
-        cfg.read(path)
-
-        api_key = cfg["OpenAI"]["API_KEY"]
-        sec = cfg["Baseline"] if "Baseline" in cfg else {}
-
-        return BaselineConfig(
-            api_key=api_key,
-            discussion_model=sec.get("DISCUSSION_MODEL", "gpt-4.1"),
-            vote_model=sec.get("VOTE_MODEL", "gpt-4.1"),
-            discussion_temperature=float(sec.get("DISCUSSION_TEMPERATURE", 0.7)),
-            vote_temperature=float(sec.get("VOTE_TEMPERATURE", 0.2)),
-            discussion_max_tokens=int(sec.get("DISCUSSION_MAX_TOKENS", 3000)),
-            vote_max_tokens=int(sec.get("VOTE_MAX_TOKENS", 3000)),
-            step1_runs=int(sec.get("STEP1_RUNS", 5)),
-            step1_rounds=int(sec.get("STEP1_ROUNDS", 5)),
-            step2_runs=int(sec.get("STEP2_RUNS", 20)),
-            step2_rounds=int(sec.get("STEP2_ROUNDS", 3)),
-            personas_dir=sec.get("PERSONAS_DIR", "personas"),
-            output_dir=sec.get("OUTPUT_DIR", "results"),
-        )
-
-
-class _BalancedSampler:
+class BalancedSampler:
     """Cycles through a pool in random order, ensuring each item appears once
     per cycle before any item repeats. Eliminates the over-representation bias
     that arises from repeated random.choice calls."""
@@ -69,372 +26,165 @@ class _BalancedSampler:
         self._pool = list(pool)
         self._queue: list[str] = []
 
-    def next(self) -> str:
-        if not self._queue:
-            self._queue = random.sample(self._pool, len(self._pool))
-        return self._queue.pop(0)
+    def take(self, n: int) -> list[str]:
+        drawn: list[str] = []
+        while len(drawn) < n:
+            if not self._queue:
+                self._queue = random.sample(self._pool, len(self._pool))
+            drawn.append(self._queue.pop(0))
+        return drawn
 
 
-def _sample_run_agents(
-    base_agents: dict[str, Any],
-    names: dict[str, str],
-    p_sampler: _BalancedSampler,
-    d_sampler: _BalancedSampler,
-) -> tuple[list[Any], list[str], list[str], str, str]:
-    """Sample 1P + 1D + all 8N for one run using balanced samplers.
+def make_samplers(study: Study) -> dict[str, BalancedSampler]:
+    return {
+        key: BalancedSampler(list(group.ids))
+        for key, group in study.groups.items()
+        if group.sample is not None
+    }
 
-    Returns (agents, agent_names, persona_types, p_id, d_id).
+
+def compose_run(
+    study: Study,
+    pool: dict[str, Participant],
+    samplers: dict[str, BalancedSampler],
+) -> list[Participant]:
+    """Pick this run's cast: `sample` members per sampled group, all members otherwise."""
+    from discussion import clone_participants
+
+    chosen: list[str] = []
+    for key, group in study.groups.items():
+        if group.sample is None:
+            chosen.extend(group.ids)
+        else:
+            chosen.extend(samplers[key].take(group.sample))
+    return clone_participants([pool[pid] for pid in chosen])
+
+
+def run_condition(
+    study: Study,
+    condition: Condition,
+    config: RunConfig,
+    *,
+    runs: int,
+    rounds: int,
+    with_votes: bool = True,
+    output_dir: Path,
+    on_progress: Callable[[str], None] | None = None,
+) -> list[dict[str, Any]]:
+    """Execute `runs` independent runs, checkpointing each one.
+
+    Existing checkpoints are reused, so an interrupted study resumes where it stopped.
+    Returns one record per run: run_no, members (by group), transcript, votes.
     """
-    p_id = p_sampler.next()
-    d_id = d_sampler.next()
-    run_ids = [p_id, d_id] + NEUTRAL_TYPES
-    agents = [clone_person(base_agents[t]) for t in run_ids]
-    agent_names = [names[t] for t in run_ids]
-    return agents, agent_names, run_ids, p_id, d_id
+    # Imported here, not at module scope: openai/tinytroupe are only needed to actually
+    # run a simulation, so tools and tests can import this module without them installed.
+    from discussion import (
+        APIQuotaExhausted, clone_participants, run_discussion, run_survey, run_vote,
+    )
+    from persona_store import load_personas
 
-
-def step1_validate_silence(
-    config: BaselineConfig,
-    *,
-    on_progress: Any = None,
-    checkpoint_dir: Path | None = None,
-) -> dict[str, Any]:
-    """Run Step 1: silence mechanism validation (1P + 1D + 8N per run)."""
     def progress(msg: str) -> None:
         if on_progress:
             on_progress(msg)
 
-    ckpt_dir = checkpoint_dir or Path(config.output_dir) / "step1_checkpoints"
+    ckpt_dir = output_dir / "checkpoints"
     ckpt_dir.mkdir(parents=True, exist_ok=True)
 
-    progress("Loading personas...")
-    base_agents, names_by_id = load_personas(config.personas_dir)
-    p_sampler = _BalancedSampler(PRESTIGE_TYPES)
-    d_sampler = _BalancedSampler(DOMINANCE_TYPES)
+    progress(f"Loading personas from {study.personas_dir} ...")
+    pool = load_personas(
+        study.personas_dir,
+        {pid: group.key for group in study.groups.values() for pid in group.ids},
+    )
 
-    # Track per-persona across runs they actually participated in
-    per_persona_runs: dict[str, int] = {t: 0 for t in ALL_TYPES}
-    per_persona_spoke: dict[str, int] = {t: 0 for t in ALL_TYPES}
-    per_persona_words: dict[str, int] = {t: 0 for t in ALL_TYPES}
-    per_persona_talk_turns: dict[str, int] = {t: 0 for t in ALL_TYPES}
+    samplers = make_samplers(study)
+    records: list[dict[str, Any]] = []
 
-    for run_no in range(1, config.step1_runs + 1):
+    for run_no in range(1, runs + 1):
         ckpt = ckpt_dir / f"run_{run_no:03d}.json"
         if ckpt.exists():
-            progress(f"\nRun {run_no}/{config.step1_runs}  [checkpoint]")
-            saved = json.loads(ckpt.read_text(encoding="utf-8"))
-            p_id, d_id = saved["p_id"], saved["d_id"]
-            for t in [p_id, d_id] + NEUTRAL_TYPES:
-                per_persona_runs[t] += config.step1_rounds
-            for entry in saved["transcript"]:
-                t = entry["persona_type"]
-                if entry["spoke"]:
-                    per_persona_spoke[t] += 1
-                    per_persona_words[t] += entry["word_count"]
-                    per_persona_talk_turns[t] += 1
+            progress(f"\nRun {run_no}/{runs}  [checkpoint]")
+            records.append(json.loads(ckpt.read_text(encoding="utf-8")))
             continue
 
-        agents, agent_names, run_ids, p_id, d_id = _sample_run_agents(base_agents, names_by_id, p_sampler, d_sampler)
-        progress(f"\nRun {run_no}/{config.step1_runs}  (P={p_id}, D={d_id})")
-        for t in run_ids:
-            per_persona_runs[t] += config.step1_rounds
-
-        transcript = run_discussion(
-            agents=agents,
-            names=agent_names,
-            persona_types=run_ids,
-            scenario=SCENARIO,
-            friction=SCENARIO_FRICTION,
-            rounds=config.step1_rounds,
-            api_key=config.api_key,
-            model=config.discussion_model,
-            temperature=config.discussion_temperature,
-            max_tokens=config.discussion_max_tokens,
-            on_progress=progress,
-        )
-
-        for entry in transcript:
-            t = entry["persona_type"]
-            if entry["spoke"]:
-                per_persona_spoke[t] += 1
-                per_persona_words[t] += entry["word_count"]
-                per_persona_talk_turns[t] += 1
-
-        ckpt.write_text(
-            json.dumps(
-                {"run_no": run_no, "p_id": p_id, "d_id": d_id, "transcript": transcript},
-                ensure_ascii=False, indent=2,
-            ),
-            encoding="utf-8",
-        )
-
-    speech_rate = {
-        t: (per_persona_spoke[t] / per_persona_runs[t] if per_persona_runs[t] > 0 else float("nan"))
-        for t in ALL_TYPES
-    }
-    mean_words = {
-        t: (per_persona_words[t] / per_persona_talk_turns[t] if per_persona_talk_turns[t] > 0 else float("nan"))
-        for t in ALL_TYPES
-    }
-
-    # Pass criteria: N personas show silence variation (always present, enough data)
-    n_rates = [speech_rate[t] for t in NEUTRAL_TYPES if not math.isnan(speech_rate[t])]
-    n_mean_rate = sum(n_rates) / len(n_rates) if n_rates else 1.0
-    n_some_silence = sum(1 for r in n_rates if r < 0.80)
-    passed = n_some_silence >= 3 and n_mean_rate < 0.90
-
-    return {
-        "step": 1,
-        "runs": config.step1_runs,
-        "rounds": config.step1_rounds,
-        "speech_rate": speech_rate,
-        "mean_words_when_speaking": mean_words,
-        "n_mean_speech_rate": n_mean_rate,
-        "n_some_silence_count": n_some_silence,
-        "passed": passed,
-        "names": names_by_id,
-    }
-
-
-def step2_run_simulation(
-    config: BaselineConfig,
-    *,
-    on_progress: Any = None,
-    checkpoint_dir: Path | None = None,
-) -> dict[str, Any]:
-    """Run Step 2: Prestige vs Dominance leadership hypothesis test (1P + 1D + 8N per run)."""
-    def progress(msg: str) -> None:
-        if on_progress:
-            on_progress(msg)
-
-    ckpt_dir = checkpoint_dir or Path(config.output_dir) / "step2_checkpoints"
-    ckpt_dir.mkdir(parents=True, exist_ok=True)
-
-    progress("Loading personas...")
-    base_agents, names_by_id = load_personas(config.personas_dir)
-    p_sampler = _BalancedSampler(PRESTIGE_TYPES)
-    d_sampler = _BalancedSampler(DOMINANCE_TYPES)
-
-    run_results: list[dict[str, Any]] = []
-
-    for run_no in range(1, config.step2_runs + 1):
-        ckpt = ckpt_dir / f"run_{run_no:03d}.json"
-        if ckpt.exists():
-            progress(f"\nRun {run_no}/{config.step2_runs}  [checkpoint]")
-            run_results.append(json.loads(ckpt.read_text(encoding="utf-8")))
-            continue
-
-        agents, agent_names, run_ids, p_id, d_id = _sample_run_agents(base_agents, names_by_id, p_sampler, d_sampler)
-        progress(f"\nRun {run_no}/{config.step2_runs}  (P={p_id}, D={d_id})")
+        cast = compose_run(study, pool, samplers)
+        members: dict[str, list[str]] = {}
+        for p in cast:
+            members.setdefault(p.group, []).append(p.persona_id)
+        progress(f"\nRun {run_no}/{runs}  ({members})")
 
         try:
+            # Baseline goes to a throwaway fork: the agents who actually discuss must never
+            # have seen the items, or the battery primes the very needs we then measure.
+            measures: dict[str, dict[str, Any]] = {"baseline": {}, "post": {}}
+            for inst in study.instruments_at(BASELINE):
+                progress(f"  baseline {inst.key}")
+                measures["baseline"][inst.key] = run_survey(
+                    participants=clone_participants(cast),
+                    instrument=inst,
+                    model=config.survey,
+                    on_progress=progress,
+                )
+
             transcript = run_discussion(
-                agents=agents,
-                names=agent_names,
-                persona_types=run_ids,
-                scenario=SCENARIO,
-                friction=SCENARIO_FRICTION,
-                rounds=config.step2_rounds,
-                api_key=config.api_key,
-                model=config.discussion_model,
-                temperature=config.discussion_temperature,
-                max_tokens=config.discussion_max_tokens,
+                participants=cast,
+                scenario=condition.scenario,
+                friction=condition.friction,
+                rounds=rounds,
+                model=config.discussion,
                 on_progress=progress,
             )
 
-            votes = run_vote(
-                agents=agents,
-                names=agent_names,
-                persona_types=run_ids,
-                transcript=transcript,
-                api_key=config.api_key,
-                model=config.vote_model,
-                temperature=config.vote_temperature,
-                max_tokens=config.vote_max_tokens,
+            # Each post measure branches from the same post-discussion state, so none of
+            # them primes another, yet all of them reflect the discussion that happened.
+            for inst in study.instruments_at(POST):
+                progress(f"  post {inst.key}")
+                measures["post"][inst.key] = run_survey(
+                    participants=clone_participants(cast),
+                    instrument=inst,
+                    model=config.survey,
+                    on_progress=progress,
+                )
+
+            # Vote last, on the original cast — nothing downstream can be primed by it.
+            votes = (
+                run_vote(
+                    participants=cast,
+                    question=study.vote_prompt,
+                    model=config.vote,
+                )
+                if with_votes
+                else []
             )
         except APIQuotaExhausted as exc:
             progress(f"\n[FATAL] {exc}")
-            progress(f"  Stopping after {len(run_results)} completed runs. Checkpoints are saved — resume when quota is restored.")
+            progress(
+                f"  Stopping after {len(records)} completed runs. "
+                "Checkpoints are saved — resume with the same command when quota is restored."
+            )
             break
 
-        vote_counts: dict[str, int] = {t: 0 for t in run_ids}
-        for v in votes:
-            vt = v["voted_for_type"]
-            if vt in vote_counts:
-                vote_counts[vt] += 1
-
-        p_votes = vote_counts[p_id]
-        d_votes = vote_counts[d_id]
-
-        spoke_by_type: dict[str, list[bool]] = {t: [] for t in run_ids}
-        words_by_type: dict[str, list[int]] = {t: [] for t in run_ids}
-        for entry in transcript:
-            t = entry["persona_type"]
-            spoke_by_type[t].append(entry["spoke"])
-            if entry["spoke"]:
-                words_by_type[t].append(entry["word_count"])
-
-        speech_rate_run = {
-            t: (sum(spoke_by_type[t]) / len(spoke_by_type[t]) if spoke_by_type[t] else 0.0)
-            for t in run_ids
-        }
-
-        p_speech_rate = speech_rate_run[p_id]
-        d_speech_rate = speech_rate_run[d_id]
-        p_words = (sum(words_by_type[p_id]) / len(words_by_type[p_id])
-                   if words_by_type[p_id] else float("nan"))
-        d_words = (sum(words_by_type[d_id]) / len(words_by_type[d_id])
-                   if words_by_type[d_id] else float("nan"))
-
-        result = {
+        record = {
             "run_no": run_no,
-            "p_id": p_id,
-            "d_id": d_id,
-            "p_votes": p_votes,
-            "d_votes": d_votes,
-            "vote_counts": vote_counts,
-            "p_speech_rate": p_speech_rate,
-            "d_speech_rate": d_speech_rate,
-            "p_words_per_turn": p_words,
-            "d_words_per_turn": d_words,
-            "speech_rate_by_type": speech_rate_run,
+            "condition": condition.key,
+            "members": members,
             "transcript": transcript,
             "votes": votes,
+            "measures": measures,
         }
-        run_results.append(result)
-        ckpt.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+        records.append(record)
+        ckpt.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
 
-        progress(
-            f"  votes  P({p_id}) {p_votes:>2} / D({d_id}) {d_votes:>2}"
-            f"   speech  P {p_speech_rate:.2f} / D {d_speech_rate:.2f}"
-        )
-
-    return {
-        "step": 2,
-        "runs": config.step2_runs,
-        "rounds": config.step2_rounds,
-        "run_results": run_results,
-    }
+    return records
 
 
-def step3_run_simulation(
-    config: BaselineConfig,
-    *,
-    on_progress: Any = None,
-    checkpoint_dir: Path | None = None,
-) -> dict[str, Any]:
-    """Run Step 3: threat scenario — tests whether Dominance > Prestige under
-    resource scarcity and external survival pressure (H2: D > P)."""
-    def progress(msg: str) -> None:
-        if on_progress:
-            on_progress(msg)
-
-    ckpt_dir = checkpoint_dir or Path(config.output_dir) / "step3_checkpoints"
-    ckpt_dir.mkdir(parents=True, exist_ok=True)
-
-    progress("Loading personas...")
-    base_agents, names_by_id = load_personas(config.personas_dir)
-    p_sampler = _BalancedSampler(PRESTIGE_TYPES)
-    d_sampler = _BalancedSampler(DOMINANCE_TYPES)
-
-    run_results: list[dict[str, Any]] = []
-
-    for run_no in range(1, config.step2_runs + 1):
-        ckpt = ckpt_dir / f"run_{run_no:03d}.json"
-        if ckpt.exists():
-            progress(f"\nRun {run_no}/{config.step2_runs}  [checkpoint]")
-            run_results.append(json.loads(ckpt.read_text(encoding="utf-8")))
-            continue
-
-        agents, agent_names, run_ids, p_id, d_id = _sample_run_agents(base_agents, names_by_id, p_sampler, d_sampler)
-        progress(f"\nRun {run_no}/{config.step2_runs}  (P={p_id}, D={d_id})")
-
-        try:
-            transcript = run_discussion(
-                agents=agents,
-                names=agent_names,
-                persona_types=run_ids,
-                scenario=SCENARIO_THREAT,
-                friction=SCENARIO_THREAT_FRICTION,
-                rounds=config.step2_rounds,
-                api_key=config.api_key,
-                model=config.discussion_model,
-                temperature=config.discussion_temperature,
-                max_tokens=config.discussion_max_tokens,
-                on_progress=progress,
-            )
-
-            votes = run_vote(
-                agents=agents,
-                names=agent_names,
-                persona_types=run_ids,
-                transcript=transcript,
-                api_key=config.api_key,
-                model=config.vote_model,
-                temperature=config.vote_temperature,
-                max_tokens=config.vote_max_tokens,
-            )
-        except APIQuotaExhausted as exc:
-            progress(f"\n[FATAL] {exc}")
-            progress(f"  Stopping after {len(run_results)} completed runs. Checkpoints are saved — resume when quota is restored.")
-            break
-
-        vote_counts: dict[str, int] = {t: 0 for t in run_ids}
-        for v in votes:
-            vt = v["voted_for_type"]
-            if vt in vote_counts:
-                vote_counts[vt] += 1
-
-        p_votes = vote_counts[p_id]
-        d_votes = vote_counts[d_id]
-
-        spoke_by_type: dict[str, list[bool]] = {t: [] for t in run_ids}
-        words_by_type: dict[str, list[int]] = {t: [] for t in run_ids}
-        for entry in transcript:
-            t = entry["persona_type"]
-            spoke_by_type[t].append(entry["spoke"])
-            if entry["spoke"]:
-                words_by_type[t].append(entry["word_count"])
-
-        speech_rate_run = {
-            t: (sum(spoke_by_type[t]) / len(spoke_by_type[t]) if spoke_by_type[t] else 0.0)
-            for t in run_ids
-        }
-
-        p_speech_rate = speech_rate_run[p_id]
-        d_speech_rate = speech_rate_run[d_id]
-        p_words = (sum(words_by_type[p_id]) / len(words_by_type[p_id])
-                   if words_by_type[p_id] else float("nan"))
-        d_words = (sum(words_by_type[d_id]) / len(words_by_type[d_id])
-                   if words_by_type[d_id] else float("nan"))
-
-        result = {
-            "run_no": run_no,
-            "p_id": p_id,
-            "d_id": d_id,
-            "p_votes": p_votes,
-            "d_votes": d_votes,
-            "vote_counts": vote_counts,
-            "p_speech_rate": p_speech_rate,
-            "d_speech_rate": d_speech_rate,
-            "p_words_per_turn": p_words,
-            "d_words_per_turn": d_words,
-            "speech_rate_by_type": speech_rate_run,
-            "transcript": transcript,
-            "votes": votes,
-        }
-        run_results.append(result)
-        ckpt.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-
-        progress(
-            f"  votes  P({p_id}) {p_votes:>2} / D({d_id}) {d_votes:>2}"
-            f"   speech  P {p_speech_rate:.2f} / D {d_speech_rate:.2f}"
-        )
-
-    return {
-        "step": 3,
-        "scenario": "threat",
-        "runs": config.step2_runs,
-        "rounds": config.step2_rounds,
-        "run_results": run_results,
-    }
+def load_records(output_dir: Path) -> list[dict[str, Any]]:
+    """Read completed run checkpoints without running anything."""
+    ckpt_dir = output_dir / "checkpoints"
+    if not ckpt_dir.exists():
+        raise SystemExit(f"No checkpoints found at {ckpt_dir}")
+    records = [
+        json.loads(p.read_text(encoding="utf-8")) for p in sorted(ckpt_dir.glob("run_*.json"))
+    ]
+    if not records:
+        raise SystemExit(f"No checkpoint files in {ckpt_dir}")
+    return records

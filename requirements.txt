@@ -1,0 +1,4 @@
+tinytroupe @ git+https://github.com/microsoft/tinytroupe.git
+openai>=1.0
+matplotlib>=3.7
+scipy>=1.10
