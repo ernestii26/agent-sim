@@ -8,8 +8,10 @@ seeds.json holds every theme-specific word:
       "prompts":  {"<key>": "<system prompt>"},
       "personas": [{"persona_id", "group", "prompt", "temperature", "user"}]
     }
-The `user` string may contain {existing_names}, replaced with the names generated
-so far — useful for asking the model to avoid near-duplicate names.
+The `user` string may contain the literal {existing_names}, substituted with the names
+generated so far — useful for asking the model to avoid near-duplicate names. Plain
+replacement, not str.format: prompts legitimately contain braces (a rendered score dict,
+a JSON example) and format() would treat every one of them as a field.
 Existing persona files are kept unless --force is given, so a failed run resumes.
 """
 from __future__ import annotations
@@ -82,7 +84,7 @@ def main() -> None:
             print(f"  [{i}/{len(personas)}] Generating {pid} ({seed.get('label', '')})...", flush=True)
             spec = _generate(
                 prompts[seed["prompt"]],
-                seed["user"].format(existing_names=", ".join(names) or "none yet"),
+                seed["user"].replace("{existing_names}", ", ".join(names) or "none yet"),
                 float(seed.get("temperature", 0.8)),
             )
             if not spec.get("name"):

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import math
+import random
 import sys
 import tempfile
 from pathlib import Path
@@ -467,6 +468,85 @@ def test_transports_do_not_share_a_failure_counter() -> None:
     second = AgentTransport(retries=1)
     second.actions(agent, "p")  # would be the 5th failure if the counter were global
     assert second.consecutive_failures == 1 and first.consecutive_failures == 4
+
+
+# --------------------------------------------------------------------------- #
+# Persona bank sampling                                                        #
+# --------------------------------------------------------------------------- #
+
+def _sample_bank_module():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "sample_bank", PROJECT_DIR / "tools" / "sample_bank.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _fake_bank(profiles: int, per_profile: int = 3) -> list[dict]:
+    levels = ["low", "medium", "high"]
+    bank = []
+    for i in range(profiles):
+        ocean = {t: levels[(i + j) % 3] for j, t in enumerate(
+            ("openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism"))}
+        for k in range(per_profile):
+            bank.append({
+                "ocean_description": {"ocean": ocean, "description_en": f"p{i}", "is_valid": True},
+                "occupation": f"job{k}",
+                "demographic": {"age_group": "36-50", "is_parent": k % 2 == 0},
+            })
+    return bank
+
+
+def test_split_parsing_rejects_nonsense() -> None:
+    sb = _sample_bank_module()
+    assert sb.parse_split("P=6,D=6,N=24") == {"P": 6, "D": 6, "N": 24}
+    for bad in ("P=0", "P=-1", "P", "P=x", "=3"):
+        try:
+            sb.parse_split(bad)
+        except SystemExit:
+            pass
+        else:
+            raise AssertionError(f"accepted bad split {bad!r}")
+
+
+def test_sampling_never_repeats_a_personality_and_refuses_to_overdraw() -> None:
+    sb = _sample_bank_module()
+    bank = _fake_bank(profiles=3, per_profile=4)   # only 3 distinct OCEAN profiles
+
+    picked = sb.stratified_sample(bank, 3, random.Random(0))
+    keys = [tuple(e["ocean_description"]["ocean"].values()) for e in picked]
+    assert len(set(keys)) == 3, keys
+
+    # Asking for more than the bank can supply without repeating must fail loudly,
+    # not silently hand back duplicate personalities.
+    try:
+        sb.stratified_sample(bank, 4, random.Random(0))
+    except SystemExit as exc:
+        assert "distinct OCEAN profiles" in str(exc)
+    else:
+        raise AssertionError("overdrawing was allowed")
+
+
+def test_assigned_style_reaches_the_generation_prompt() -> None:
+    """A leadership label the prompt does not carry would leave the agent unchanged."""
+    sb = _sample_bank_module()
+    entry = _fake_bank(profiles=1, per_profile=1)[0]
+
+    dominance = sb.build_user_prompt(entry, "D")
+    assert "DOMINANCE" in dominance
+    assert "traits, mannerisms" in dominance          # style must be woven in, not labelled
+    assert entry["ocean_description"]["description_en"] in dominance
+
+    neutral = sb.build_user_prompt(entry, "N")
+    assert "NOT a natural leader" in neutral
+    assert "DOMINANCE" not in neutral and "PRESTIGE" not in neutral
+
+    # gen_personas.py substitutes this by plain replacement, so a prompt may also
+    # contain unrelated braces (the rendered score dict does).
+    assert "{existing_names}" in dominance
+    assert dominance.replace("{existing_names}", "Ana, Bo").count("Ana, Bo") == 1
 
 
 if __name__ == "__main__":
