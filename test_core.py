@@ -10,18 +10,24 @@ from __future__ import annotations
 import json
 import math
 import sys
+import tempfile
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_DIR / "src"))
 
-from pipeline import BalancedSampler  # noqa: E402
-from instrument import load_instrument, subscale_scores  # noqa: E402
-from reporting import (  # noqa: E402
-    cronbach_alpha, group_metrics, need_outcome_links, paired_ttest_onesided, persona_metrics,
-    straight_lining, summarize_contrast, summarize_mediation, summarize_needs,
-    summarize_validation,
+from analysis import (  # noqa: E402
+    group_metrics, need_outcome_links, persona_metrics, straight_lining, summarize_contrast,
+    summarize_mediation, summarize_needs, summarize_validation,
 )
+from discussion import APIQuotaExhausted, AgentTransport, _administer  # noqa: E402
+from instrument import (  # noqa: E402
+    ABOUT_SELF, Instrument, load_instrument, subscale_scores,
+)
+from persona_store import Participant  # noqa: E402
+from pipeline import BalancedSampler  # noqa: E402
+from run_record import RunRecord  # noqa: E402
+from stats import cronbach_alpha, paired_ttest_onesided  # noqa: E402
 from study import list_studies, load_study  # noqa: E402
 
 
@@ -74,7 +80,7 @@ def test_compose_run_respects_group_sampling() -> None:
             assert n == (len(group.ids) if group.sample is None else group.sample)
 
 
-def _record(run_no: int = 1, p_votes: int = 2, neutrals: tuple[str, ...] = ()) -> dict:
+def _record(run_no: int = 1, p_votes: int = 2, neutrals: tuple[str, ...] = ()) -> RunRecord:
     """A synthetic run: P1 speaks 1 of 2 turns, D1 speaks both, plus optional neutrals."""
     tr = [
         {"round": 1, "persona_id": "P1", "group": "P", "spoke": True, "word_count": 10},
@@ -93,8 +99,11 @@ def _record(run_no: int = 1, p_votes: int = 2, neutrals: tuple[str, ...] = ()) -
          "voted_for_group": "P" if i < p_votes else "D", "reason": ""}
         for i, v in enumerate(voters)
     ]
-    return {"run_no": run_no, "members": {"P": ["P1"], "D": ["D1"], "N": list(neutrals)},
-            "transcript": tr, "votes": votes}
+    return RunRecord.from_dict(
+        {"run_no": run_no, "condition": "collaborative",
+         "members": {"P": ["P1"], "D": ["D1"], "N": list(neutrals)},
+         "transcript": tr, "votes": votes, "measures": {}}
+    )
 
 
 def test_group_metrics() -> None:
@@ -206,7 +215,9 @@ def test_straight_lining_detects_a_dead_scale() -> None:
     ffni = next(i for i in study.instruments if i.key == "ffni")
     flat = {item_id: 7 for item_id, _, _ in ffni.items}
     varied = {item_id: (i % 5) + 1 for i, (item_id, _, _) in enumerate(ffni.items)}
-    record = {"measures": {"baseline": {"ffni": {"N1": flat, "N2": flat, "N3": varied}}}}
+    record = RunRecord.from_dict(
+        {"run_no": 1, "measures": {"baseline": {"ffni": {"N1": flat, "N2": flat, "N3": varied}}}}
+    )
     assert straight_lining(record, "baseline", ffni) == 2 / 3
 
 
@@ -217,7 +228,7 @@ def test_cronbach_alpha_high_when_items_agree_and_nan_when_flat() -> None:
     assert math.isnan(cronbach_alpha([[1, 2, 3]]))                # too few respondents
 
 
-def _needs_record(run_no: int, protection: int, d_rating: int, p_rating: int = 4) -> dict:
+def _needs_record(run_no: int, protection: int, d_rating: int, p_rating: int = 4) -> RunRecord:
     """A run where every neutral reports the same protection need and rates the same way."""
     ffni_answers = {}
     for name, count in (("protection", 4), ("affiliation", 4), ("status", 4),
@@ -225,8 +236,9 @@ def _needs_record(run_no: int, protection: int, d_rating: int, p_rating: int = 4
         for i in range(1, count + 1):
             ffni_answers[f"{name}_{i}"] = protection if name == "protection" else 4
     neutrals = ["N1", "N2", "N3", "N4"]
-    return {
-        "run_no": run_no, "members": {"P": ["P1"], "D": ["D1"], "N": neutrals},
+    return RunRecord.from_dict({
+        "run_no": run_no, "condition": "threat",
+        "members": {"P": ["P1"], "D": ["D1"], "N": neutrals},
         "transcript": [], "votes": [],
         "measures": {
             "baseline": {"ffni": {pid: dict(ffni_answers) for pid in neutrals}},
@@ -239,7 +251,7 @@ def _needs_record(run_no: int, protection: int, d_rating: int, p_rating: int = 4
                 },
             },
         },
-    }
+    })
 
 
 def test_summarize_needs_reports_the_within_persona_change() -> None:
@@ -247,7 +259,7 @@ def test_summarize_needs_reports_the_within_persona_change() -> None:
     ffni = next(i for i in study.instruments if i.key == "ffni")
     record = _needs_record(1, protection=6, d_rating=5)
     # Post-discussion protection rises to 7 for everyone.
-    for answers in record["measures"]["post"]["ffni"].values():
+    for answers in record.measures["post"]["ffni"].values():
         for i in range(1, 5):
             answers[f"protection_{i}"] = 7
 
@@ -302,9 +314,9 @@ def test_need_outcome_links_separates_cognition_from_evaluation() -> None:
         [(2, 2, 5), (4, 5, 5), (6, 8, 5), (7, 9, 5)], 1
     ):
         record = _needs_record(run_no, protection=protection, d_rating=d_rating)
-        record["measures"]["post"]["leader_ideal"] = {
+        record.measures["post"]["leader_ideal"] = {
             pid: {"protection_ideal_1": ideal, "protection_ideal_2": ideal}
-            for pid in record["members"]["N"]
+            for pid in record.members("N")
         }
         records.append(record)
 
@@ -315,6 +327,146 @@ def test_need_outcome_links_separates_cognition_from_evaluation() -> None:
     assert protection["cognition"]["r"] > 0.95        # need tracks the prototype
     assert math.isnan(protection["evaluation_a"]["r"])  # effectiveness held flat -> no variance
     assert links["contrast"] == ["D", "P"]
+
+
+def test_run_record_round_trips_and_tolerates_pre_instrument_checkpoints() -> None:
+    study = load_study("ffni_mediation")
+    ffni = study.self_report
+
+    data = _needs_record(1, protection=5, d_rating=4).to_dict()
+    assert RunRecord.from_dict(data).to_dict() == data
+    assert list(data) == ["run_no", "condition", "members", "transcript", "votes", "measures"]
+
+    # A checkpoint written before instruments existed has no "measures" key at all.
+    legacy = RunRecord.from_dict({"run_no": 7, "members": {"P": ["P1"]},
+                                  "transcript": [], "votes": []})
+    assert legacy.needs("post", ffni) == {}
+    assert legacy.ratings(study.candidate_rating) == {}
+    assert summarize_needs(study, [legacy], ffni)["subscales"]["protection"]["delta_n"] == 0
+
+
+def test_load_study_rejects_two_instruments_of_the_same_kind() -> None:
+    import study as study_module
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        directory = root / "dup"
+        (directory / "instruments").mkdir(parents=True)
+        for key in ("first", "second"):
+            (directory / "instruments" / f"{key}.json").write_text(json.dumps({
+                "instructions": "rate", "scale": [1, 7], "about": "self",
+                "subscales": {"protection": ["item"]},
+            }), encoding="utf-8")
+        (directory / "study.json").write_text(json.dumps({
+            "groups": {"N": {"ids": ["N1"]}},
+            "contrast": ["N", "N"],
+            "conditions": {"only": {"scenario": "x"}},
+            "instruments": ["first", "second"],
+        }), encoding="utf-8")
+
+        original = study_module.STUDIES_DIR
+        study_module.STUDIES_DIR = root
+        try:
+            load_study("dup")
+        except SystemExit as exc:
+            assert "first" in str(exc) and "second" in str(exc) and "dup" in str(exc), exc
+        else:
+            raise AssertionError("two about='self' instruments were accepted")
+        finally:
+            study_module.STUDIES_DIR = original
+
+# --- survey parsing, driven through the transport seam (no API, no TinyTroupe) ---
+
+_PROBE = Instrument(
+    key="probe", title="Probe", instructions="Rate.", scale=(1, 5), anchors=("low", "high"),
+    subscales={"s": ("a", "b")}, about=ABOUT_SELF, targets=(), timing=("post",),
+    citation="", license="", note="",
+)
+_RESPONDENT = Participant(agent=None, persona_id="X1", name="Probe Person", group="N")
+
+
+def _scripted(*replies: str):
+    """A fake transport: hands back the next canned reply and counts the calls."""
+    calls = []
+
+    def ask(agent, prompt):
+        calls.append(prompt)
+        return replies[min(len(calls), len(replies)) - 1]
+
+    return ask, calls
+
+
+def test_survey_scores_a_well_formed_reply() -> None:
+    ask, calls = _scripted('here you go: {"s_1": 4, "s_2": 2} thanks')
+    result = _administer(_RESPONDENT, _PROBE, target=None, ask=ask)
+    assert result["s_1"] == 4 and result["s_2"] == 2
+    assert result["_meta"] == {"attempts": 1, "answered": 2, "complete": True}
+    assert len(calls) == 1
+
+
+def test_survey_nulls_a_rating_outside_the_scale() -> None:
+    ask, _ = _scripted('{"s_1": 4, "s_2": 9}')
+    result = _administer(_RESPONDENT, _PROBE, target=None, ask=ask)
+    assert result["s_1"] == 4 and result["s_2"] is None
+    assert result["_meta"]["complete"] is False and result["_meta"]["answered"] == 1
+
+
+def test_survey_retries_once_then_records_nulls() -> None:
+    ask, calls = _scripted('{"s_1": 3}', '{"s_1": 3}')
+    result = _administer(_RESPONDENT, _PROBE, target=None, ask=ask)
+    assert len(calls) == 2, "a partial answer gets exactly one retry"
+    assert result["s_2"] is None and result["_meta"] == {
+        "attempts": 2, "answered": 1, "complete": False,
+    }
+
+
+def test_survey_survives_a_non_json_reply() -> None:
+    ask, calls = _scripted("I would rather not answer that.")
+    result = _administer(_RESPONDENT, _PROBE, target=None, ask=ask)
+    assert result["s_1"] is None and result["s_2"] is None
+    assert result["_meta"]["complete"] is False and len(calls) == 2
+
+
+class _FlakyAgent:
+    """Stands in for a TinyPerson: raises the P1 TypeError until told otherwise."""
+
+    def __init__(self, fail: bool = True) -> None:
+        self.fail = fail
+
+    def listen_and_act(self, prompt, return_actions=False, communication_display=True):
+        if self.fail:
+            raise TypeError("'NoneType' object is not subscriptable")
+        return [{"action": {"type": "TALK", "content": "hi"}}]
+
+
+def test_transport_counter_resets_on_success_and_aborts_after_five_failures() -> None:
+    transport = AgentTransport(retries=1)  # retries=1 so the test never sleeps
+    agent = _FlakyAgent()
+    for _ in range(4):
+        assert transport.actions(agent, "p") == []
+    agent.fail = False
+    transport.actions(agent, "p")
+    assert transport.consecutive_failures == 0, "a success clears the counter"
+
+    agent.fail = True
+    for _ in range(4):
+        transport.actions(agent, "p")
+    try:
+        transport.actions(agent, "p")
+    except APIQuotaExhausted:
+        pass
+    else:
+        raise AssertionError("5 consecutive exhausted-retry failures must abort the run")
+
+
+def test_transports_do_not_share_a_failure_counter() -> None:
+    agent = _FlakyAgent()
+    first = AgentTransport(retries=1)
+    for _ in range(4):
+        first.actions(agent, "p")
+    second = AgentTransport(retries=1)
+    second.actions(agent, "p")  # would be the 5th failure if the counter were global
+    assert second.consecutive_failures == 1 and first.consecutive_failures == 4
 
 
 if __name__ == "__main__":

@@ -19,12 +19,12 @@ and returns `None`. TinyTroupe's `_generate_tentative_action` then does `next_me
 with no None guard. TinyTroupe's own `continue_on_failure=True` never helps here, because this is
 a Python `TypeError`, not an LLM validation error.
 
-**Guard:** `src/discussion.py:_safe_listen_and_act` wraps every agent call and returns an empty
+**Guard:** `src/discussion.py:AgentTransport.actions` wraps every agent call and returns an empty
 action list on failure. The turn is recorded as silence and the run continues.
 
 **Watch out:** a rate-limited run degrades into agents that "choose" not to speak. Speech rate is a
 dependent variable here, so silent API failures silently corrupt the data. That is why
-`_safe_listen_and_act` prints a warning per failure and `_check_quota` aborts the whole run after
+`AgentTransport.actions` prints a warning per failure and `_check_quota` aborts the whole run after
 `_MAX_CONSECUTIVE_FAILURES` (5) — better to stop with checkpoints saved than to publish a run
 whose silences are really 429s.
 
@@ -60,11 +60,11 @@ for 22 ratings plus reasoning.
 
 ## P4 — `LengthFinishReasonError` is an `OpenAIError`, not a `TypeError`
 
-**Cause:** an early version of `_safe_listen_and_act` caught only `TypeError`/`AttributeError`
+**Cause:** an early version of the transport caught only `TypeError`/`AttributeError`
 (the P1 bug). `LengthFinishReasonError` subclasses `openai.OpenAIError`, so after TinyTroupe
 exhausted its own retries the exception propagated and killed the run.
 
-**Guard:** `_safe_listen_and_act` catches `(TypeError, AttributeError, openai.OpenAIError)`, plus a
+**Guard:** `AgentTransport.actions` catches `(TypeError, AttributeError, openai.OpenAIError)` (the openai arm drops out only when the package is absent, e.g. in tests), plus a
 bare `except Exception` fallback. Keep the `openai.OpenAIError` arm.
 
 ---

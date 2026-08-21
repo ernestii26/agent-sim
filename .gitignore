@@ -11,3 +11,6 @@ config.ini
 # Final summaries and charts (results/<study>/<condition>/*.json|png) stay tracked.
 results/**/checkpoints/
 results/**/logs/
+
+# Agent worktrees
+.claude/worktrees/

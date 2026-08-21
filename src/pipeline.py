@@ -2,18 +2,20 @@
 
 One execution path for every step. What used to be "step 1 / step 2 / step 3" is now
 a condition from the study definition plus `with_votes` on or off — all aggregation
-and reporting happens afterwards in reporting.py from the saved run records.
+and reporting happens afterwards in analysis.py from the saved run records.
 """
 from __future__ import annotations
 
 import json
 import random
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Callable
 
 from config import RunConfig
 from instrument import BASELINE, POST
 from persona_store import Participant
+from run_record import RunRecord
 from study import Condition, Study
 
 
@@ -70,7 +72,7 @@ def run_condition(
     with_votes: bool = True,
     output_dir: Path,
     on_progress: Callable[[str], None] | None = None,
-) -> list[dict[str, Any]]:
+) -> list[RunRecord]:
     """Execute `runs` independent runs, checkpointing each one.
 
     Existing checkpoints are reused, so an interrupted study resumes where it stopped.
@@ -97,13 +99,13 @@ def run_condition(
     )
 
     samplers = make_samplers(study)
-    records: list[dict[str, Any]] = []
+    records: list[RunRecord] = []
 
     for run_no in range(1, runs + 1):
         ckpt = ckpt_dir / f"run_{run_no:03d}.json"
         if ckpt.exists():
             progress(f"\nRun {run_no}/{runs}  [checkpoint]")
-            records.append(json.loads(ckpt.read_text(encoding="utf-8")))
+            records.append(RunRecord.from_dict(json.loads(ckpt.read_text(encoding="utf-8"))))
             continue
 
         cast = compose_run(study, pool, samplers)
@@ -163,28 +165,88 @@ def run_condition(
             )
             break
 
-        record = {
-            "run_no": run_no,
-            "condition": condition.key,
-            "members": members,
-            "transcript": transcript,
-            "votes": votes,
-            "measures": measures,
-        }
+        record = RunRecord(
+            run_no=run_no,
+            condition=condition.key,
+            members_by_group=members,
+            transcript=transcript,
+            votes=votes,
+            measures=measures,
+        )
         records.append(record)
-        ckpt.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
+        ckpt.write_text(
+            json.dumps(record.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8"
+        )
 
     return records
 
 
-def load_records(output_dir: Path) -> list[dict[str, Any]]:
+def load_records(output_dir: Path) -> list[RunRecord]:
     """Read completed run checkpoints without running anything."""
     ckpt_dir = output_dir / "checkpoints"
     if not ckpt_dir.exists():
         raise SystemExit(f"No checkpoints found at {ckpt_dir}")
     records = [
-        json.loads(p.read_text(encoding="utf-8")) for p in sorted(ckpt_dir.glob("run_*.json"))
+        RunRecord.from_dict(json.loads(p.read_text(encoding="utf-8")))
+        for p in sorted(ckpt_dir.glob("run_*.json"))
     ]
     if not records:
         raise SystemExit(f"No checkpoint files in {ckpt_dir}")
     return records
+
+
+def run_measure_check(
+    study: Study,
+    config: RunConfig,
+    *,
+    on_progress: Callable[[str], None] | None = None,
+) -> RunRecord:
+    """Administer the self-report instrument twice per persona, nothing else.
+
+    Cheap by design: no discussion, no votes. The two administrations are stored as
+    baseline and post of a single run record so the ordinary needs analysis applies —
+    with no discussion between them, the "change" is measurement noise, which is
+    exactly the test-retest reliability we want to see before paying for a study.
+    """
+    from discussion import clone_participants, run_survey
+    from persona_store import load_personas
+
+    def progress(msg: str) -> None:
+        if on_progress:
+            on_progress(msg)
+
+    instrument = study.self_report
+    if instrument is None:
+        raise SystemExit(f"Study '{study.name}' has no self-report instrument to check.")
+
+    pool = load_personas(
+        study.personas_dir,
+        {pid: g.key for g in study.groups.values() for pid in g.ids},
+    )
+    # Every persona answers, not just the instrument's usual targets — a check of the
+    # scale itself should cover the whole cast.
+    wide = replace(instrument, targets=())
+
+    administrations = []
+    for pass_no in (1, 2):
+        progress(f"  Administration {pass_no}/2")
+        administrations.append(
+            run_survey(
+                participants=clone_participants(list(pool.values())),
+                instrument=wide,
+                model=config.survey,
+                on_progress=progress,
+            )
+        )
+
+    return RunRecord(
+        run_no=1,
+        condition="measure_check",
+        members_by_group={},
+        transcript=[],
+        votes=[],
+        measures={
+            BASELINE: {instrument.key: administrations[0]},
+            POST: {instrument.key: administrations[1]},
+        },
+    )

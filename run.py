@@ -14,20 +14,21 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from dataclasses import replace
 from pathlib import Path
 
 _PROJECT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(_PROJECT_DIR / "src"))
 os.chdir(_PROJECT_DIR)  # TinyTroupe reads config.ini from the CWD
 
+from analysis import (  # noqa: E402
+    need_outcome_links, summarize_contrast, summarize_measure_check, summarize_mediation,
+    summarize_needs, summarize_validation,
+)
 from config import RunConfig  # noqa: E402
-from instrument import BASELINE, POST  # noqa: E402
-from pipeline import load_records, run_condition  # noqa: E402
-from reporting import (  # noqa: E402
-    need_outcome_links, plot_contrast, render_contrast, render_layers, render_mediation,
-    render_measure_check, render_needs, render_validation, save_summary, summarize_contrast,
-    summarize_mediation, summarize_needs, summarize_validation,
+from pipeline import load_records, run_condition, run_measure_check  # noqa: E402
+from render import (  # noqa: E402
+    plot_contrast, render_contrast, render_layers, render_mediation, render_measure_check,
+    render_needs, render_validation, save_summary,
 )
 from runtime import setup_file_logging  # noqa: E402
 from study import Study, list_studies, load_study  # noqa: E402
@@ -116,16 +117,16 @@ def _report(study: Study, condition, records: list, out: Path) -> None:
     summary = summarize_contrast(study, condition, records)
     render_contrast(study, condition, summary)
 
-    needs = next((i for i in study.instruments if i.about == "self"), None)
-    if needs and any(r.get("measures") for r in records):
+    needs = study.self_report
+    if needs and any(r.measures for r in records):
         need_summary = summarize_needs(study, records, needs)
         render_needs(study, need_summary)
         summary["needs"] = need_summary
 
         links = need_outcome_links(
             study, records, needs,
-            ideals=next((i for i in study.instruments if i.about == "prototype"), None),
-            effectiveness=next((i for i in study.instruments if i.about == "each_candidate"), None),
+            ideals=study.prototype,
+            effectiveness=study.candidate_rating,
             contrast=condition.contrast,
         )
         render_layers(study, links)
@@ -136,15 +137,10 @@ def _report(study: Study, condition, records: list, out: Path) -> None:
 
 
 def cmd_measure_check(args: argparse.Namespace) -> None:
-    """Administer the self-report instrument twice per persona and judge whether it works.
-
-    Cheap by design: no discussion, no votes. If the agents straight-line the scale or
-    answer it differently every time, the whole mediation design is dead and this is the
-    place to find out — before paying for a full study.
-    """
+    """Is the self-report instrument usable on these agents, before a full study is paid for?"""
     config = RunConfig.from_ini(_PROJECT_DIR / "config.ini")
     study = load_study(args.study)
-    needs = next((i for i in study.instruments if i.about == "self"), None)
+    needs = study.self_report
     if needs is None:
         raise SystemExit(f"Study '{study.name}' has no self-report instrument to check.")
 
@@ -153,51 +149,9 @@ def cmd_measure_check(args: argparse.Namespace) -> None:
     print(f"\nMeasure check — {study.title} / {needs.title}")
     print(f"  Model: {config.survey_model}   Personas: {study.personas_dir}\n")
 
-    from discussion import clone_participants, run_survey
-    from persona_store import load_personas
-    from reporting import _slope
-
-    pool = load_personas(
-        study.personas_dir,
-        {pid: g.key for g in study.groups.values() for pid in g.ids},
-    )
-    everyone = list(pool.values())
-    # Every persona answers, not just the instrument's usual targets — a check of the
-    # scale itself should cover the whole cast.
-    wide = replace(needs, targets=())
-
-    administrations = []
-    for pass_no in (1, 2):
-        print(f"  Administration {pass_no}/2")
-        administrations.append(
-            run_survey(
-                participants=clone_participants(everyone),
-                instrument=wide,
-                model=config.survey,
-                on_progress=print,
-            )
-        )
-
-    fake_records = [
-        {"run_no": 1, "members": {}, "transcript": [], "votes": [],
-         "measures": {"baseline": {needs.key: administrations[0]},
-                      "post": {needs.key: administrations[1]}}}
-    ]
-    summary = summarize_needs(study, fake_records, needs)
-
-    from reporting import scored
-    first, second = scored(fake_records[0], BASELINE, needs), scored(fake_records[0], POST, needs)
-    shared = sorted(first.keys() & second.keys())
-    retest = {}
-    for name in needs.subscales:
-        _, r, _ = _slope(
-            [first[pid].get(name, float("nan")) for pid in shared],
-            [second[pid].get(name, float("nan")) for pid in shared],
-        )
-        retest[name] = r
-
-    summary["test_retest"] = retest
-    passed = render_measure_check(study, summary, retest)
+    record = run_measure_check(study, config, on_progress=print)
+    summary = summarize_measure_check(study, record, needs)
+    passed = render_measure_check(study, summary)
     save_summary(summary, out, "measure_check")
     if not passed:
         sys.exit(1)
@@ -207,8 +161,8 @@ def cmd_mediate(args: argparse.Namespace) -> None:
     """H6/H7: pool both conditions' checkpoints and test the indirect path."""
     config = RunConfig.from_ini(_PROJECT_DIR / "config.ini")
     study = load_study(args.study)
-    needs = next((i for i in study.instruments if i.about == "self"), None)
-    effectiveness = next((i for i in study.instruments if i.about == "each_candidate"), None)
+    needs = study.self_report
+    effectiveness = study.candidate_rating
     if needs is None or effectiveness is None:
         raise SystemExit(
             f"Study '{study.name}' needs both a self-report and an each_candidate instrument."

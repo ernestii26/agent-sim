@@ -9,7 +9,9 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from instrument import Instrument, load_instrument
+from instrument import (
+    ABOUT_EACH_CANDIDATE, ABOUT_KINDS, ABOUT_PROTOTYPE, ABOUT_SELF, Instrument, load_instrument,
+)
 
 STUDIES_DIR = Path(__file__).resolve().parent.parent / "studies"
 
@@ -52,6 +54,22 @@ class Study:
 
     def instruments_at(self, timing: str) -> tuple["Instrument", ...]:
         return tuple(i for i in self.instruments if timing in i.timing)
+
+    def _about(self, kind: str) -> "Instrument | None":
+        # load_study guarantees at most one per kind, so "the" is well defined here.
+        return next((i for i in self.instruments if i.about == kind), None)
+
+    @property
+    def self_report(self) -> "Instrument | None":
+        return self._about(ABOUT_SELF)
+
+    @property
+    def prototype(self) -> "Instrument | None":
+        return self._about(ABOUT_PROTOTYPE)
+
+    @property
+    def candidate_rating(self) -> "Instrument | None":
+        return self._about(ABOUT_EACH_CANDIDATE)
 
     @property
     def seeds_path(self) -> Path:
@@ -137,6 +155,16 @@ def load_study(name: str) -> Study:
                 f"{path}: instrument '{key}' targets unknown group(s) {sorted(unknown_targets)}"
             )
         instruments.append(inst)
+
+    # One instrument per `about` kind: Study.self_report and friends would otherwise
+    # have to guess which of two self-reports the analysis meant.
+    for kind in ABOUT_KINDS:
+        clash = [i.key for i in instruments if i.about == kind]
+        if len(clash) > 1:
+            raise SystemExit(
+                f"{path}: study '{name}' declares {len(clash)} instruments with "
+                f"about='{kind}' ({', '.join(clash)}); at most one is allowed"
+            )
 
     personas_from = spec.get("personas_from")
     if personas_from and not (STUDIES_DIR / personas_from / "personas").exists():

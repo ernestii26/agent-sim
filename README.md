@@ -106,7 +106,10 @@ from `seeds.json` or from disk fails the check.
 | `src/pipeline.py` | Composes each run, executes, checkpoints |
 | `src/discussion.py` | One discussion, one vote, one survey administration; retries and quota detection |
 | `src/persona_store.py` | Persona spec → TinyTroupe agent |
-| `src/reporting.py` | Metrics and paired t-tests (`summarize_*`), then rendering (`render_*`, `plot_*`) |
+| `src/run_record.py` | One run's output; the only thing that knows the checkpoint JSON shape |
+| `src/stats.py` | Numeric primitives (means, OLS slope, paired t-test, Cronbach's alpha) |
+| `src/analysis.py` | Run records → summary dicts (`summarize_*`, `need_outcome_links`) |
+| `src/render.py` | Summary dicts → terminal tables, JSON files, charts (`render_*`, `plot_*`) |
 | `src/runtime.py` | TinyTroupe wiring and logging |
 | `tools/gen_personas.py` | Generates a study's personas from `seeds.json` |
 | `studies/` | One directory per research theme |

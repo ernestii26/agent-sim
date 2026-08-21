@@ -9,15 +9,12 @@ import time
 from itertools import count
 from typing import Any
 
-import openai
-
 from config import ModelSettings
 from instrument import ABOUT_EACH_CANDIDATE, ABOUT_PROTOTYPE, ABOUT_SELF, Instrument
 from persona_store import Participant
 from runtime import actions_to_text, configure_tinytroupe_runtime, ensure_tinytroupe_imports
 
 _WORLD_COUNTER = count(1)
-_consecutive_api_failures = 0
 _MAX_CONSECUTIVE_FAILURES = 5
 
 
@@ -25,39 +22,67 @@ class APIQuotaExhausted(RuntimeError):
     """Raised when the API appears to have no remaining quota (billing exhausted)."""
 
 
-def _safe_listen_and_act(agent: Any, prompt: str, retries: int = 3) -> list[dict[str, Any]]:
-    global _consecutive_api_failures
-    for attempt in range(1, retries + 1):
-        try:
-            result = agent.listen_and_act(
-                prompt,
-                return_actions=True,
-                communication_display=False,
-            )
-            _consecutive_api_failures = 0
-            return result or []
-        except (TypeError, AttributeError, openai.OpenAIError) as exc:
-            if attempt < retries:
-                delay = 2 ** attempt
-                print(f"  [warn] {type(exc).__name__} (attempt {attempt}/{retries}, retrying in {delay}s): {exc}")
-                time.sleep(delay)
-            else:
-                _consecutive_api_failures += 1
-                print(f"  [warn] {type(exc).__name__} after {retries} attempts ({exc}) — treating as silence")
-                _check_quota()
+def _api_error_types() -> tuple[type[BaseException], ...]:
+    """P1 + P4 (docs/ERRORS_AND_FIXES.md): TinyTroupe returns None on exhausted retries
+    (TypeError/AttributeError) and LengthFinishReasonError arrives as an OpenAIError.
+    Imported lazily so this module stays importable where openai is not installed."""
+    try:
+        import openai
+    except ImportError:
+        return (TypeError, AttributeError)
+    return (TypeError, AttributeError, openai.OpenAIError)
+
+
+class AgentTransport:
+    """The one real adapter: turn a prompt into agent actions, absorbing API failure.
+
+    The consecutive-failure counter lives here rather than on the module so its lifetime
+    is one run: scattered failures across two conditions in the same process must not add
+    up into a spurious APIQuotaExhausted abort.
+    """
+
+    def __init__(self, retries: int = 3) -> None:
+        self.retries = retries
+        self.consecutive_failures = 0
+
+    def actions(self, agent: Any, prompt: str) -> list[dict[str, Any]]:
+        errors = _api_error_types()
+        for attempt in range(1, self.retries + 1):
+            try:
+                result = agent.listen_and_act(
+                    prompt,
+                    return_actions=True,
+                    communication_display=False,
+                )
+                self.consecutive_failures = 0
+                return result or []
+            except errors as exc:
+                if attempt < self.retries:
+                    delay = 2 ** attempt
+                    print(f"  [warn] {type(exc).__name__} (attempt {attempt}/{self.retries}, retrying in {delay}s): {exc}")
+                    time.sleep(delay)
+                else:
+                    self.consecutive_failures += 1
+                    print(f"  [warn] {type(exc).__name__} after {self.retries} attempts ({exc}) — treating as silence")
+                    self._check_quota()
+                    return []
+            except Exception as exc:
+                print(f"  [warn] Unexpected error ({type(exc).__name__}: {exc}) — treating as silence")
                 return []
-        except Exception as exc:
-            print(f"  [warn] Unexpected error ({type(exc).__name__}: {exc}) — treating as silence")
-            return []
-    return []
+        return []
 
+    def __call__(self, agent: Any, prompt: str) -> str:
+        """Ask the agent and give back plain text — the seam the survey parser talks to."""
+        return actions_to_text(self.actions(agent, prompt))
 
-def _check_quota() -> None:
-    if _consecutive_api_failures >= _MAX_CONSECUTIVE_FAILURES:
-        raise APIQuotaExhausted(
-            f"API failed {_consecutive_api_failures} times in a row — "
-            "likely billing quota exhausted. Stopping simulation."
-        )
+    def _check_quota(self) -> None:
+        # A rate-limited run degrades into fake silence, and speech rate is a dependent
+        # variable — stop with checkpoints saved rather than publish 429s as data.
+        if self.consecutive_failures >= _MAX_CONSECUTIVE_FAILURES:
+            raise APIQuotaExhausted(
+                f"API failed {self.consecutive_failures} times in a row — "
+                "likely billing quota exhausted. Stopping simulation."
+            )
 
 
 def _extract_json(text: str) -> dict[str, Any]:
@@ -163,13 +188,14 @@ def run_discussion(
         world.broadcast(friction)
 
     transcript: list[dict[str, Any]] = []
+    transport = AgentTransport()
 
     for round_no in range(1, rounds + 1):
         if on_progress:
             on_progress(f"  Round {round_no}/{rounds}")
 
         for participant in random.sample(participants, len(participants)):
-            actions = _safe_listen_and_act(
+            actions = transport.actions(
                 participant.agent, TURN_PROMPT.format(name=participant.name).strip()
             )
             time.sleep(1)
@@ -221,6 +247,7 @@ def run_vote(
 
     by_name = {p.name: p for p in participants}
     votes: list[dict[str, Any]] = []
+    ask = AgentTransport()
 
     for participant in participants:
         candidates = [p.name for p in participants if p.name != participant.name]
@@ -242,7 +269,7 @@ def run_vote(
             """
         ).strip()
 
-        parsed = _extract_json(actions_to_text(_safe_listen_and_act(participant.agent, prompt)))
+        parsed = _extract_json(ask(participant.agent, prompt))
         choice = str(parsed.get("choice") or parsed.get("leader") or "").strip()
         reason = str(parsed.get("reason", "")).strip() or "No reason provided."
 
@@ -287,16 +314,19 @@ def run_survey(
         p for p in participants if not instrument.targets or p.group in instrument.targets
     ]
     results: dict[str, Any] = {}
+    ask = AgentTransport()
 
     for participant in respondents:
         if instrument.about == ABOUT_EACH_CANDIDATE:
             results[participant.persona_id] = {
-                other.persona_id: _administer(participant, instrument, target=other)
+                other.persona_id: _administer(participant, instrument, target=other, ask=ask)
                 for other in participants
                 if other.persona_id != participant.persona_id
             }
         else:
-            results[participant.persona_id] = _administer(participant, instrument, target=None)
+            results[participant.persona_id] = _administer(
+                participant, instrument, target=None, ask=ask
+            )
 
         if on_progress:
             on_progress(f"    {participant.persona_id:<4} {instrument.key} done")
@@ -305,9 +335,17 @@ def run_survey(
 
 
 def _administer(
-    participant: Participant, instrument: Instrument, *, target: Participant | None
+    participant: Participant,
+    instrument: Instrument,
+    *,
+    target: Participant | None,
+    ask: Any,
 ) -> dict[str, Any]:
-    """One administration = one API call, with a single retry on an unusable response."""
+    """One administration = one API call, with a single retry on an unusable response.
+
+    `ask(agent, prompt) -> str` is the transport seam, so this parser can be driven from a
+    test with scripted replies instead of a live agent.
+    """
     items = instrument.items
     order = random.sample(items, len(items))
     low, high = instrument.scale
@@ -343,7 +381,7 @@ def _administer(
     ).strip()
 
     for attempt in (1, 2):
-        parsed = _extract_json(actions_to_text(_safe_listen_and_act(participant.agent, prompt)))
+        parsed = _extract_json(ask(participant.agent, prompt))
         responses: dict[str, Any] = {}
         for item_id, _, _ in items:
             value = parsed.get(item_id)
