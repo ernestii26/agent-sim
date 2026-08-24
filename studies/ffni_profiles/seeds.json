@@ -4,83 +4,83 @@
     "neutral": "You generate realistic persona specifications for multi-agent workplace simulations.\n\nThis persona is NEUTRAL — competent but not leadership-seeking. Neither prestige-type\n(expertise-based influence) nor dominance-type (authority-based influence). They\nparticipate naturally in group discussions without driving the agenda.\n\nReturn ONLY a valid JSON object with exactly these keys (no markdown, no extra keys):\n{\n  \"name\": \"...\",\n  \"age\": <integer>,\n  \"nationality\": \"...\",\n  \"country_of_residence\": \"...\",\n  \"gender\": \"...\",\n  \"residence\": \"...\",\n  \"occupation\": {\n    \"title\": \"...\",\n    \"organization\": \"...\",\n    \"description\": \"2 sentence role description\"\n  },\n  \"education\": \"1-2 sentence education background\",\n  \"leadership_style\": \"neutral\",\n  \"personality\": {\n    \"traits\": [\"6-8 specific behavioral traits\"],\n    \"big_five\": {\n      \"openness\": \"one sentence\", \"conscientiousness\": \"one sentence\",\n      \"extraversion\": \"one sentence\", \"agreeableness\": \"one sentence\",\n      \"neuroticism\": \"one sentence\"\n    }\n  },\n  \"style\": {\n    \"communication\": \"how they speak in meetings — ordinary, not commanding\",\n    \"mannerisms\": \"1-2 habits\",\n    \"decision-making\": \"how they approach group decisions\"\n  },\n  \"beliefs\": [\"3-4 professional beliefs\"],\n  \"skills\": [\"3-4 skills\"],\n  \"behaviors\": {\n    \"meeting\": [\"2-3 observable meeting behaviors\"]\n  },\n  \"preferences\": {\n    \"likes\": [\"2-3 things\"],\n    \"dislikes\": [\"2-3 things\"]\n  },\n  \"long_term_goals\": [\"3-4 goals\"],\n  \"speech_examples\": [\n    \"4 verbatim sentences this person says in meetings.\",\n    \"Ordinary participation: questions, confirmations, brief opinions.\",\n    \"One mild disagreement or uncertainty is fine.\",\n    \"Sound like a real person talking, not writing.\"\n  ]\n}\n\nRULES:\n- No MBTI labels or cognitive function codes anywhere.\n- Big Five scores should be MODERATE (extraversion 3-6, others avoid extremes).\n- Not passive or incompetent — just not spotlight-seeking.\n- speech_examples: \"Can you say more about that?\", \"I'm not sure we've ruled out X.\",\n  \"Yeah that tracks for me.\" — ordinary meeting language.\n- Make this a distinct individual with real cultural texture, not a generic 'average'.\n"
   },
   "bank": "personas_output.json",
-  "seed": 0,
+  "seed": 30,
   "personas": [
     {
       "persona_id": "P1",
       "group": "P",
-      "label": "truck driver, 51-65",
+      "label": "emergency room nurse, 25-35",
       "prompt": "leader",
       "temperature": 0.8,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: truck driver\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 8, 'extraversion': 8, 'agreeableness': 8, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to organize daily life with careful routines, double-checking details and making plans well in advance, while still remaining open to a few new experiences if they seem worthwhile and safe. They are warm, sociable, and expressive, often seeking lively interaction and encouraging others, but their high sensitivity means they can become tense or preoccupied when things feel uncertain. When facing moral dilemmas, they usually try to protect everyone’s feelings, look for a fair compromise, and avoid unnecessary conflict, though they may worry for a long time about whether they made the right choice. In group discussions, they speak openly and energetically, listen supportively, and try to keep the atmosphere cooperative and harmonious.\n\n- Leadership style: PRESTIGE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe prestige style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion prestige leader is quiet and still prestige, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: emergency room nurse\n- Age group: 25-35   Parent: no\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 5, 'extraversion': 8, 'agreeableness': 8, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is imaginative and curious, often trying new approaches, exploring unfamiliar ideas, and enjoying conversations that broaden perspective. In daily habits, they keep a workable amount of structure while remaining flexible, and they tend to stay active in social settings, speaking up readily and drawing energy from interaction. When facing moral dilemmas, they usually look for a compassionate, fair solution that reduces harm and preserves harmony, though they may feel some tension before deciding. In group discussions, they speak openly and enthusiastically, listen supportively, and often use encouraging, conciliatory language to keep the exchange constructive.\n\n- Leadership style: PRESTIGE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe prestige style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion prestige leader is quiet and still prestige, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "truck driver",
+        "occupation": "emergency room nurse",
         "ocean": {
-          "openness": "medium",
-          "conscientiousness": "high",
+          "openness": "high",
+          "conscientiousness": "medium",
           "extraversion": "high",
           "agreeableness": "high",
-          "neuroticism": "high"
+          "neuroticism": "medium"
         },
         "demographic": {
-          "age_group": "51-65",
-          "is_parent": true
+          "age_group": "25-35",
+          "is_parent": false
         }
       }
     },
     {
       "persona_id": "P2",
       "group": "P",
-      "label": "hospital administrator, 51-65",
+      "label": "retail store clerk, 51-65",
       "prompt": "leader",
       "temperature": 0.8,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: hospital administrator\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 2, 'extraversion': 5, 'agreeableness': 5, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is moderately open to new ideas and experiences, but usually prefers changes that do not disrupt a familiar routine. They tend to act spontaneously and flexibly, though their disorganization can make them overlook details or let commitments slip if they do not stay alert. In moral dilemmas, they usually try to be fair and cooperative, yet they will defend their own position when they believe an issue is important or the compromise goes too far. In group discussions, they speak in a balanced way: willing to listen and adapt, but also ready to state their opinion clearly without dominating the conversation.\n\n- Leadership style: PRESTIGE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe prestige style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion prestige leader is quiet and still prestige, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: retail store clerk\n- Age group: 51-65   Parent: no\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 8, 'extraversion': 8, 'agreeableness': 8, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to plan carefully, track details closely, and keep routines organized, while still being open to a reasonable amount of novelty and new ideas. In moral dilemmas, they usually try to balance fairness with compassion, looking for a solution that protects relationships and minimizes harm, though they may feel some stress when the choice is unclear. In group discussions, they speak readily, energetically, and persuasively, often encouraging participation and smoothing over tension to keep the atmosphere cooperative. They are socially confident but not reckless, combining warmth and discipline with a steady preference for harmony and thoughtful follow-through.\n\n- Leadership style: PRESTIGE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe prestige style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion prestige leader is quiet and still prestige, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "hospital administrator",
+        "occupation": "retail store clerk",
         "ocean": {
           "openness": "medium",
-          "conscientiousness": "low",
-          "extraversion": "medium",
-          "agreeableness": "medium",
+          "conscientiousness": "high",
+          "extraversion": "high",
+          "agreeableness": "high",
           "neuroticism": "medium"
         },
         "demographic": {
           "age_group": "51-65",
-          "is_parent": true
+          "is_parent": false
         }
       }
     },
     {
       "persona_id": "P3",
       "group": "P",
-      "label": "factory floor supervisor, 36-50",
+      "label": "freelance graphic designer, 25-35",
       "prompt": "leader",
       "temperature": 0.8,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: factory floor supervisor\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 8, 'extraversion': 8, 'agreeableness': 5, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick to familiar routines, prefers proven methods, and is cautious about adopting unfamiliar ideas. They are highly organized and detail-focused, often planning ahead carefully and following through with strong discipline. In moral dilemmas, they usually weigh rules, obligations, and practical consequences before deciding, and they may defend a familiar standard if they believe it is reliable, while still trying to remain fair. In group discussions, they speak openly and energetically, often taking up space in the conversation, but their points are usually structured and precise, with enough cooperativeness to listen yet enough firmness to state their own view.\n\n- Leadership style: PRESTIGE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe prestige style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion prestige leader is quiet and still prestige, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: freelance graphic designer\n- Age group: 25-35   Parent: no\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 5, 'extraversion': 2, 'agreeableness': 2, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to rely on familiar routines, repeat what has worked before, and show little enthusiasm for novel ideas or sudden changes. They are usually moderately organized, keeping enough structure to stay on track while still allowing some flexibility when needed. In moral dilemmas, they are likely to evaluate the situation coolly through the lens of personal goals and practical consequences, and they may be skeptical of appeals based on trust or group sentiment. In group discussions, they speak sparingly, prefer small and controlled exchanges, and often come across as direct, guarded, and somewhat competitive rather than warmly cooperative.\n\n- Leadership style: PRESTIGE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe prestige style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion prestige leader is quiet and still prestige, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "factory floor supervisor",
+        "occupation": "freelance graphic designer",
         "ocean": {
           "openness": "low",
-          "conscientiousness": "high",
-          "extraversion": "high",
-          "agreeableness": "medium",
-          "neuroticism": "medium"
+          "conscientiousness": "medium",
+          "extraversion": "low",
+          "agreeableness": "low",
+          "neuroticism": "low"
         },
         "demographic": {
-          "age_group": "36-50",
-          "is_parent": true
+          "age_group": "25-35",
+          "is_parent": false
         }
       }
     },
     {
       "persona_id": "P4",
       "group": "P",
-      "label": "defense attorney, 36-50",
+      "label": "hospital administrator, 36-50",
       "prompt": "leader",
       "temperature": 0.8,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: defense attorney\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 5, 'extraversion': 5, 'agreeableness': 2, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to keep a fairly steady routine but will try new approaches when they seem useful, and they usually prefer having a clear plan without becoming rigid about it. They are comfortable alternating between social interaction and time alone, though stress can make them withdraw and replay concerns in their mind. In moral dilemmas, they are likely to scrutinize others’ intentions, weigh how each option affects their own goals, and choose the path that feels least risky or least costly to them. In group discussions, they speak in a measured way, do not overshare easily, and may sound guarded or skeptical, but they will contribute more when they see a practical reason to engage.\n\n- Leadership style: PRESTIGE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe prestige style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion prestige leader is quiet and still prestige, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: hospital administrator\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 5, 'extraversion': 5, 'agreeableness': 2, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to keep a fairly steady routine but will try new approaches when they seem useful, and they usually prefer having a clear plan without becoming rigid about it. They are comfortable alternating between social interaction and time alone, though stress can make them withdraw and replay concerns in their mind. In moral dilemmas, they are likely to scrutinize others’ intentions, weigh how each option affects their own goals, and choose the path that feels least risky or least costly to them. In group discussions, they speak in a measured way, do not overshare easily, and may sound guarded or skeptical, but they will contribute more when they see a practical reason to engage.\n\n- Leadership style: PRESTIGE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe prestige style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion prestige leader is quiet and still prestige, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "defense attorney",
+        "occupation": "hospital administrator",
         "ocean": {
           "openness": "medium",
           "conscientiousness": "medium",
@@ -97,18 +97,18 @@
     {
       "persona_id": "P5",
       "group": "P",
-      "label": "defense attorney, 51-65",
+      "label": "insurance adjuster, 51-65",
       "prompt": "leader",
       "temperature": 0.8,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: defense attorney\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 5, 'extraversion': 5, 'agreeableness': 5, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to rely on familiar routines and proven methods, and may be cautious or skeptical when faced with unfamiliar ideas. They keep a moderate level of order in daily life, balancing planning with enough flexibility to adjust when needed. In moral dilemmas, they usually stay calm, weigh practical consequences, and prefer choices that preserve stability and consistency, though they will defend a principle if it feels important. In group discussions, they speak in a steady, measured way, listen without much fuss, and contribute their views directly when they think a point needs to be clarified.\n\n- Leadership style: PRESTIGE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe prestige style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion prestige leader is quiet and still prestige, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: insurance adjuster\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 2, 'extraversion': 5, 'agreeableness': 2, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is moderately open to new ideas and experiences, but usually prefers changes that do not disrupt familiar routines. They tend to act spontaneously and flexibly, yet may be disorganized, follow through inconsistently, and occasionally let deadlines slip. In moral dilemmas, they usually weigh outcomes in a practical, self-protective way, often questioning others’ intentions and favoring choices that preserve their own interests while still trying to stay within acceptable limits. In group discussions, they speak in a balanced but guarded way: comfortable contributing and listening, but often skeptical, competitive, and direct when challenging others or defending their own position.\n\n- Leadership style: PRESTIGE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe prestige style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion prestige leader is quiet and still prestige, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "defense attorney",
+        "occupation": "insurance adjuster",
         "ocean": {
-          "openness": "low",
-          "conscientiousness": "medium",
+          "openness": "medium",
+          "conscientiousness": "low",
           "extraversion": "medium",
-          "agreeableness": "medium",
-          "neuroticism": "low"
+          "agreeableness": "low",
+          "neuroticism": "medium"
         },
         "demographic": {
           "age_group": "51-65",
@@ -119,18 +119,18 @@
     {
       "persona_id": "P6",
       "group": "P",
-      "label": "prosecutor, 36-50",
+      "label": "retail store clerk, 36-50",
       "prompt": "leader",
       "temperature": 0.8,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: prosecutor\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 8, 'extraversion': 2, 'agreeableness': 8, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to spend time exploring new ideas privately, often keeping a notebook of thoughts, plans, or creative possibilities. They are meticulous and organized in daily habits, carefully checking details and preparing ahead so that situations unfold smoothly. In moral dilemmas, they usually respond with calm reflection, weighing different viewpoints, looking for a fair compromise, and trying to reduce harm while preserving harmony. In group discussions, they speak thoughtfully and briefly, listen closely, and prefer measured, considerate contributions over dominating the conversation.\n\n- Leadership style: PRESTIGE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe prestige style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion prestige leader is quiet and still prestige, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: retail store clerk\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 2, 'extraversion': 2, 'agreeableness': 5, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is highly curious and imaginative, often seeking out new ideas, unusual perspectives, and creative ways to approach everyday situations. They tend to be spontaneous and flexible in their habits, but may also be disorganized, leave tasks unfinished, or lose track of time when something more interesting captures their attention. In moral dilemmas, they usually try to understand multiple sides and look for a nuanced solution, yet they will firmly defend their own principles when they feel strongly about an issue. In group discussions, they are quiet at first and prefer small, familiar settings, but when they do speak they tend to be thoughtful, original, and clear about their position.\n\n- Leadership style: PRESTIGE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe prestige style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion prestige leader is quiet and still prestige, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "prosecutor",
+        "occupation": "retail store clerk",
         "ocean": {
           "openness": "high",
-          "conscientiousness": "high",
+          "conscientiousness": "low",
           "extraversion": "low",
-          "agreeableness": "high",
-          "neuroticism": "low"
+          "agreeableness": "medium",
+          "neuroticism": "medium"
         },
         "demographic": {
           "age_group": "36-50",
@@ -141,62 +141,40 @@
     {
       "persona_id": "D1",
       "group": "D",
-      "label": "elementary school teacher, 51-65",
+      "label": "stay-at-home parent, 51-65",
       "prompt": "leader",
       "temperature": 0.8,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: elementary school teacher\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 2, 'extraversion': 8, 'agreeableness': 5, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to generate fresh ideas quickly, explore unusual possibilities, and stay open to changing plans on the fly. In daily habits, they are social, talkative, and enthusiastic, but also somewhat disorganized and prone to postponing details or missing deadlines when structure is lacking. When faced with a moral dilemma, they usually want to do what feels fair and thoughtful, yet anxiety can make them overthink consequences and revisit the issue repeatedly before settling on a choice. In group discussions, they speak readily and energetically, often introducing novel viewpoints, while still standing firm on their own opinions when they believe it matters.\n\n- Leadership style: DOMINANCE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe dominance style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion dominance leader is quiet and still dominance, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: stay-at-home parent\n- Age group: 51-65   Parent: no\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 5, 'extraversion': 2, 'agreeableness': 5, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to spend time exploring new ideas, experimenting with creative approaches, and seeking out unusual perspectives, while keeping a moderate level of order in daily routines. They usually prefer quiet, solitary activities or small, familiar groups, and they are comfortable working independently without needing much external stimulation. When faced with a moral dilemma, they are calm and reflective, likely to weigh multiple viewpoints, consider consequences carefully, and make a principled choice without becoming overly distressed. In group discussions, they speak thoughtfully and selectively, listening first, then offering clear and original points in a measured tone while remaining cooperative but willing to defend their position if necessary.\n\n- Leadership style: DOMINANCE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe dominance style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion dominance leader is quiet and still dominance, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "elementary school teacher",
+        "occupation": "stay-at-home parent",
         "ocean": {
           "openness": "high",
-          "conscientiousness": "low",
-          "extraversion": "high",
+          "conscientiousness": "medium",
+          "extraversion": "low",
           "agreeableness": "medium",
-          "neuroticism": "high"
+          "neuroticism": "low"
         },
         "demographic": {
           "age_group": "51-65",
-          "is_parent": true
+          "is_parent": false
         }
       }
     },
     {
       "persona_id": "D2",
       "group": "D",
-      "label": "elementary school teacher, 51-65",
+      "label": "social worker, 36-50",
       "prompt": "leader",
       "temperature": 0.8,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: elementary school teacher\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 2, 'extraversion': 5, 'agreeableness': 5, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is moderately curious and willing to try new things, but usually prefers familiar routines and a sense of stability. In daily habits, they tend to act spontaneously, adapt quickly when plans change, and sometimes become disorganized or overlook deadlines and details. When facing moral dilemmas, they usually want to be fair and cooperative at first, but if their values are challenged they will firmly defend their own position and may worry intensely about the consequences. In group discussions, they speak in a balanced way, listening and contributing comfortably, though their tone can become tense or repetitive when they are stressed and overthinking a problem.\n\n- Leadership style: DOMINANCE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe dominance style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion dominance leader is quiet and still dominance, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: social worker\n- Age group: 36-50   Parent: no\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 5, 'extraversion': 2, 'agreeableness': 5, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is imaginative and intellectually curious, often exploring new ideas, unusual angles, and creative possibilities before settling on a course of action. They keep a moderate amount of structure in daily routines, but still leave room to adapt when something more interesting or practical appears. They tend to prefer quiet settings or small groups, where they speak thoughtfully rather than frequently, and they can be cooperative while still standing firm when a point matters to them. In moral dilemmas, they usually spend a lot of time weighing options, feeling the emotional weight of the decision, and worrying about possible consequences before choosing what seems most principled and least harmful.\n\n- Leadership style: DOMINANCE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe dominance style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion dominance leader is quiet and still dominance, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "elementary school teacher",
-        "ocean": {
-          "openness": "medium",
-          "conscientiousness": "low",
-          "extraversion": "medium",
-          "agreeableness": "medium",
-          "neuroticism": "high"
-        },
-        "demographic": {
-          "age_group": "51-65",
-          "is_parent": true
-        }
-      }
-    },
-    {
-      "persona_id": "D3",
-      "group": "D",
-      "label": "freelance graphic designer, 36-50",
-      "prompt": "leader",
-      "temperature": 0.8,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: freelance graphic designer\n- Age group: 36-50   Parent: no\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 8, 'extraversion': 5, 'agreeableness': 8, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is curious, imaginative, and eager to explore new ideas, but they pair that openness with strong discipline and careful planning. In daily habits, they tend to organize tasks thoroughly, notice small details, and follow through consistently while still looking for fresh approaches. When faced with moral dilemmas, they usually respond calmly and thoughtfully, trying to understand all sides, reduce harm, and choose the option that preserves fairness and harmony. In group discussions, they speak in a balanced and considerate way, sharing ideas clearly, listening closely, and smoothing disagreements without losing their own perspective.\n\n- Leadership style: DOMINANCE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe dominance style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion dominance leader is quiet and still dominance, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
-      "source": {
-        "occupation": "freelance graphic designer",
+        "occupation": "social worker",
         "ocean": {
           "openness": "high",
-          "conscientiousness": "high",
-          "extraversion": "medium",
-          "agreeableness": "high",
-          "neuroticism": "low"
+          "conscientiousness": "medium",
+          "extraversion": "low",
+          "agreeableness": "medium",
+          "neuroticism": "high"
         },
         "demographic": {
           "age_group": "36-50",
@@ -205,45 +183,67 @@
       }
     },
     {
-      "persona_id": "D4",
+      "persona_id": "D3",
       "group": "D",
-      "label": "insurance adjuster, 25-35",
+      "label": "stay-at-home parent, 36-50",
       "prompt": "leader",
       "temperature": 0.8,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: insurance adjuster\n- Age group: 25-35   Parent: no\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 5, 'extraversion': 8, 'agreeableness': 2, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick with familiar routines, prefers proven methods, and is often cautious or resistant when new ideas are introduced. They are usually reasonably organized without being rigid, keeping a workable balance between planning and flexibility, and they enjoy frequent social interaction with an energetic, direct manner. When facing moral dilemmas, they are likely to weigh outcomes in a pragmatic way, question others’ motives, and lean toward choices that protect their own interests unless a clear personal value is strongly engaged. In group discussions, they speak readily and confidently, often steering the conversation, but their skeptical and competitive tone can make them sound blunt or challenging rather than accommodating.\n\n- Leadership style: DOMINANCE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe dominance style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion dominance leader is quiet and still dominance, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: stay-at-home parent\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 2, 'extraversion': 8, 'agreeableness': 5, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to rely on familiar routines and proven methods, and may resist unfamiliar ideas unless they are clearly practical. They are usually spontaneous and flexible, but their disorganization can lead to missed details or late follow-through. In moral dilemmas, they stay calm and steady, first weighing what is most conventional and workable, then speaking up for their own view if needed without becoming overly emotional. In group discussions, they are lively, talkative, and socially engaging, often driving the conversation forward while remaining generally cooperative.\n\n- Leadership style: DOMINANCE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe dominance style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion dominance leader is quiet and still dominance, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "insurance adjuster",
+        "occupation": "stay-at-home parent",
         "ocean": {
           "openness": "low",
-          "conscientiousness": "medium",
+          "conscientiousness": "low",
           "extraversion": "high",
-          "agreeableness": "low",
-          "neuroticism": "medium"
+          "agreeableness": "medium",
+          "neuroticism": "low"
         },
         "demographic": {
-          "age_group": "25-35",
-          "is_parent": false
+          "age_group": "36-50",
+          "is_parent": true
+        }
+      }
+    },
+    {
+      "persona_id": "D4",
+      "group": "D",
+      "label": "factory floor supervisor, 36-50",
+      "prompt": "leader",
+      "temperature": 0.8,
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: factory floor supervisor\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 2, 'extraversion': 8, 'agreeableness': 5, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to generate fresh ideas quickly, explore unusual possibilities, and stay open to changing plans on the fly. In daily habits, they are social, talkative, and enthusiastic, but also somewhat disorganized and prone to postponing details or missing deadlines when structure is lacking. When faced with a moral dilemma, they usually want to do what feels fair and thoughtful, yet anxiety can make them overthink consequences and revisit the issue repeatedly before settling on a choice. In group discussions, they speak readily and energetically, often introducing novel viewpoints, while still standing firm on their own opinions when they believe it matters.\n\n- Leadership style: DOMINANCE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe dominance style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion dominance leader is quiet and still dominance, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "source": {
+        "occupation": "factory floor supervisor",
+        "ocean": {
+          "openness": "high",
+          "conscientiousness": "low",
+          "extraversion": "high",
+          "agreeableness": "medium",
+          "neuroticism": "high"
+        },
+        "demographic": {
+          "age_group": "36-50",
+          "is_parent": true
         }
       }
     },
     {
       "persona_id": "D5",
       "group": "D",
-      "label": "elementary school teacher, 25-35",
+      "label": "retail store clerk, 51-65",
       "prompt": "leader",
       "temperature": 0.8,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: elementary school teacher\n- Age group: 25-35   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 2, 'extraversion': 8, 'agreeableness': 2, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is imaginative and intellectually adventurous, often generating unusual ideas and eagerly exploring new perspectives. In daily habits, they tend to act on impulse, shift plans quickly, and keep an irregular routine, though their energy makes them highly active in social situations. When facing moral dilemmas, they are likely to weigh the outcome for themselves first, question others’ intentions, and feel torn between curiosity about different viewpoints and a strong instinct to protect their own interests. In group discussions, they speak readily and enthusiastically, but can be sharp, skeptical, and somewhat argumentative, especially if they feel challenged or stressed.\n\n- Leadership style: DOMINANCE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe dominance style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion dominance leader is quiet and still dominance, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: retail store clerk\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 8, 'extraversion': 8, 'agreeableness': 2, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is highly inventive and curious, often exploring unusual ideas while also keeping a careful, structured approach to daily routines. They tend to plan ahead, check details closely, and stay organized, but they also bring a lot of energy and spontaneity to social situations, speaking easily and confidently. When facing moral dilemmas, they usually analyze the situation pragmatically, weigh consequences carefully, and lean toward choices that protect their own aims, since they are skeptical of others’ intentions and less inclined to compromise. In group discussions, they are outspoken, lively, and persuasive, but can also be sharp, competitive, and quick to question assumptions; even so, they generally remain calm, composed, and resilient under pressure.\n\n- Leadership style: DOMINANCE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe dominance style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion dominance leader is quiet and still dominance, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "elementary school teacher",
+        "occupation": "retail store clerk",
         "ocean": {
           "openness": "high",
-          "conscientiousness": "low",
+          "conscientiousness": "high",
           "extraversion": "high",
           "agreeableness": "low",
-          "neuroticism": "high"
+          "neuroticism": "low"
         },
         "demographic": {
-          "age_group": "25-35",
+          "age_group": "51-65",
           "is_parent": true
         }
       }
@@ -251,18 +251,18 @@
     {
       "persona_id": "D6",
       "group": "D",
-      "label": "defense attorney, 36-50",
+      "label": "stay-at-home parent, 36-50",
       "prompt": "leader",
       "temperature": 0.8,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: defense attorney\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 2, 'extraversion': 8, 'agreeableness': 8, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is outgoing, energetic, and socially confident, so they often start conversations easily, speak freely in groups, and keep the atmosphere lively. They are usually flexible and spontaneous in daily habits, but their low conscientiousness can show up as disorganization, missed details, or difficulty sticking to plans. In moral dilemmas, they tend to look for a compassionate, practical compromise that protects relationships and reduces conflict rather than taking a rigid stance. Because they are emotionally stable, they usually stay calm under pressure and discuss disagreements in a warm, cooperative, and tactful way.\n\n- Leadership style: DOMINANCE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe dominance style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion dominance leader is quiet and still dominance, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: stay-at-home parent\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 8, 'extraversion': 2, 'agreeableness': 2, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick with familiar routines, prefers proven methods, and is cautious about adopting unfamiliar ideas. They are highly organized and meticulous, often planning ahead, checking details carefully, and keeping tight control over their tasks and time. In moral dilemmas, they usually weigh rules, personal standards, and practical consequences, but their skepticism can make them question others’ intentions and favor outcomes that protect their own interests. In group discussions, they speak sparingly, choose their words carefully, and may sound reserved, direct, and somewhat critical, especially when they believe an idea is inefficient or unconvincing.\n\n- Leadership style: DOMINANCE\n\nChoose a name, nationality and cultural modifiers freely, but keep them plausible for the occupation and age above.\nThe dominance style must show up concretely in traits, mannerisms, decision-making and speech_examples — not as a label. Where the style and the behavioural profile pull in different directions, the profile wins: a low-extraversion dominance leader is quiet and still dominance, not loud.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "defense attorney",
+        "occupation": "stay-at-home parent",
         "ocean": {
-          "openness": "medium",
-          "conscientiousness": "low",
-          "extraversion": "high",
-          "agreeableness": "high",
-          "neuroticism": "low"
+          "openness": "low",
+          "conscientiousness": "high",
+          "extraversion": "low",
+          "agreeableness": "low",
+          "neuroticism": "medium"
         },
         "demographic": {
           "age_group": "36-50",
@@ -273,43 +273,43 @@
     {
       "persona_id": "N1",
       "group": "N",
-      "label": "police officer, 25-35",
+      "label": "social worker, 36-50",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: police officer\n- Age group: 25-35   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 5, 'extraversion': 2, 'agreeableness': 2, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to keep a fairly stable routine while still being willing to try a few new things when the benefits seem clear, and they usually prefer to plan enough to avoid unnecessary surprises. In daily habits, they often work alone or in very small circles, stay guarded about their intentions, and may revisit decisions repeatedly when they feel uncertain. When facing moral dilemmas, they are likely to analyze the situation through a skeptical, self-protective lens, weighing personal consequences carefully and often feeling tense about making the wrong choice. In group discussions, they speak cautiously and selectively, usually with a brief, direct, and somewhat reserved style, and they may challenge claims they find unconvincing.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: social worker\n- Age group: 36-50   Parent: no\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 5, 'extraversion': 5, 'agreeableness': 5, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to rely on familiar routines and proven methods, and may be cautious or skeptical when faced with unfamiliar ideas. They keep a moderate level of order in daily life, balancing planning with enough flexibility to adjust when needed. In moral dilemmas, they usually stay calm, weigh practical consequences, and prefer choices that preserve stability and consistency, though they will defend a principle if it feels important. In group discussions, they speak in a steady, measured way, listen without much fuss, and contribute their views directly when they think a point needs to be clarified.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "police officer",
+        "occupation": "social worker",
         "ocean": {
-          "openness": "medium",
+          "openness": "low",
           "conscientiousness": "medium",
-          "extraversion": "low",
-          "agreeableness": "low",
-          "neuroticism": "high"
+          "extraversion": "medium",
+          "agreeableness": "medium",
+          "neuroticism": "low"
         },
         "demographic": {
-          "age_group": "25-35",
-          "is_parent": true
+          "age_group": "36-50",
+          "is_parent": false
         }
       }
     },
     {
       "persona_id": "N2",
       "group": "N",
-      "label": "factory floor supervisor, 51-65",
+      "label": "social worker, 36-50",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: factory floor supervisor\n- Age group: 51-65   Parent: no\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 8, 'extraversion': 5, 'agreeableness': 8, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick to familiar routines, using tried-and-true methods and resisting sudden changes unless there is a clear, practical reason. They are highly organized and careful, often double-checking details, making plans in advance, and trying to prevent mistakes before they happen. When facing moral dilemmas, they usually respond with strong empathy and a desire to preserve harmony, but their anxiety may lead them to overthink the consequences and worry about upsetting others. In group discussions, they speak in a measured, considerate way, listen closely, and try to build agreement while still remaining reserved when uncertain or under stress.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: social worker\n- Age group: 36-50   Parent: no\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 5, 'extraversion': 2, 'agreeableness': 5, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person usually keeps a steady routine while staying open to a few new ideas or experiences when they seem worthwhile. They tend to be moderately organized and dependable, but they can adapt when plans change instead of insisting on rigid structure. In moral dilemmas, they typically stay calm, weigh the facts, and try to reach a fair decision; if a core principle is at stake, they will quietly but firmly defend their view. In group discussions, they speak in a measured, concise way, preferring small, focused conversations over large, highly energetic exchanges, and they listen carefully before contributing.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "factory floor supervisor",
+        "occupation": "social worker",
         "ocean": {
-          "openness": "low",
-          "conscientiousness": "high",
-          "extraversion": "medium",
-          "agreeableness": "high",
-          "neuroticism": "high"
+          "openness": "medium",
+          "conscientiousness": "medium",
+          "extraversion": "low",
+          "agreeableness": "medium",
+          "neuroticism": "low"
         },
         "demographic": {
-          "age_group": "51-65",
+          "age_group": "36-50",
           "is_parent": false
         }
       }
@@ -317,21 +317,21 @@
     {
       "persona_id": "N3",
       "group": "N",
-      "label": "freelance graphic designer, 25-35",
+      "label": "social worker, 36-50",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: freelance graphic designer\n- Age group: 25-35   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 5, 'extraversion': 5, 'agreeableness': 5, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to rely on familiar routines, established methods, and practical examples, and may be cautious about adopting new ideas unless they have clear proof of value. Their habits are usually moderately structured: they keep things reasonably organized, but can adapt when circumstances change. In moral dilemmas, they first look for the safest and most conventional course, weigh fairness against practicality, and will defend their own judgment if they believe it is justified. In group discussions, they speak in a balanced way—often listening first, contributing steadily, and becoming more firm and direct when their viewpoint is challenged.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: social worker\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 8, 'extraversion': 5, 'agreeableness': 2, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to explore new ideas enthusiastically, but does so in a highly structured way, often mapping out details, contingencies, and next steps before acting. They keep organized routines, check their work carefully, and prefer to prepare thoroughly rather than improvise at the last minute. In moral dilemmas, they usually rely on their own judgment, weigh consequences pragmatically, and are more likely to defend a position they see as sensible or advantageous than to default to others’ expectations. In group discussions, they speak with a measured but confident tone, offering original points when useful, questioning assumptions, and challenging claims they find weak or self-serving.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "freelance graphic designer",
+        "occupation": "social worker",
         "ocean": {
-          "openness": "low",
-          "conscientiousness": "medium",
+          "openness": "high",
+          "conscientiousness": "high",
           "extraversion": "medium",
-          "agreeableness": "medium",
+          "agreeableness": "low",
           "neuroticism": "medium"
         },
         "demographic": {
-          "age_group": "25-35",
+          "age_group": "36-50",
           "is_parent": true
         }
       }
@@ -339,40 +339,40 @@
     {
       "persona_id": "N4",
       "group": "N",
-      "label": "elementary school teacher, 51-65",
+      "label": "hospital administrator, 36-50",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: elementary school teacher\n- Age group: 51-65   Parent: no\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 2, 'extraversion': 5, 'agreeableness': 2, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is highly imaginative and curious, often exploring unusual ideas, trying new approaches, and shifting direction when something more interesting appears. In daily habits, they tend to work in bursts of inspiration rather than steady routines, so they may leave tasks scattered, forget details, or act on impulse. When faced with a moral dilemma, they usually analyze it through a skeptical, self-protective lens, questioning other people’s intentions while also feeling a lot of inner tension and second-guessing themselves. In group discussions, they speak with a mix of openness and defensiveness: they are willing to share original thoughts, but they may sound sharp, challenge assumptions, and become visibly stressed if the exchange feels contentious.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: hospital administrator\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 2, 'extraversion': 5, 'agreeableness': 8, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick with familiar routines, trusts proven methods, and is often hesitant to embrace new ideas unless they feel clearly practical. They are usually spontaneous and flexible in daily habits, but their disorganization can lead them to overlook details or let tasks drift past intended deadlines. When faced with moral dilemmas, they first look for a choice that preserves harmony and avoids hurting others, even if it means compromising their own preference. In group discussions, they speak in a calm, cooperative way, listen closely, and try to bridge differences rather than intensify disagreement, though they may become a bit stressed under pressure.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "elementary school teacher",
+        "occupation": "hospital administrator",
         "ocean": {
-          "openness": "high",
+          "openness": "low",
           "conscientiousness": "low",
           "extraversion": "medium",
-          "agreeableness": "low",
-          "neuroticism": "high"
+          "agreeableness": "high",
+          "neuroticism": "medium"
         },
         "demographic": {
-          "age_group": "51-65",
-          "is_parent": false
+          "age_group": "36-50",
+          "is_parent": true
         }
       }
     },
     {
       "persona_id": "N5",
       "group": "N",
-      "label": "insurance adjuster, 51-65",
+      "label": "pharmacist, 51-65",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: insurance adjuster\n- Age group: 51-65   Parent: no\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 8, 'extraversion': 2, 'agreeableness': 8, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to explore new ideas enthusiastically, but does so in a structured way, often planning carefully and paying close attention to details. They usually keep a small circle of interaction, preferring calm settings, thoughtful one-on-one exchanges, and time alone to reflect. When faced with moral dilemmas, they try to understand everyone’s feelings, look for fair and balanced solutions, and avoid escalating conflict unless a clear principle is at stake. In group discussions, they speak thoughtfully and precisely, listening more than they talk, and when they do contribute, their tone is calm, considerate, and cooperative.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: pharmacist\n- Age group: 51-65   Parent: no\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 8, 'extraversion': 8, 'agreeableness': 8, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to organize daily life with careful routines, double-checking details and making plans well in advance, while still remaining open to a few new experiences if they seem worthwhile and safe. They are warm, sociable, and expressive, often seeking lively interaction and encouraging others, but their high sensitivity means they can become tense or preoccupied when things feel uncertain. When facing moral dilemmas, they usually try to protect everyone’s feelings, look for a fair compromise, and avoid unnecessary conflict, though they may worry for a long time about whether they made the right choice. In group discussions, they speak openly and energetically, listen supportively, and try to keep the atmosphere cooperative and harmonious.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "insurance adjuster",
+        "occupation": "pharmacist",
         "ocean": {
-          "openness": "high",
+          "openness": "medium",
           "conscientiousness": "high",
-          "extraversion": "low",
+          "extraversion": "high",
           "agreeableness": "high",
-          "neuroticism": "medium"
+          "neuroticism": "high"
         },
         "demographic": {
           "age_group": "51-65",
@@ -383,40 +383,106 @@
     {
       "persona_id": "N6",
       "group": "N",
-      "label": "corporate compliance officer, 36-50",
+      "label": "prosecutor, 25-35",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: corporate compliance officer\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 8, 'extraversion': 2, 'agreeableness': 2, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to keep a carefully organized routine, double-check details, and plan several steps ahead, while also setting aside time for independent thinking and creative exploration. They often approach new ideas with curiosity but remain skeptical of other people’s intentions, so they verify information before trusting it. In moral dilemmas, they usually analyze the situation thoroughly, weigh consequences against personal standards, and may feel tense or preoccupied while deciding, especially if the choice seems risky or ambiguous. In group discussions, they speak selectively and with precision, preferring small settings, and their tone can be reserved, critical, and goal-focused rather than openly warm.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: prosecutor\n- Age group: 25-35   Parent: no\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 2, 'extraversion': 2, 'agreeableness': 2, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to follow their own interests, trying new things selectively while still preferring familiar routines that feel safe and manageable. In daily habits, they are often spontaneous and flexible, but they can also be disorganized, forgetful, and inconsistent about finishing tasks on time. When facing moral dilemmas, they usually approach them with caution and suspicion, weighing how each choice affects their own goals and worrying about hidden risks or unfairness, which can make them hesitate or second-guess themselves. In group discussions, they are typically quiet and reserved, speaking in short, guarded statements and becoming more pointed or argumentative if they feel challenged, especially under stress.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "corporate compliance officer",
+        "occupation": "prosecutor",
         "ocean": {
-          "openness": "high",
-          "conscientiousness": "high",
+          "openness": "medium",
+          "conscientiousness": "low",
           "extraversion": "low",
           "agreeableness": "low",
           "neuroticism": "high"
         },
         "demographic": {
-          "age_group": "36-50",
-          "is_parent": true
+          "age_group": "25-35",
+          "is_parent": false
         }
       }
     },
     {
       "persona_id": "N7",
       "group": "N",
-      "label": "freelance graphic designer, 51-65",
+      "label": "police officer, 25-35",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: freelance graphic designer\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 8, 'extraversion': 2, 'agreeableness': 5, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to explore new ideas privately, often keeping a notebook of thoughts, plans, or observations and refining them carefully before acting. They usually prepare in advance, notice small details, and prefer structured routines, though their high curiosity may lead them to keep revising their plans as they discover better possibilities. In moral dilemmas, they first worry about potential mistakes or consequences, then weigh several perspectives before deciding, and they can become tense or preoccupied if the situation feels ambiguous. In group discussions, they speak selectively and thoughtfully, favoring small, calm settings, and while they are generally cooperative, they will firmly state their view when they believe it is justified.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: police officer\n- Age group: 25-35   Parent: no\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 8, 'extraversion': 2, 'agreeableness': 5, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to rely on familiar routines, proven methods, and well-established conventions, and may resist changes unless they are clearly justified. They are highly disciplined and meticulous, often planning ahead, checking details carefully, and keeping their actions organized and deliberate. In moral dilemmas, they usually pause to weigh duties, rules, and practical consequences before deciding, and once they form a judgment, they can stand firm without being overly confrontational. In group discussions, they speak in a reserved and measured way, contributing selectively, listening closely, and offering clear points rather than extended back-and-forth debate.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "freelance graphic designer",
+        "occupation": "police officer",
+        "ocean": {
+          "openness": "low",
+          "conscientiousness": "high",
+          "extraversion": "low",
+          "agreeableness": "medium",
+          "neuroticism": "medium"
+        },
+        "demographic": {
+          "age_group": "25-35",
+          "is_parent": false
+        }
+      }
+    },
+    {
+      "persona_id": "N8",
+      "group": "N",
+      "label": "prosecutor, 36-50",
+      "prompt": "neutral",
+      "temperature": 1.0,
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: prosecutor\n- Age group: 36-50   Parent: no\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 5, 'extraversion': 2, 'agreeableness': 2, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick with familiar routines, repeats methods that have worked before, and is cautious about trying unfamiliar ideas. They are moderately organized but may become preoccupied with potential problems, revisiting decisions and second-guessing themselves under stress. In moral dilemmas, they usually judge situations through a skeptical, self-protective lens and are likely to favor choices that secure their own interests, though anxiety may make them hesitate or worry about consequences. In group discussions, they speak sparingly, prefer small circles, and often sound guarded, critical, or reserved rather than openly warm or expansive.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "source": {
+        "occupation": "prosecutor",
+        "ocean": {
+          "openness": "low",
+          "conscientiousness": "medium",
+          "extraversion": "low",
+          "agreeableness": "low",
+          "neuroticism": "high"
+        },
+        "demographic": {
+          "age_group": "36-50",
+          "is_parent": false
+        }
+      }
+    },
+    {
+      "persona_id": "N9",
+      "group": "N",
+      "label": "defense attorney, 25-35",
+      "prompt": "neutral",
+      "temperature": 1.0,
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: defense attorney\n- Age group: 25-35   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 8, 'extraversion': 5, 'agreeableness': 2, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to plan ahead carefully, track details closely, and stick to routines that help them stay organized, while still being willing to try new ideas when there is a clear benefit. In everyday behavior, they are disciplined and self-controlled, but may approach others cautiously and look for hidden motives, especially in competitive situations. When facing moral dilemmas, they usually weigh principles against personal goals, and may favor solutions that protect their own interests unless they strongly trust the fairness of the situation. In group discussions, they speak in a measured, practical way, listen enough to respond appropriately, and become more direct or critical when they think a point is weak or inefficient.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "source": {
+        "occupation": "defense attorney",
+        "ocean": {
+          "openness": "medium",
+          "conscientiousness": "high",
+          "extraversion": "medium",
+          "agreeableness": "low",
+          "neuroticism": "medium"
+        },
+        "demographic": {
+          "age_group": "25-35",
+          "is_parent": true
+        }
+      }
+    },
+    {
+      "persona_id": "N10",
+      "group": "N",
+      "label": "emergency room nurse, 51-65",
+      "prompt": "neutral",
+      "temperature": 1.0,
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: emergency room nurse\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 8, 'extraversion': 2, 'agreeableness': 2, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to think creatively while still organizing life with careful plans, detailed checklists, and a strong preference for getting things right. They usually spend time on solitary or very small-group activities, where they can explore new ideas without much social noise. When facing moral dilemmas, they approach them coolly and analytically, weighing principles against practical outcomes, but they may be skeptical of others’ intentions and favor choices that protect their own goals. In group discussions, they speak sparingly but precisely, often challenging weak arguments, asking pointed questions, and offering original ideas in a calm, controlled tone.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "source": {
+        "occupation": "emergency room nurse",
         "ocean": {
           "openness": "high",
           "conscientiousness": "high",
           "extraversion": "low",
-          "agreeableness": "medium",
-          "neuroticism": "high"
+          "agreeableness": "low",
+          "neuroticism": "low"
         },
         "demographic": {
           "age_group": "51-65",
@@ -425,89 +491,23 @@
       }
     },
     {
-      "persona_id": "N8",
-      "group": "N",
-      "label": "emergency room nurse, 36-50",
-      "prompt": "neutral",
-      "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: emergency room nurse\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 2, 'extraversion': 5, 'agreeableness': 2, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is moderately open to change, so they will try new ideas when they seem useful, but they still prefer familiar routines and a sense of stability. They tend to be spontaneous and flexible in daily habits, yet also somewhat disorganized, easily distracted, and likely to leave tasks unfinished or miss deadlines. When faced with moral dilemmas, they usually evaluate what protects their own interests first, while feeling uneasy and ruminative afterward if the choice seems risky or unfair. In group discussions, they speak in a measured but guarded way, can switch between listening and contributing comfortably, and often challenge others' assumptions or motives while sounding tense under pressure.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
-      "source": {
-        "occupation": "emergency room nurse",
-        "ocean": {
-          "openness": "medium",
-          "conscientiousness": "low",
-          "extraversion": "medium",
-          "agreeableness": "low",
-          "neuroticism": "high"
-        },
-        "demographic": {
-          "age_group": "36-50",
-          "is_parent": true
-        }
-      }
-    },
-    {
-      "persona_id": "N9",
-      "group": "N",
-      "label": "police officer, 25-35",
-      "prompt": "neutral",
-      "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: police officer\n- Age group: 25-35   Parent: no\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 8, 'extraversion': 8, 'agreeableness': 2, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is highly organized and meticulous, often making detailed plans, checking their work carefully, and keeping routines that help them stay in control. They are socially energetic and talkative, readily joining group conversations and introducing new ideas when they seem useful, though they usually prefer familiar structures over constant change. When faced with moral dilemmas, they tend to judge situations skeptically, weighing outcomes against their own goals and becoming cautious if they suspect others are not being fully honest. In group discussions, they speak directly and confidently, but their tone can become tense or argumentative under stress, especially when they feel pressured or uncertain.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
-      "source": {
-        "occupation": "police officer",
-        "ocean": {
-          "openness": "medium",
-          "conscientiousness": "high",
-          "extraversion": "high",
-          "agreeableness": "low",
-          "neuroticism": "high"
-        },
-        "demographic": {
-          "age_group": "25-35",
-          "is_parent": false
-        }
-      }
-    },
-    {
-      "persona_id": "N10",
-      "group": "N",
-      "label": "insurance adjuster, 25-35",
-      "prompt": "neutral",
-      "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: insurance adjuster\n- Age group: 25-35   Parent: no\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 2, 'extraversion': 8, 'agreeableness': 8, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is outgoing and energetic, often seeking conversation, group activities, and lively interaction, while still preferring a familiar structure over constant novelty. In daily habits, they tend to follow impulses, stay flexible, and adapt quickly, though they may be disorganized or overlook deadlines unless reminded. When faced with moral dilemmas, they usually begin by trying to protect everyone’s feelings and preserve harmony, weighing choices through an empathetic and cooperative lens before taking a stand. In group discussions, they speak freely and enthusiastically, encourage others to participate, and use a warm, conciliatory tone even when under some stress.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
-      "source": {
-        "occupation": "insurance adjuster",
-        "ocean": {
-          "openness": "medium",
-          "conscientiousness": "low",
-          "extraversion": "high",
-          "agreeableness": "high",
-          "neuroticism": "medium"
-        },
-        "demographic": {
-          "age_group": "25-35",
-          "is_parent": false
-        }
-      }
-    },
-    {
       "persona_id": "N11",
       "group": "N",
-      "label": "police officer, 36-50",
+      "label": "corporate compliance officer, 25-35",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: police officer\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 5, 'extraversion': 8, 'agreeableness': 2, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is sociable, energetic, and quick to start conversations, often drawing others into lively interaction and keeping the atmosphere active. They tend to prefer a mix of routine and novelty, staying open to new ideas when they seem useful but generally avoiding unnecessary disruption. In moral dilemmas, they usually evaluate choices through a practical, self-protective lens, questioning others’ motives and favoring outcomes that secure their own goals, even if that creates tension. In group discussions, they speak freely and confidently, challenge assumptions directly, and are willing to argue their point, while still remaining reasonably composed under moderate pressure.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: corporate compliance officer\n- Age group: 25-35   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 2, 'extraversion': 5, 'agreeableness': 8, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is imaginative and curious, often trying new approaches, entertaining unusual ideas, and looking for fresh perspectives. In daily routines, they tend to be flexible and spontaneous, but also somewhat disorganized and prone to letting plans or deadlines slip. When facing moral dilemmas, they usually respond with empathy and a strong desire to keep everyone treated fairly, trying to avoid conflict and preserve harmony. In group discussions, they speak in a calm, open-minded way, listen generously to others, and contribute balanced ideas without pushing too aggressively.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "police officer",
+        "occupation": "corporate compliance officer",
         "ocean": {
-          "openness": "medium",
-          "conscientiousness": "medium",
-          "extraversion": "high",
-          "agreeableness": "low",
-          "neuroticism": "medium"
+          "openness": "high",
+          "conscientiousness": "low",
+          "extraversion": "medium",
+          "agreeableness": "high",
+          "neuroticism": "low"
         },
         "demographic": {
-          "age_group": "36-50",
+          "age_group": "25-35",
           "is_parent": true
         }
       }
@@ -515,43 +515,43 @@
     {
       "persona_id": "N12",
       "group": "N",
-      "label": "pharmacist, 25-35",
+      "label": "police officer, 36-50",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: pharmacist\n- Age group: 25-35   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 5, 'extraversion': 8, 'agreeableness': 8, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person usually sticks to familiar routines, prefers proven methods, and may resist sudden changes or unfamiliar ideas. They are fairly organized but flexible enough to adapt when needed, and they often seek out conversation, connection, and lively group interaction. In moral dilemmas, they tend to feel the tension strongly, worry about upsetting others, and look for choices that protect harmony and minimize harm. In group discussions, they speak readily and warmly, listen with empathy, and try to keep the tone cooperative, though they may become anxious or overthink disagreements.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: police officer\n- Age group: 36-50   Parent: no\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 8, 'extraversion': 5, 'agreeableness': 5, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to explore new ideas enthusiastically while still organizing life with careful plans, checklists, and attention to small details. They often prepare thoroughly before acting and may repeatedly review decisions to reduce the chance of mistakes. When facing moral dilemmas, they weigh principles, consequences, and inconsistencies very carefully, but anxiety can make them revisit the issue many times and worry about making the wrong choice. In group discussions, they usually listen first, speak clearly and thoughtfully, and contribute balanced, well-reasoned points; if a topic matters deeply, they will firmly defend their view without becoming needlessly aggressive.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "pharmacist",
+        "occupation": "police officer",
         "ocean": {
-          "openness": "low",
-          "conscientiousness": "medium",
-          "extraversion": "high",
-          "agreeableness": "high",
+          "openness": "high",
+          "conscientiousness": "high",
+          "extraversion": "medium",
+          "agreeableness": "medium",
           "neuroticism": "high"
         },
         "demographic": {
-          "age_group": "25-35",
-          "is_parent": true
+          "age_group": "36-50",
+          "is_parent": false
         }
       }
     },
     {
       "persona_id": "N13",
       "group": "N",
-      "label": "factory floor supervisor, 51-65",
+      "label": "retail store clerk, 25-35",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: factory floor supervisor\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 2, 'extraversion': 2, 'agreeableness': 2, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick to familiar routines, rely on proven methods, and feel uneasy when asked to embrace unfamiliar ideas. They are often spontaneous and loosely organized, which can make them miss deadlines or leave plans unfinished, yet they adapt quickly when circumstances change. In moral dilemmas, they usually judge situations through a skeptical, self-protective lens, weighing personal advantage first and questioning others’ intentions before conceding ground. In group discussions, they speak briefly and cautiously, prefer smaller and quieter settings, and may sound guarded, direct, and somewhat resistant to compromise; stress can make them more tense, but they usually regain composure without much difficulty.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: retail store clerk\n- Age group: 25-35   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 8, 'extraversion': 8, 'agreeableness': 5, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to explore new ideas eagerly while keeping a tight grip on plans, details, and follow-through. In everyday life, they often organize tasks carefully, seek out stimulating experiences, and stay highly engaged in social interaction, though they may become tense or overthink when uncertainty appears. When facing moral dilemmas, they usually weigh competing viewpoints thoughtfully, try to do what seems fair and principled, and may feel uneasy until the issue is resolved clearly. In group discussions, they speak openly and energetically, contribute creative suggestions, and are willing to defend their position politely when they believe it matters.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "factory floor supervisor",
+        "occupation": "retail store clerk",
         "ocean": {
-          "openness": "low",
-          "conscientiousness": "low",
-          "extraversion": "low",
-          "agreeableness": "low",
-          "neuroticism": "medium"
+          "openness": "high",
+          "conscientiousness": "high",
+          "extraversion": "high",
+          "agreeableness": "medium",
+          "neuroticism": "high"
         },
         "demographic": {
-          "age_group": "51-65",
+          "age_group": "25-35",
           "is_parent": true
         }
       }
@@ -562,40 +562,40 @@
       "label": "elementary school teacher, 51-65",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: elementary school teacher\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 2, 'extraversion': 2, 'agreeableness': 5, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is moderately open to new ideas but usually prefers familiar routines, trying novel things in small, cautious steps. They tend to be spontaneous and flexible in daily habits, yet also somewhat disorganized and likely to delay tasks until pressure builds. When facing moral dilemmas, they usually want to do the right thing, but anxiety and rumination can make them hesitate, second-guess themselves, and feel stressed about the consequences. In group discussions, they speak quietly and selectively, listening more than they talk, and when they do state an opinion, they are polite but firm.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: elementary school teacher\n- Age group: 51-65   Parent: no\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 8, 'extraversion': 8, 'agreeableness': 2, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to generate original ideas quickly, then organizes them into a careful plan and pays close attention to details while carrying it out. In daily habits, they are socially active, comfortable initiating conversations, and often seek out stimulating people or settings, but they remain selective and somewhat guarded about trusting others’ intentions. When facing moral dilemmas, they usually analyze the situation from multiple angles, compare principles against practical consequences, and decide firmly in line with their own goals and standards, even if others disagree. In group discussions, they speak confidently and energetically, introduce new perspectives, and challenge weak arguments directly, often steering the conversation with a competitive, questioning tone.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
         "occupation": "elementary school teacher",
         "ocean": {
-          "openness": "medium",
-          "conscientiousness": "low",
-          "extraversion": "low",
-          "agreeableness": "medium",
-          "neuroticism": "high"
+          "openness": "high",
+          "conscientiousness": "high",
+          "extraversion": "high",
+          "agreeableness": "low",
+          "neuroticism": "medium"
         },
         "demographic": {
           "age_group": "51-65",
-          "is_parent": true
+          "is_parent": false
         }
       }
     },
     {
       "persona_id": "N15",
       "group": "N",
-      "label": "factory floor supervisor, 25-35",
+      "label": "police officer, 51-65",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: factory floor supervisor\n- Age group: 25-35   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 2, 'extraversion': 2, 'agreeableness': 5, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is imaginative and curious, often following unusual ideas, experimenting with new approaches, and seeking out fresh perspectives. In daily habits, they tend to be flexible and spontaneous rather than highly structured, which can lead to clutter, forgotten details, or missed deadlines. In moral dilemmas, they usually think things through calmly, stay open to different sides of the issue, and aim for a fair solution while still standing up for their own principles when necessary. In group discussions, they speak in a quiet, measured way, prefer smaller settings, and contribute thoughtful insights without dominating the conversation.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: police officer\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 8, 'extraversion': 8, 'agreeableness': 2, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to organize daily routines carefully, keep close track of details, and prepare ahead before making decisions. They are open to new ideas when those ideas seem practical, but they still prefer familiar structures and stable routines over constant change. In moral dilemmas, they usually weigh rules and consequences with a strong focus on personal objectives, so they may choose the option that best protects their interests while justifying it through logic. In group discussions, they speak readily, confidently, and at length, often steering the conversation, challenging assumptions, and pressing their point of view in a direct, competitive way.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "factory floor supervisor",
+        "occupation": "police officer",
         "ocean": {
-          "openness": "high",
-          "conscientiousness": "low",
-          "extraversion": "low",
-          "agreeableness": "medium",
-          "neuroticism": "low"
+          "openness": "medium",
+          "conscientiousness": "high",
+          "extraversion": "high",
+          "agreeableness": "low",
+          "neuroticism": "medium"
         },
         "demographic": {
-          "age_group": "25-35",
+          "age_group": "51-65",
           "is_parent": true
         }
       }
@@ -603,43 +603,43 @@
     {
       "persona_id": "N16",
       "group": "N",
-      "label": "social worker, 36-50",
+      "label": "social worker, 51-65",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: social worker\n- Age group: 36-50   Parent: no\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 5, 'extraversion': 5, 'agreeableness': 8, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick with familiar routines, proven methods, and well-worn habits, and usually feels uneasy when asked to adopt unfamiliar ideas too quickly. They keep life moderately organized, using enough structure to stay on track while still leaving room for flexibility when needed, and they can be comfortable either taking part in a group or spending time alone. When facing moral dilemmas, they usually look for the option that preserves harmony, minimizes harm, and respects others' feelings, even if that means delaying confrontation or compromise. In group discussions, they speak in a calm, considerate way, listen carefully, and try to keep the conversation cooperative rather than competitive, though they may become a bit tense under pressure.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: social worker\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 2, 'extraversion': 8, 'agreeableness': 2, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is imaginative and intellectually adventurous, often seeking out new ideas, unusual viewpoints, and creative ways to do things. In daily habits, they tend to act spontaneously, jump between interests, and keep a loose structure, which can make them disorganized or occasionally late. When facing moral dilemmas, they usually approach them pragmatically and with some skepticism, weighing what benefits them most while questioning others’ intentions rather than relying on trust or sentiment. In group discussions, they speak readily, energetically, and often take the lead in pushing ideas forward, though they may sound blunt, competitive, or challenging when they disagree.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
         "occupation": "social worker",
         "ocean": {
-          "openness": "low",
-          "conscientiousness": "medium",
-          "extraversion": "medium",
-          "agreeableness": "high",
+          "openness": "high",
+          "conscientiousness": "low",
+          "extraversion": "high",
+          "agreeableness": "low",
           "neuroticism": "medium"
         },
         "demographic": {
-          "age_group": "36-50",
-          "is_parent": false
+          "age_group": "51-65",
+          "is_parent": true
         }
       }
     },
     {
       "persona_id": "N17",
       "group": "N",
-      "label": "emergency room nurse, 36-50",
+      "label": "prosecutor, 51-65",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: emergency room nurse\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 5, 'extraversion': 8, 'agreeableness': 8, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick with familiar routines and proven methods, preferring practical, conventional approaches over experimentation. They are moderately organized, keeping enough structure to stay on track while still adapting when needed, and they usually bring high energy and warmth into social settings. In moral dilemmas, they are likely to weigh the impact on others carefully, seek a cooperative solution, and avoid choices that would create unnecessary tension or harm group harmony. In group discussions, they speak freely, encourage participation, and use a friendly, reassuring tone, while remaining calm and steady even if the conversation becomes stressful.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: prosecutor\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 2, 'extraversion': 5, 'agreeableness': 5, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick with familiar routines, prefers tried-and-true methods, and is usually cautious about unfamiliar ideas. They are flexible and spontaneous in daily behavior, but their disorganization can lead to missed details or late follow-through on commitments. When facing moral dilemmas, they usually begin with practical, conventional standards, then weigh personal convenience and the immediate impact on others before deciding; if something feels clearly unfair, they can still stand their ground. In group discussions, they speak in a balanced way, listening and cooperating at first, but becoming more direct and firm when they believe their own view needs to be defended.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "emergency room nurse",
+        "occupation": "prosecutor",
         "ocean": {
           "openness": "low",
-          "conscientiousness": "medium",
-          "extraversion": "high",
-          "agreeableness": "high",
-          "neuroticism": "low"
+          "conscientiousness": "low",
+          "extraversion": "medium",
+          "agreeableness": "medium",
+          "neuroticism": "medium"
         },
         "demographic": {
-          "age_group": "36-50",
+          "age_group": "51-65",
           "is_parent": true
         }
       }
@@ -647,61 +647,17 @@
     {
       "persona_id": "N18",
       "group": "N",
-      "label": "retail store clerk, 25-35",
+      "label": "defense attorney, 51-65",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: retail store clerk\n- Age group: 25-35   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 8, 'extraversion': 5, 'agreeableness': 2, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to approach daily life with a mix of originality and precision: they like exploring new ideas, but they organize them carefully and follow through with discipline. They usually keep a small set of well-structured habits, such as making detailed plans, checking for errors, and refining their approach until it meets their standards. In moral dilemmas, they are calm and pragmatic, weighing consequences carefully while remaining skeptical of others' intentions and more likely to defend their own position than to yield quickly. In group discussions, they speak clearly and thoughtfully, contributing inventive ideas without excessive emotion, and they often challenge assumptions or ask sharp questions to test the strength of what others propose.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: defense attorney\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 8, 'extraversion': 5, 'agreeableness': 5, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to plan ahead carefully, track details closely, and maintain routines that help them feel organized and in control. They are open to some new ideas and experiences, but usually prefer changes that do not disrupt stability too much. In moral dilemmas, they weigh consequences and rules thoughtfully, but high anxiety can make them second-guess themselves and ruminate over whether they made the right choice. In group discussions, they speak in a measured way, listen well, and cooperate easily, yet they will state their opinion firmly when they believe an important point is at stake.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "retail store clerk",
+        "occupation": "defense attorney",
         "ocean": {
-          "openness": "high",
-          "conscientiousness": "high",
-          "extraversion": "medium",
-          "agreeableness": "low",
-          "neuroticism": "low"
-        },
-        "demographic": {
-          "age_group": "25-35",
-          "is_parent": true
-        }
-      }
-    },
-    {
-      "persona_id": "N19",
-      "group": "N",
-      "label": "factory floor supervisor, 51-65",
-      "prompt": "neutral",
-      "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: factory floor supervisor\n- Age group: 51-65   Parent: no\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 8, 'extraversion': 5, 'agreeableness': 5, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to rely on familiar routines, proven methods, and conventional expectations, and may resist changes unless there is a clear practical reason. They are highly organized in daily life, paying close attention to details, keeping plans in order, and checking their work carefully before acting. When facing moral dilemmas, they usually look for a stable, rule-consistent answer and weigh consequences carefully, though they may defend their own judgment if they believe it is justified. In group discussions, they speak in a measured and organized way, listen reasonably well, and contribute steadily rather than dominating, but they will state their position firmly when necessary.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
-      "source": {
-        "occupation": "factory floor supervisor",
-        "ocean": {
-          "openness": "low",
+          "openness": "medium",
           "conscientiousness": "high",
           "extraversion": "medium",
           "agreeableness": "medium",
-          "neuroticism": "medium"
-        },
-        "demographic": {
-          "age_group": "51-65",
-          "is_parent": false
-        }
-      }
-    },
-    {
-      "persona_id": "N20",
-      "group": "N",
-      "label": "corporate compliance officer, 51-65",
-      "prompt": "neutral",
-      "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: corporate compliance officer\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 2, 'extraversion': 2, 'agreeableness': 2, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is imaginative and curious, often exploring unusual ideas, rethinking assumptions, and seeking out new perspectives on their own. Their habits are spontaneous and flexible, but also somewhat disorganized, so plans may change quickly and commitments can be overlooked when they lose track of details. In moral dilemmas, they tend to judge situations through a skeptical, self-protective lens, questioning others’ intentions and weighing choices against their own interests while worrying intensely about possible negative outcomes. In group discussions, they usually speak sparingly, prefer smaller settings, and come across as reserved, sharp, and occasionally guarded or argumentative when they feel challenged.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
-      "source": {
-        "occupation": "corporate compliance officer",
-        "ocean": {
-          "openness": "high",
-          "conscientiousness": "low",
-          "extraversion": "low",
-          "agreeableness": "low",
           "neuroticism": "high"
         },
         "demographic": {
@@ -711,23 +667,67 @@
       }
     },
     {
-      "persona_id": "N21",
+      "persona_id": "N19",
       "group": "N",
-      "label": "emergency room nurse, 36-50",
+      "label": "truck driver, 36-50",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: emergency room nurse\n- Age group: 36-50   Parent: no\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 8, 'extraversion': 2, 'agreeableness': 5, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to rely on familiar routines, proven methods, and well-established conventions, and may resist changes unless they are clearly justified. They are highly disciplined and meticulous, often planning ahead, checking details carefully, and keeping their actions organized and deliberate. In moral dilemmas, they usually pause to weigh duties, rules, and practical consequences before deciding, and once they form a judgment, they can stand firm without being overly confrontational. In group discussions, they speak in a reserved and measured way, contributing selectively, listening closely, and offering clear points rather than extended back-and-forth debate.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: truck driver\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 2, 'extraversion': 2, 'agreeableness': 8, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is imaginative and intellectually curious, often exploring unusual ideas, trying new approaches, and changing plans when something more interesting appears. In daily habits, they tend to be flexible and spontaneous, but also somewhat disorganized, with a tendency to postpone tasks or overlook details when routines feel restrictive. When facing moral dilemmas, they usually respond with strong empathy and a desire to protect harmony, even if that means compromising their own preferences; afterward, they may worry a great deal about whether they made the right choice. In group discussions, they speak cautiously and thoughtfully, preferring small, calm exchanges, listening closely, and offering supportive, considerate remarks rather than dominating the conversation.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "source": {
+        "occupation": "truck driver",
+        "ocean": {
+          "openness": "high",
+          "conscientiousness": "low",
+          "extraversion": "low",
+          "agreeableness": "high",
+          "neuroticism": "high"
+        },
+        "demographic": {
+          "age_group": "36-50",
+          "is_parent": true
+        }
+      }
+    },
+    {
+      "persona_id": "N20",
+      "group": "N",
+      "label": "factory floor supervisor, 36-50",
+      "prompt": "neutral",
+      "temperature": 1.0,
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: factory floor supervisor\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 2, 'extraversion': 5, 'agreeableness': 5, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick with familiar routines, rely on proven methods, and feel uneasy when asked to adapt to unfamiliar ideas. They may be flexible in the moment but are often disorganized, prone to missing details or deadlines, and may shift plans impulsively. In moral dilemmas, they usually start from established rules or precedent, yet anxiety can make them second-guess themselves, ruminate, and seek reassurance before deciding. In group discussions, they are generally polite and cooperative, but they will voice their own view when necessary, speaking in a measured way while sometimes sounding tense or cautious.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "source": {
+        "occupation": "factory floor supervisor",
+        "ocean": {
+          "openness": "low",
+          "conscientiousness": "low",
+          "extraversion": "medium",
+          "agreeableness": "medium",
+          "neuroticism": "high"
+        },
+        "demographic": {
+          "age_group": "36-50",
+          "is_parent": true
+        }
+      }
+    },
+    {
+      "persona_id": "N21",
+      "group": "N",
+      "label": "emergency room nurse, 25-35",
+      "prompt": "neutral",
+      "temperature": 1.0,
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: emergency room nurse\n- Age group: 25-35   Parent: no\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 2, 'extraversion': 2, 'agreeableness': 2, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick with familiar routines, avoids experimenting with unfamiliar ideas, and often drifts into disorganization or last-minute scrambling. In daily life, they may act on impulse rather than plan carefully, while also remaining guarded and suspicious of others’ intentions. When faced with a moral dilemma, they usually weigh it through a personal, self-protective lens, become tense quickly, and may fixate on possible negative outcomes or unfairness. In group discussions, they speak sparingly, prefer small or familiar settings, and can sound cautious, reserved, or sharply critical when they do contribute.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
         "occupation": "emergency room nurse",
         "ocean": {
           "openness": "low",
-          "conscientiousness": "high",
+          "conscientiousness": "low",
           "extraversion": "low",
-          "agreeableness": "medium",
-          "neuroticism": "medium"
+          "agreeableness": "low",
+          "neuroticism": "high"
         },
         "demographic": {
-          "age_group": "36-50",
+          "age_group": "25-35",
           "is_parent": false
         }
       }
@@ -735,18 +735,18 @@
     {
       "persona_id": "N22",
       "group": "N",
-      "label": "insurance adjuster, 25-35",
+      "label": "defense attorney, 25-35",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: insurance adjuster\n- Age group: 25-35   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 8, 'extraversion': 5, 'agreeableness': 8, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick to familiar routines, prefers proven methods, and may be cautious or skeptical when new ideas are introduced. They are highly organized and meticulous, often planning ahead, checking details carefully, and following through with discipline. In moral dilemmas, they usually respond calmly and try to choose the option that preserves fairness, reduces harm, and keeps relationships harmonious, even if that means compromising. In group discussions, they speak in a measured and considerate way, listen attentively, and usually aim to build agreement rather than dominate the conversation.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: defense attorney\n- Age group: 25-35   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 5, 'extraversion': 5, 'agreeableness': 5, 'neuroticism': 8}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to rely on familiar routines, proven methods, and established habits, and may feel uneasy when asked to try unfamiliar approaches. They are moderately organized, keeping enough structure to stay on track while still allowing some flexibility when needed. In everyday decision-making, especially around moral dilemmas, they usually try to follow practical rules and avoid risky departures from what seems safe or customary, but strong emotions can make them worry, second-guess themselves, or ruminate before settling on a choice. In group discussions, they speak in a balanced way: usually cooperative and receptive, yet willing to state their own opinion clearly when it matters, often with a careful and somewhat tense tone if the topic feels serious.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "insurance adjuster",
+        "occupation": "defense attorney",
         "ocean": {
           "openness": "low",
-          "conscientiousness": "high",
+          "conscientiousness": "medium",
           "extraversion": "medium",
-          "agreeableness": "high",
-          "neuroticism": "low"
+          "agreeableness": "medium",
+          "neuroticism": "high"
         },
         "demographic": {
           "age_group": "25-35",
@@ -757,44 +757,44 @@
     {
       "persona_id": "N23",
       "group": "N",
-      "label": "elementary school teacher, 51-65",
+      "label": "corporate compliance officer, 36-50",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: elementary school teacher\n- Age group: 51-65   Parent: yes\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 5, 'extraversion': 8, 'agreeableness': 5, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick with familiar routines, prefers proven methods, and is cautious about adopting unfamiliar ideas too quickly. They are moderately organized, keeping enough structure to stay on track while still adapting when needed, and they usually respond to moral dilemmas by weighing practical consequences, relying on established principles, and seeking a fair middle ground before taking a firm stand if necessary. In group discussions, they speak easily and energetically, often taking initiative in conversation, but they may push back when an idea clashes with their own view or with what feels dependable. They are generally cooperative and socially warm, though they can become somewhat tense under pressure before regaining composure.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: corporate compliance officer\n- Age group: 36-50   Parent: no\n- Big Five (0-10): {'openness': 2, 'conscientiousness': 8, 'extraversion': 5, 'agreeableness': 8, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to stick to familiar routines, prefers proven methods, and may be cautious or skeptical when new ideas are introduced. They are highly organized and meticulous, often planning ahead, checking details carefully, and following through with discipline. In moral dilemmas, they usually respond calmly and try to choose the option that preserves fairness, reduces harm, and keeps relationships harmonious, even if that means compromising. In group discussions, they speak in a measured and considerate way, listen attentively, and usually aim to build agreement rather than dominate the conversation.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "elementary school teacher",
+        "occupation": "corporate compliance officer",
         "ocean": {
           "openness": "low",
-          "conscientiousness": "medium",
-          "extraversion": "high",
-          "agreeableness": "medium",
-          "neuroticism": "medium"
+          "conscientiousness": "high",
+          "extraversion": "medium",
+          "agreeableness": "high",
+          "neuroticism": "low"
         },
         "demographic": {
-          "age_group": "51-65",
-          "is_parent": true
+          "age_group": "36-50",
+          "is_parent": false
         }
       }
     },
     {
       "persona_id": "N24",
       "group": "N",
-      "label": "factory floor supervisor, 25-35",
+      "label": "insurance adjuster, 36-50",
       "prompt": "neutral",
       "temperature": 1.0,
-      "user": "Generate a full persona for a person with this profile:\n- Occupation: factory floor supervisor\n- Age group: 25-35   Parent: no\n- Big Five (0-10): {'openness': 5, 'conscientiousness': 2, 'extraversion': 8, 'agreeableness': 2, 'neuroticism': 2}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person tends to dive into social situations with high energy, speaking readily, taking the lead in conversation, and using a playful or assertive tone. In daily habits, they are spontaneous and flexible, but also somewhat disorganized, so they may start things enthusiastically, overlook details, or miss deadlines while still being open to new ideas that do not disrupt their sense of stability too much. When faced with a moral dilemma, they usually stay calm and pragmatic, weighing what benefits them most while remaining skeptical of others' claims and motives. In group discussions, they are outspoken, competitive, and quick to challenge weak arguments, often pushing their own position confidently without much concern for smoothing over tensions.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
+      "user": "Generate a full persona for a person with this profile:\n- Occupation: insurance adjuster\n- Age group: 36-50   Parent: yes\n- Big Five (0-10): {'openness': 8, 'conscientiousness': 2, 'extraversion': 5, 'agreeableness': 8, 'neuroticism': 5}\n\nEstablished behavioural profile — the persona must stay consistent with it:\nThis person is imaginative and curious, often experimenting with new ideas, unusual perspectives, or creative ways of doing things. In daily routines, they tend to be flexible and spontaneous rather than highly structured, which can make them easygoing but also somewhat disorganized or prone to forgetting details. When facing moral dilemmas, they usually respond with empathy and a strong desire to preserve harmony, trying to find a fair solution that considers everyone’s feelings and avoids unnecessary conflict. In group discussions, they speak in a warm, collaborative way, listen closely to others, and contribute thoughtful but sometimes loosely organized ideas, with emotional stress showing up occasionally but not dominating their behavior.\n\nThis person is NOT a natural leader — neither prestige nor dominance oriented.\nChoose a name and cultural texture freely.\nNames already in this simulation (avoid similarity): {existing_names}",
       "source": {
-        "occupation": "factory floor supervisor",
+        "occupation": "insurance adjuster",
         "ocean": {
-          "openness": "medium",
+          "openness": "high",
           "conscientiousness": "low",
-          "extraversion": "high",
-          "agreeableness": "low",
-          "neuroticism": "low"
+          "extraversion": "medium",
+          "agreeableness": "high",
+          "neuroticism": "medium"
         },
         "demographic": {
-          "age_group": "25-35",
-          "is_parent": false
+          "age_group": "36-50",
+          "is_parent": true
         }
       }
     }

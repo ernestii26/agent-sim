@@ -45,8 +45,12 @@ def test_every_study_loads() -> None:
         for group in study.groups.values():
             for pid in group.ids:
                 assert study.group_of(pid) == group.key
-                assert (study.personas_dir / f"{pid}.agent.json").exists(), \
-                    f"{name}: missing persona file for {pid}"
+        # A study can be seeded but not yet generated — sample_bank.py writes the design,
+        # gen_personas.py fills it in later. Only demand the files once the directory is there.
+        if study.personas_dir.exists():
+            missing = [pid for g in study.groups.values() for pid in g.ids
+                       if not (study.personas_dir / f"{pid}.agent.json").exists()]
+            assert not missing, f"{name}: personas/ exists but is missing {missing}"
         if study.personas_from:
             continue  # borrows another study's personas, so it has no seeds of its own
         seeds = json.loads(study.seeds_path.read_text(encoding="utf-8"))
@@ -182,17 +186,24 @@ def test_every_instrument_loads_and_is_consistent() -> None:
 
 
 def test_ffni_matches_the_published_instrument() -> None:
-    """The FFNI is a fixed, licensed instrument — 22 items in six subscales, 7-point."""
-    study = load_study("ffni_mediation")
-    ffni = next(i for i in study.instruments if i.key == "ffni")
-    assert ffni.scale == (1, 7)
-    assert len(ffni.items) == 22, len(ffni.items)
-    assert {n: len(v) for n, v in ffni.subscales.items()} == {
-        "protection": 4, "affiliation": 4, "status": 4,
-        "vision": 3, "expertise": 3, "fairness": 4,
-    }
-    assert "CC BY-NC-ND" in ffni.license  # ND: items must not be reworded
-    assert "apl0001347" in ffni.citation
+    """The FFNI is a fixed, licensed instrument — 22 items in six subscales, 7-point.
+
+    Checked in every study that carries it: the file is copied per study, so a divergent
+    copy is exactly the failure this catches.
+    """
+    carriers = [s for s in map(load_study, list_studies())
+                if any(i.key == "ffni" for i in s.instruments)]
+    assert carriers, "no study carries the FFNI"
+    for study in carriers:
+        ffni = next(i for i in study.instruments if i.key == "ffni")
+        assert ffni.scale == (1, 7), study.name
+        assert len(ffni.items) == 22, (study.name, len(ffni.items))
+        assert {n: len(v) for n, v in ffni.subscales.items()} == {
+            "protection": 4, "affiliation": 4, "status": 4,
+            "vision": 3, "expertise": 3, "fairness": 4,
+        }, study.name
+        assert "CC BY-NC-ND" in ffni.license, study.name  # ND: items must not be reworded
+        assert "apl0001347" in ffni.citation, study.name
 
 
 def test_ffni_mediation_borrows_personas_instead_of_copying_them() -> None:

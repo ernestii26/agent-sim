@@ -1,0 +1,103 @@
+{
+  "name": "ffni_profiles",
+  "title": "FFNI Mediation on a Sampled Persona Bank",
+  "description": "Same design as ffni_mediation, run on personas sampled from a 3645-entry OCEAN bank instead of a hand-written cast of 18. Each run draws 1 Prestige, 1 Dominance and 8 of 24 Neutrals, so personality composition varies across runs and the leadership effect is not confounded with one fixed set of characters. Leadership style was assigned at random and independently of personality; seed 30 was selected by rerandomisation so that Prestige and Dominance are matched on all five Big Five traits (largest mean gap 0.5 on a 0-10 scale) — any style difference therefore cannot be read as a personality difference. H1-H7 are unchanged from ffni_mediation.",
+  "instruments": [
+    "ffni",
+    "leader_ideal",
+    "effectiveness"
+  ],
+  "groups": {
+    "P": {
+      "label": "Prestige",
+      "sample": 1,
+      "ids": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6"
+      ]
+    },
+    "D": {
+      "label": "Dominance",
+      "sample": 1,
+      "ids": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "D6"
+      ]
+    },
+    "N": {
+      "label": "Neutral",
+      "sample": 8,
+      "ids": [
+        "N1",
+        "N2",
+        "N3",
+        "N4",
+        "N5",
+        "N6",
+        "N7",
+        "N8",
+        "N9",
+        "N10",
+        "N11",
+        "N12",
+        "N13",
+        "N14",
+        "N15",
+        "N16",
+        "N17",
+        "N18",
+        "N19",
+        "N20",
+        "N21",
+        "N22",
+        "N23",
+        "N24"
+      ]
+    }
+  },
+  "contrast": [
+    "P",
+    "D"
+  ],
+  "vote_prompt": "Based on what you observed, who do you most trust to lead this team?",
+  "conditions": {
+    "collaborative": {
+      "label": "Collaborative",
+      "hypothesis": "H1: Prestige receives more peer votes than Dominance",
+      "scenario": "Your team has been missing key deliverables for two consecutive quarters. Leadership has granted your group full autonomy to diagnose the root cause and commit to one concrete change. You must reach a shared decision that everyone in the room can commit to implementing.",
+      "friction": "[Meeting context: This group has attempted to address performance issues before. A previous initiative stalled halfway through and was quietly dropped. People in this room have different — and sometimes conflicting — views on what actually went wrong and who was responsible. Not everyone trusts the last diagnosis that was made.]"
+    },
+    "threat": {
+      "label": "Threat",
+      "hypothesis": "H2: Dominance receives more peer votes than Prestige under resource scarcity",
+      "contrast": [
+        "D",
+        "P"
+      ],
+      "scenario": "Your division is under review. Senior leadership will retain only one of two competing teams — yours or the other. The decision will be made in 48 hours. Your group must agree right now on a single pitch: what you deliver, who leads it, and who is accountable. If you cannot agree among yourselves, leadership will make the decision for you — and people may lose their positions.",
+      "friction": "[Meeting context: Two months ago, the rival team landed a major client your division had been pursuing for a year. Some people here believe your group lost because of indecision and unclear ownership. Others think it was a resourcing failure. Either way, you are now in direct competition for survival. Not everyone in this room agrees on who should be leading the response — and some people are wondering whether they have a future here at all.]"
+    }
+  },
+  "hypotheses": {
+    "H1": "Collaborative: Prestige > Dominance endorsement (carried over)",
+    "H2": "Threat: Dominance > Prestige endorsement (carried over)",
+    "H3": "Threat raises Protection and Status needs relative to collaborative (within-persona T1->T2)",
+    "H4": "Cognition layer: Protection/Status needs predict dominance-side leader ideals; Affiliation/Vision/Expertise/Fairness predict prestige-side ideals (supported in Study 5, Sample B)",
+    "H5": "Evaluation layer: Vision/Expertise/Fairness predict Prestige effectiveness ratings (supported); Protection/Status predict Dominance effectiveness ratings (NOT supported in Study 5 - a null here is an expected outcome)",
+    "H6": "Protection need mediates the condition -> Dominance-endorsement effect (named as untested)",
+    "H7": "Threat strengthens the Protection -> dominance link and narrows the gap between the cognition and evaluation layers"
+  },
+  "persona_bank": {
+    "source": "personas_output.json",
+    "seed": 30,
+    "assignment": "random, rerandomised for Big Five balance across P and D"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "key": "effectiveness",
+  "title": "Perceived leadership effectiveness",
+  "instructions": "Think about how this person behaved in the meeting you just had. Rate how effective they would be as your own leader.",
+  "scale": [
+    1,
+    7
+  ],
+  "anchors": [
+    "not at all effective as a leader",
+    "extremely effective as a leader"
+  ],
+  "about": "each_candidate",
+  "targets": [
+    "N"
+  ],
+  "timing": [
+    "post"
+  ],
+  "citation": "Response format follows Sheng, Andrews & van Vugt (2026), Study 5.",
+  "license": "",
+  "note": "Single-item effectiveness rating, administered once per other participant.",
+  "subscales": {
+    "effectiveness": [
+      "This person would be effective as my leader."
+    ]
+  }
+}
