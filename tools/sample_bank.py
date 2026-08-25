@@ -119,6 +119,9 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=0, help="RNG seed, so a sample is reproducible")
     parser.add_argument("--prompts-from", default="prestige_dominance",
                         help="study whose seeds.json supplies the system prompts")
+    parser.add_argument("--direct", action="store_true",
+                        help="write persona specs straight from the bank (no API calls) "
+                             "instead of seeds for tools/gen_personas.py")
     args = parser.parse_args()
 
     split = parse_split(args.split)
@@ -135,11 +138,16 @@ def main() -> None:
     sample = stratified_sample(usable, total, rng)
     rng.shuffle(sample)  # style assignment is random, independent of personality
 
-    prompts = json.loads(
+    prompts = {} if args.direct else json.loads(
         (_PROJECT_DIR / "studies" / args.prompts_from / "seeds.json").read_text(encoding="utf-8")
     )["prompts"]
 
-    personas, cursor = [], 0
+    if args.direct and total > len(NAME_POOL):
+        raise SystemExit(f"--direct needs {total} distinct names but NAME_POOL has {len(NAME_POOL)}")
+    names = list(NAME_POOL)
+    rng.shuffle(names)
+
+    personas, specs, cursor = [], [], 0
     group_ids: dict[str, list[str]] = {}
     for group, count in split.items():
         ids = []
@@ -148,6 +156,8 @@ def main() -> None:
             cursor += 1
             pid = f"{group}{i}"
             ids.append(pid)
+            if args.direct:
+                specs.append((pid, to_tinyperson_spec(entry, group, pid, names[cursor - 1])))
             personas.append({
                 "persona_id": pid,
                 "group": group,
@@ -165,19 +175,181 @@ def main() -> None:
 
     out_dir = _PROJECT_DIR / "studies" / args.study
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "seeds.json").write_text(
-        json.dumps({"prompts": prompts, "bank": args.bank, "seed": args.seed,
-                    "personas": personas}, indent=2, ensure_ascii=False),
-        encoding="utf-8",
-    )
+
+    provenance = {"bank": args.bank, "seed": args.seed, "direct": args.direct,
+                  "personas": [{k: v for k, v in p.items() if k != "user"} for p in personas]}
+    if args.direct:
+        personas_dir = out_dir / "personas"
+        personas_dir.mkdir(exist_ok=True)
+        for pid, spec in specs:
+            (personas_dir / f"{pid}.agent.json").write_text(
+                json.dumps(spec, indent=2, ensure_ascii=False), encoding="utf-8")
+        (out_dir / "bank_sample.json").write_text(
+            json.dumps(provenance, indent=2, ensure_ascii=False), encoding="utf-8")
+    else:
+        (out_dir / "seeds.json").write_text(
+            json.dumps({"prompts": prompts, "bank": args.bank, "seed": args.seed,
+                        "personas": personas}, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
 
     print(f"\nSampled {total} personas across {len(split)} groups (seed {args.seed}):")
     for group, ids in group_ids.items():
         print(f"  {group}: {len(ids)}  {ids[0]}..{ids[-1]}")
-    print(f"\nWrote {out_dir / 'seeds.json'}")
+    written = f"{len(specs)} persona specs in {out_dir / 'personas'}" if args.direct \
+        else str(out_dir / "seeds.json")
+    print(f"\nWrote {written}")
     print("\nGroup ids for study.json:")
     print(json.dumps({g: ids for g, ids in group_ids.items()}, indent=2))
-    print(f"\nNext: python3 tools/gen_personas.py {args.study}   (this is the step that costs API calls)")
+    if args.direct:
+        print("\nNo API calls needed — the personas are ready to run.")
+    else:
+        print(f"\nNext: python3 tools/gen_personas.py {args.study}   (this step costs API calls)")
+
+
+
+# --------------------------------------------------------------------------- #
+# Direct conversion — bank entry to TinyPerson spec, no API call               #
+# --------------------------------------------------------------------------- #
+
+# The bank's prose covers personality only. These blocks are the leadership-style
+# manipulation, and they are deliberately IDENTICAL for every persona of a style:
+# the manipulation is then a constant while personality varies, instead of six
+# idiosyncratic LLM inventions that differ in ways nobody measured.
+#
+# Style is assigned at random, so it lands on personalities it appears to contradict —
+# a low-extraversion, agreeable person drawing Dominance. Without a reconciliation the
+# agent gets two texts that argue with each other. `register` resolves it in one
+# direction: the style says WHAT they do about influence, the personality says HOW it
+# comes out. A quiet dominant person is still dominant, just not loud.
+STYLE_BLOCKS = {
+    "P": {
+        "summary": (
+            "Earns influence by being worth listening to. Shares what they know freely, "
+            "shows the reasoning behind a claim, and gives way to better evidence without "
+            "treating it as a loss."
+        ),
+        "register": (
+            "This describes how they seek influence, not their temperament. Where it seems "
+            "to conflict with their disposition, the disposition sets the register and the "
+            "influence style still holds: a reserved version of this person earns standing "
+            "in few words and in writing rather than by holding the floor."
+        ),
+        "traits": [
+            "explains the reasoning behind a claim instead of asserting it",
+            "shares what they know without being asked, including things that weaken their case",
+            "changes position openly when someone presents better evidence",
+            "credits the person whose idea it was, by name",
+            "asks a clarifying question before disagreeing",
+            "does not invoke seniority or position to settle a disagreement",
+        ],
+        "speech": [
+            "Here's why I think that — tell me where it breaks.",
+            "You're right, I had that backwards.",
+            "That was Dana's point, not mine.",
+            "I've seen this fail before. Want the details?",
+        ],
+    },
+    "D": {
+        "summary": (
+            "Claims influence by taking control of the room. Sets the agenda, closes "
+            "questions down, and makes disagreeing feel costly rather than welcome."
+        ),
+        "register": (
+            "This describes how they seek influence, not their temperament. Where it seems "
+            "to conflict with their disposition, the disposition sets the register and the "
+            "influence style still holds: a quiet version of this person dominates by flat "
+            "refusal, cold silence and ending discussions early — not by volume."
+        ),
+        "traits": [
+            "states conclusions as settled rather than opening them for discussion",
+            "interrupts to redirect the conversation back to their own framing",
+            "uses impatience as a signal that hesitation looks like incompetence",
+            "assigns work to others without asking whether it fits",
+            "treats a challenge as something to be shut down, not examined",
+            "invokes position or precedent when pressed for justification",
+        ],
+        "speech": [
+            "We're doing it this way. Next.",
+            "That's not the question. The question is who owns it.",
+            "We've spent long enough on this.",
+            "I've made the call. Someone write it up.",
+        ],
+    },
+    "N": {
+        "summary": (
+            "Participates without trying to run the room. Contributes when they have "
+            "something to add and is content to let others set direction."
+        ),
+        "register": "Their temperament shows through as-is; they are not seeking influence.",
+        "traits": [
+            "asks for clarification rather than assuming",
+            "gives an opinion when asked, briefly",
+            "goes along with a decision they did not personally push for",
+        ],
+        "speech": [
+            "Can you say more about that?",
+            "Yeah, that tracks for me.",
+            "I'm not sure we've ruled out the other option.",
+        ],
+    },
+}
+
+# Names only need to be distinct and pronounceable — the bank supplies no identity, and
+# agents address and vote for each other by name.
+NAME_POOL = [
+    "Alma Reyes", "Ben Osei", "Cara Lindqvist", "Dev Raman", "Elena Petrova", "Farid Haddad",
+    "Grace Mbeki", "Hugo Marchand", "Ines Duarte", "Jonas Weber", "Kiran Shah", "Lena Novak",
+    "Marco Bianchi", "Nadia Aziz", "Oscar Lindgren", "Pia Kowalski", "Quinn Doherty",
+    "Rosa Iglesias", "Samir Chaudhry", "Tomas Varga", "Uma Krishnan", "Viktor Sokolov",
+    "Wendy Chao", "Xavier Dubois", "Yara Halabi", "Zoe Andersen", "Adam Kovac", "Bianca Rossi",
+    "Caleb Nwosu", "Dalia Moreno", "Erik Solberg", "Fatima Sow", "Gabriel Costa", "Hana Sato",
+    "Ivan Petrenko", "Julia Berg", "Kofi Mensah", "Liwei Zhang", "Mira Halonen", "Noah Feldman",
+    "Olga Ivanova", "Pedro Alves", "Rania Khoury", "Stefan Novotny", "Tara Lindholm",
+    "Umar Farooq", "Vera Jankovic", "Will Harding", "Xiomara Vega", "Yusuf Demir",
+]
+
+AGE_MIDPOINT = {"25-35": 30, "36-50": 43, "51-65": 58}
+
+
+def to_tinyperson_spec(entry: dict, group: str, persona_id: str, name: str) -> dict:
+    """Build a persona spec from a bank entry — same shape as the hand-written ones.
+
+    src/ only reads persona.name; every other field is what TinyTroupe turns into the
+    agent's system prompt, so this mirrors the schema of the existing personas rather
+    than inventing a leaner one.
+    """
+    ocean = entry["ocean_description"]["ocean"]
+    demo = entry["demographic"]
+    block = STYLE_BLOCKS[group]
+
+    return {
+        "type": "TinyPerson",
+        "persona": {
+            "name": name,
+            "age": AGE_MIDPOINT.get(demo["age_group"], 40),
+            # tiny_person.py's minibio() does self._persona["nationality"] with no
+            # fallback, called on nearly every turn — an absent key is a hard crash
+            # that AgentTransport's catch-all then reports as silence. The bank
+            # carries no nationality data, so this stays a neutral placeholder
+            # rather than fabricating one from the name.
+            "nationality": "not specified",
+            "occupation": {"title": entry["occupation"]},
+            "leadership_style": STYLE_NAME[group],
+            "personality": {
+                "description": entry["ocean_description"]["description_en"],
+                "big_five": {t: ocean[t] for t in OCEAN_ORDER},
+                "traits": list(block["traits"]),
+            },
+            "style": {"influence": block["summary"], "register": block["register"]},
+            "relationships": [] if not demo["is_parent"] else [
+                {"name": "family", "description": "Has children; family commitments sit "
+                                                  "outside work and occasionally cut into it."}
+            ],
+            "speech_examples": list(block["speech"]),
+        },
+        "persona_id": persona_id,
+    }
 
 
 if __name__ == "__main__":

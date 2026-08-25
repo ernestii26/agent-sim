@@ -53,6 +53,16 @@ def test_every_study_loads() -> None:
             assert not missing, f"{name}: personas/ exists but is missing {missing}"
         if study.personas_from:
             continue  # borrows another study's personas, so it has no seeds of its own
+        if not study.seeds_path.exists():
+            # Personas converted straight from the bank (sample_bank.py --direct) have no
+            # generation seeds; bank_sample.json records the provenance instead.
+            provenance = study.directory / "bank_sample.json"
+            assert provenance.exists(), f"{name}: neither seeds.json nor bank_sample.json"
+            sampled = {p["persona_id"] for p in
+                       json.loads(provenance.read_text(encoding="utf-8"))["personas"]}
+            declared = {pid for g in study.groups.values() for pid in g.ids}
+            assert sampled == declared, f"{name}: bank_sample.json and study.json disagree"
+            continue
         seeds = json.loads(study.seeds_path.read_text(encoding="utf-8"))
         seeded = {s["persona_id"] for s in seeds["personas"]}
         declared = {pid for g in study.groups.values() for pid in g.ids}
