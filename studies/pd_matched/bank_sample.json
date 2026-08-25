@@ -1,0 +1,367 @@
+{
+  "bank": "personas_output.json",
+  "setting": "hospital",
+  "seed": 0,
+  "personas": [
+    {
+      "persona_id": "P1",
+      "group": "P",
+      "pair": 1,
+      "name": "Hugo Marchand",
+      "occupation": "hospital administrator",
+      "ocean": {
+        "openness": "low",
+        "conscientiousness": "low",
+        "extraversion": "low",
+        "agreeableness": "low",
+        "neuroticism": "medium"
+      },
+      "demographic": {
+        "age_group": "36-50",
+        "is_parent": false
+      }
+    },
+    {
+      "persona_id": "D1",
+      "group": "D",
+      "pair": 1,
+      "name": "Xavier Dubois",
+      "occupation": "hospital administrator",
+      "ocean": {
+        "openness": "low",
+        "conscientiousness": "low",
+        "extraversion": "low",
+        "agreeableness": "low",
+        "neuroticism": "medium"
+      },
+      "demographic": {
+        "age_group": "36-50",
+        "is_parent": false
+      }
+    },
+    {
+      "persona_id": "P2",
+      "group": "P",
+      "pair": 2,
+      "name": "Farid Haddad",
+      "occupation": "social worker",
+      "ocean": {
+        "openness": "low",
+        "conscientiousness": "medium",
+        "extraversion": "high",
+        "agreeableness": "high",
+        "neuroticism": "high"
+      },
+      "demographic": {
+        "age_group": "25-35",
+        "is_parent": false
+      }
+    },
+    {
+      "persona_id": "D2",
+      "group": "D",
+      "pair": 2,
+      "name": "Viktor Sokolov",
+      "occupation": "social worker",
+      "ocean": {
+        "openness": "low",
+        "conscientiousness": "medium",
+        "extraversion": "high",
+        "agreeableness": "high",
+        "neuroticism": "high"
+      },
+      "demographic": {
+        "age_group": "25-35",
+        "is_parent": false
+      }
+    },
+    {
+      "persona_id": "P3",
+      "group": "P",
+      "pair": 3,
+      "name": "Erik Solberg",
+      "occupation": "social worker",
+      "ocean": {
+        "openness": "high",
+        "conscientiousness": "low",
+        "extraversion": "medium",
+        "agreeableness": "low",
+        "neuroticism": "high"
+      },
+      "demographic": {
+        "age_group": "36-50",
+        "is_parent": false
+      }
+    },
+    {
+      "persona_id": "D3",
+      "group": "D",
+      "pair": 3,
+      "name": "Tomas Varga",
+      "occupation": "social worker",
+      "ocean": {
+        "openness": "high",
+        "conscientiousness": "low",
+        "extraversion": "medium",
+        "agreeableness": "low",
+        "neuroticism": "high"
+      },
+      "demographic": {
+        "age_group": "36-50",
+        "is_parent": false
+      }
+    },
+    {
+      "persona_id": "P4",
+      "group": "P",
+      "pair": 4,
+      "name": "Pia Kowalski",
+      "occupation": "emergency room nurse",
+      "ocean": {
+        "openness": "low",
+        "conscientiousness": "high",
+        "extraversion": "high",
+        "agreeableness": "medium",
+        "neuroticism": "medium"
+      },
+      "demographic": {
+        "age_group": "51-65",
+        "is_parent": true
+      }
+    },
+    {
+      "persona_id": "D4",
+      "group": "D",
+      "pair": 4,
+      "name": "Olga Ivanova",
+      "occupation": "emergency room nurse",
+      "ocean": {
+        "openness": "low",
+        "conscientiousness": "high",
+        "extraversion": "high",
+        "agreeableness": "medium",
+        "neuroticism": "medium"
+      },
+      "demographic": {
+        "age_group": "51-65",
+        "is_parent": true
+      }
+    },
+    {
+      "persona_id": "P5",
+      "group": "P",
+      "pair": 5,
+      "name": "Bianca Rossi",
+      "occupation": "emergency room nurse",
+      "ocean": {
+        "openness": "low",
+        "conscientiousness": "medium",
+        "extraversion": "high",
+        "agreeableness": "medium",
+        "neuroticism": "medium"
+      },
+      "demographic": {
+        "age_group": "25-35",
+        "is_parent": true
+      }
+    },
+    {
+      "persona_id": "D5",
+      "group": "D",
+      "pair": 5,
+      "name": "Ines Duarte",
+      "occupation": "emergency room nurse",
+      "ocean": {
+        "openness": "low",
+        "conscientiousness": "medium",
+        "extraversion": "high",
+        "agreeableness": "medium",
+        "neuroticism": "medium"
+      },
+      "demographic": {
+        "age_group": "25-35",
+        "is_parent": true
+      }
+    },
+    {
+      "persona_id": "P6",
+      "group": "P",
+      "pair": 6,
+      "name": "Wendy Chao",
+      "occupation": "pharmacist",
+      "ocean": {
+        "openness": "high",
+        "conscientiousness": "high",
+        "extraversion": "medium",
+        "agreeableness": "high",
+        "neuroticism": "low"
+      },
+      "demographic": {
+        "age_group": "36-50",
+        "is_parent": true
+      }
+    },
+    {
+      "persona_id": "D6",
+      "group": "D",
+      "pair": 6,
+      "name": "Lena Novak",
+      "occupation": "pharmacist",
+      "ocean": {
+        "openness": "high",
+        "conscientiousness": "high",
+        "extraversion": "medium",
+        "agreeableness": "high",
+        "neuroticism": "low"
+      },
+      "demographic": {
+        "age_group": "36-50",
+        "is_parent": true
+      }
+    },
+    {
+      "persona_id": "N1",
+      "group": "N",
+      "pair": null,
+      "name": "Mira Halonen",
+      "occupation": "hospital administrator",
+      "ocean": {
+        "openness": "high",
+        "conscientiousness": "high",
+        "extraversion": "low",
+        "agreeableness": "high",
+        "neuroticism": "medium"
+      },
+      "demographic": {
+        "age_group": "36-50",
+        "is_parent": true
+      }
+    },
+    {
+      "persona_id": "N2",
+      "group": "N",
+      "pair": null,
+      "name": "Dev Raman",
+      "occupation": "pharmacist",
+      "ocean": {
+        "openness": "high",
+        "conscientiousness": "high",
+        "extraversion": "low",
+        "agreeableness": "high",
+        "neuroticism": "low"
+      },
+      "demographic": {
+        "age_group": "25-35",
+        "is_parent": false
+      }
+    },
+    {
+      "persona_id": "N3",
+      "group": "N",
+      "pair": null,
+      "name": "Samir Chaudhry",
+      "occupation": "pharmacist",
+      "ocean": {
+        "openness": "low",
+        "conscientiousness": "medium",
+        "extraversion": "medium",
+        "agreeableness": "medium",
+        "neuroticism": "low"
+      },
+      "demographic": {
+        "age_group": "51-65",
+        "is_parent": false
+      }
+    },
+    {
+      "persona_id": "N4",
+      "group": "N",
+      "pair": null,
+      "name": "Noah Feldman",
+      "occupation": "pharmacist",
+      "ocean": {
+        "openness": "medium",
+        "conscientiousness": "high",
+        "extraversion": "high",
+        "agreeableness": "low",
+        "neuroticism": "high"
+      },
+      "demographic": {
+        "age_group": "25-35",
+        "is_parent": true
+      }
+    },
+    {
+      "persona_id": "N5",
+      "group": "N",
+      "pair": null,
+      "name": "Yara Halabi",
+      "occupation": "social worker",
+      "ocean": {
+        "openness": "low",
+        "conscientiousness": "high",
+        "extraversion": "low",
+        "agreeableness": "medium",
+        "neuroticism": "medium"
+      },
+      "demographic": {
+        "age_group": "51-65",
+        "is_parent": true
+      }
+    },
+    {
+      "persona_id": "N6",
+      "group": "N",
+      "pair": null,
+      "name": "Marco Bianchi",
+      "occupation": "social worker",
+      "ocean": {
+        "openness": "low",
+        "conscientiousness": "high",
+        "extraversion": "medium",
+        "agreeableness": "high",
+        "neuroticism": "high"
+      },
+      "demographic": {
+        "age_group": "25-35",
+        "is_parent": false
+      }
+    },
+    {
+      "persona_id": "N7",
+      "group": "N",
+      "pair": null,
+      "name": "Ivan Petrenko",
+      "occupation": "social worker",
+      "ocean": {
+        "openness": "medium",
+        "conscientiousness": "low",
+        "extraversion": "medium",
+        "agreeableness": "medium",
+        "neuroticism": "medium"
+      },
+      "demographic": {
+        "age_group": "51-65",
+        "is_parent": true
+      }
+    },
+    {
+      "persona_id": "N8",
+      "group": "N",
+      "pair": null,
+      "name": "Pedro Alves",
+      "occupation": "emergency room nurse",
+      "ocean": {
+        "openness": "high",
+        "conscientiousness": "high",
+        "extraversion": "low",
+        "agreeableness": "low",
+        "neuroticism": "high"
+      },
+      "demographic": {
+        "age_group": "36-50",
+        "is_parent": true
+      }
+    }
+  ]
+}

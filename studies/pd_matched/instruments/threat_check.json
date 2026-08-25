@@ -1,0 +1,18 @@
+{
+  "key": "threat_check",
+  "title": "Situational threat — manipulation check",
+  "instructions": "Think about the meeting you just had and the situation your team is in right now. Indicate how much you agree with each statement.",
+  "scale": [1, 7],
+  "anchors": ["strongly disagree", "strongly agree"],
+  "about": "self",
+  "targets": ["N"],
+  "timing": ["post"],
+  "note": "Not a validated scale and not a dependent variable — its only job is to show that the threat condition felt more threatening than the collaborative one. Deliberately says nothing about leaders, leadership or any person in the room, so it cannot prime the vote or be primed by it. Post-only: the between-condition difference is the check, and a baseline administered before the scenario would only measure trait threat-sensitivity.",
+  "subscales": {
+    "threat": [
+      "My own position here feels insecure.",
+      "This situation is urgent — there is very little time to get it right.",
+      "If this goes wrong, the consequences for me personally will be serious."
+    ]
+  }
+}

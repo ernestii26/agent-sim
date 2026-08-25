@@ -1,0 +1,180 @@
+{
+  "study": "pd_matched",
+  "condition": "collaborative",
+  "hypothesis": "H1: Prestige receives more peer votes than Dominance",
+  "contrast": [
+    "P",
+    "D"
+  ],
+  "runs": 1,
+  "per_run": [
+    {
+      "run_no": 1,
+      "P": 2.0,
+      "D": 2.0
+    }
+  ],
+  "wins": 0,
+  "metrics": {
+    "votes": {
+      "P": {
+        "mean": 2.0,
+        "sd": 0.0
+      },
+      "D": {
+        "mean": 2.0,
+        "sd": 0.0
+      },
+      "t": NaN,
+      "p": NaN,
+      "values": {
+        "P": [
+          2.0
+        ],
+        "D": [
+          2.0
+        ]
+      }
+    },
+    "speech_rate": {
+      "P": {
+        "mean": 1.0,
+        "sd": 0.0
+      },
+      "D": {
+        "mean": 1.0,
+        "sd": 0.0
+      },
+      "t": NaN,
+      "p": NaN,
+      "values": {
+        "P": [
+          1.0
+        ],
+        "D": [
+          1.0
+        ]
+      }
+    },
+    "words_per_turn": {
+      "P": {
+        "mean": 35.0,
+        "sd": 0.0
+      },
+      "D": {
+        "mean": 21.666666666666668,
+        "sd": 0.0
+      },
+      "t": NaN,
+      "p": NaN,
+      "values": {
+        "P": [
+          35.0
+        ],
+        "D": [
+          21.666666666666668
+        ]
+      }
+    }
+  },
+  "personas": {
+    "D1": {
+      "turns": 3.0,
+      "speech_rate": 1.0,
+      "mean_words": 21.666666666666668
+    },
+    "N1": {
+      "turns": 3.0,
+      "speech_rate": 1.0,
+      "mean_words": 29.333333333333332
+    },
+    "N2": {
+      "turns": 3.0,
+      "speech_rate": 0.6666666666666666,
+      "mean_words": 28.0
+    },
+    "N3": {
+      "turns": 3.0,
+      "speech_rate": 0.6666666666666666,
+      "mean_words": 30.0
+    },
+    "N4": {
+      "turns": 3.0,
+      "speech_rate": 1.0,
+      "mean_words": 29.666666666666668
+    },
+    "N5": {
+      "turns": 3.0,
+      "speech_rate": 1.0,
+      "mean_words": 21.333333333333332
+    },
+    "N6": {
+      "turns": 3.0,
+      "speech_rate": 1.0,
+      "mean_words": 31.666666666666668
+    },
+    "N7": {
+      "turns": 3.0,
+      "speech_rate": 0.6666666666666666,
+      "mean_words": 28.0
+    },
+    "N8": {
+      "turns": 3.0,
+      "speech_rate": 1.0,
+      "mean_words": 28.333333333333332
+    },
+    "P5": {
+      "turns": 3.0,
+      "speech_rate": 1.0,
+      "mean_words": 35.0
+    }
+  },
+  "supported": false,
+  "needs": {
+    "study": "pd_matched",
+    "instrument": "threat_check",
+    "runs": 1,
+    "subscales": {
+      "threat": {
+        "baseline_mean": NaN,
+        "baseline_sd": 0.0,
+        "post_mean": 2.7083333333333335,
+        "post_sd": 0.6283639628760308,
+        "delta_mean": NaN,
+        "delta_sd": 0.0,
+        "delta_n": 0,
+        "alpha": NaN
+      }
+    },
+    "straight_lining": {
+      "baseline": NaN,
+      "post": 0.0
+    }
+  },
+  "layers": {
+    "contrast": [
+      "P",
+      "D"
+    ],
+    "needs": {
+      "threat": {
+        "cognition": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 0
+        },
+        "evaluation_a": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 0
+        },
+        "evaluation_b": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 0
+        },
+        "layer_gap": NaN
+      }
+    }
+  }
+}

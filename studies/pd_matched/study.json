@@ -1,0 +1,77 @@
+{
+  "name": "pd_matched",
+  "title": "Prestige vs Dominance on Matched Persona Pairs",
+  "description": "P_i and D_i are built from the same bank row — identical Big Five, occupation, age and parental status — so the only difference between the groups is the leadership style block. Group balance is exact by construction, not by seed search, and holds for every --seed. Occupations are filtered to the 'hospital' setting so the scenario is coherent for every participant.",
+  "instruments": [
+    "threat_check"
+  ],
+  "groups": {
+    "P": {
+      "label": "Prestige",
+      "sample": 1,
+      "ids": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6"
+      ]
+    },
+    "D": {
+      "label": "Dominance",
+      "sample": 1,
+      "ids": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "D5",
+        "D6"
+      ]
+    },
+    "N": {
+      "label": "Neutral",
+      "sample": null,
+      "ids": [
+        "N1",
+        "N2",
+        "N3",
+        "N4",
+        "N5",
+        "N6",
+        "N7",
+        "N8"
+      ]
+    }
+  },
+  "contrast": [
+    "P",
+    "D"
+  ],
+  "vote_prompt": "Based on what you observed, who do you most trust to lead this team?",
+  "conditions": {
+    "collaborative": {
+      "label": "Collaborative",
+      "hypothesis": "H1: Prestige receives more peer votes than Dominance",
+      "scenario": "Your unit has missed its patient-safety and throughput targets for two consecutive quarters. Hospital leadership has granted your group full autonomy to diagnose the root cause and commit to one concrete change. You must reach a shared decision that everyone in the room can commit to implementing.",
+      "friction": "[Meeting context: This group has attempted to address the shortfall before. A previous initiative stalled halfway through and was quietly dropped. People in this room have different — and sometimes conflicting — views on what actually went wrong and who was responsible. Not everyone trusts the last diagnosis.]"
+    },
+    "threat": {
+      "label": "Threat",
+      "hypothesis": "H2: Dominance receives more peer votes than Prestige under resource scarcity",
+      "contrast": [
+        "D",
+        "P"
+      ],
+      "scenario": "The hospital is consolidating. Administration will keep only one of two overlapping units — yours or the other. The decision will be made in 48 hours. Your group must agree right now on a single case for keeping this unit: what you deliver, who leads it, and who is accountable. If you cannot agree among yourselves, administration will decide for you — and people will lose their posts.",
+      "friction": "[Meeting context: Two months ago the other unit absorbed a service line yours had been building for a year. Some people here believe your group lost it through indecision and unclear ownership. Others think it was a staffing failure. Either way, you are now in direct competition for survival. Not everyone in this room agrees on who should be leading the response — and some are wondering whether they have a future here at all.]"
+    }
+  },
+  "persona_bank": {
+    "source": "personas_output.json",
+    "setting": "hospital",
+    "seed": 0,
+    "matching": "P_i and D_i share one bank row"
+  }
+}
