@@ -1034,3 +1034,88 @@ guarded.
 Roughly doubles the check: two administrations per instrument across the whole cast of
 20 personas. Still a few dollars, against a study whose per-run cost is 41 calls over
 80 runs.
+
+---
+
+## 21. Measurement leaked into the vote, and four decisions that followed (2026-08-26)
+
+A grilling session over section 12's handoff. The bug came out of checking one
+question — does answering an instrument disturb the agent that then votes.
+
+### The fork was never made
+
+`run_discussion` builds a `TinyWorld` and left it attached: every agent kept
+`agent.environment` pointing at it after the discussion returned. The world holds a
+`_thread.RLock`, so `copy.deepcopy` of a post-discussion agent raised
+`TypeError: cannot pickle '_thread.RLock' object`. `_clone_agent` caught that with a
+bare `except Exception: return person` and handed back **the original agent**.
+
+So for any study with post instruments, every survey was administered to the live
+agent, and `pipeline.run_condition` votes on that same agent immediately afterwards.
+The comment "Vote last, on the original cast — nothing downstream can be primed by it"
+was true only while cloning worked, and cloning had never worked after a discussion.
+
+Verified before and after against real `TinyPerson` objects with a real `TinyWorld`
+attached: before, `_clone_agent` returned the original and a write to the "fork"
+appeared in the agent that voted; after, it does not.
+
+**Scope.** Baseline administrations were always clean — they run before any world
+exists, so the deepcopy succeeded. `pd_matched` has no instruments, so its votes were
+never touched. `ffni_mediation` had not been run. The one study affected is the
+retired `threat_check` in the 40-run pilot: 3 threat-salience items, administered to
+the 8 neutrals — the entire electorate — immediately before they voted. The
+manipulation numbers themselves (5.38 vs 3.21) are clean, since threat_check was the
+first post instrument and nothing preceded it. What was primed is the pilot's votes,
+and those votes are what section 4's effect size and the choice of 30/40 runs rest on.
+
+**The fix.** The live wiring is stripped from the original *before* the copy and
+restored in a `finally`; the bare except is gone, so a fork that cannot be made raises
+instead of silently becoming a measurement on the original. `run_discussion` also
+detaches the world from every participant and drops it from `TinyWorld.all_environments`
+at the end, which stops one world per run accumulating for the length of a study.
+`CONTEXT.md` gains **Fork** as a term, since README said "throwaway fork" and the code
+said "clone" for the same thing.
+
+### Decisions
+
+1. **Step 1 is not re-run.** `ffni_mediation` and `pd_matched` are now identical except
+   for the instruments list — same personas, groups, sampling, contrast, vote prompt,
+   and both conditions' scenario and friction text, with `test_core` pinning the last
+   two byte-identical. The samplers share a seed, so run *N* draws the same room in
+   both. With the fork fixed, a Step 2 voter has seen no instrument, so Step 2's votes
+   are Step 1's votes. H1 and H2 come from Step 2's checkpoints. What is given up is an
+   independent replication of the effect; what is bought is the entire Step 1 budget.
+
+2. **A cheap calibration pilot comes first.** Section 4's `r` was measured on primed
+   voters, on a cast of 10, with the candidates voting in their own contest — none of
+   which is the current design. 10-15 runs of `pd_matched` threat on `gpt-4.1`
+   (discussion and vote only, the cheap quarter) re-estimate `r`, then `power_sim` sizes
+   Step 2. Those votes are exchangeable with Step 2's and pool into the final test, so
+   the calibration is not a sunk cost. This partly reverses decision 1's scope — but as
+   calibration, not as evidence.
+
+3. **The alpha gate is judged per subscale, not on the mean.** `protection` reaches
+   exactly one prototype dimension, `strength`, which has 2 items. A mean over ten
+   subscales would have waved a dead `strength` through on the back of `tyranny`'s ten,
+   and H4's and H6's main line would have rested on noise the gate called usable. The
+   gated set is the union of `predicts`' values, so a dimension nothing reads
+   (`femininity`) cannot block a study, and one added to the map is gated automatically.
+
+4. **`each_candidate` rates only the candidates.** `need_outcome_links` reads ratings of
+   the contrasted groups and nothing else, but every neutral was rating every other
+   neutral — 6 of 12 `effectiveness` calls per run collecting data no analysis looks at,
+   on the most transcript-heavy line in the design (section 15). Now 6 calls, about 20%
+   off Step 2. The rejected alternative was to keep them as a per-rater leniency anchor
+   and centre the candidate ratings on them; that would have bought variance reduction
+   for H5's expected null, at the cost of `Evaluation` no longer being the absolute
+   rating `CONTEXT.md` defines it as.
+
+### Still open after this session
+
+- Cheaper `SURVEY_MODEL` (section 12, action 2). New evidence: on `gpt-4o-mini`, both
+  the 22-item FFNI and the 45-item `leader_ideal` came back complete on the first
+  attempt, every item in range, for all three respondents.
+- What a failed gate actually means — abort, or proceed with the affected hypothesis
+  declared dead in advance.
+- No threshold is written down for `protection`'s delta SD, which section 12 calls the
+  noise floor H6's mediator has to clear.
