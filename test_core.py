@@ -425,8 +425,9 @@ def test_need_outcome_links_separates_cognition_from_evaluation() -> None:
         [(2, 2, 5), (4, 5, 5), (6, 8, 5), (7, 9, 5)], 1
     ):
         record = _needs_record(run_no, protection=protection, d_rating=d_rating)
+        # protection is predicted to move the ILT strength dimension (strong, bold).
         record.measures["post"]["leader_ideal"] = {
-            pid: {"protection_ideal_1": ideal, "protection_ideal_2": ideal}
+            pid: {"strength_1": ideal, "strength_2": ideal}
             for pid in record.members("N")
         }
         records.append(record)

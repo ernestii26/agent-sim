@@ -1,6 +1,6 @@
 {
   "key": "leader_ideal",
-  "title": "Leadership ideals (prototype ratings)",
+  "title": "Implicit leadership theories (leader prototype ratings)",
   "instructions": "Think about leaders in general — not anyone in this meeting. Rate how characteristic each trait is of a leader.",
   "scale": [
     1,
@@ -17,33 +17,102 @@
   "timing": [
     "post"
   ],
-  "citation": "Adjectives are the 'Leadership ideals' column of Table 1 in Sheng, Andrews & van Vugt (2026), which pairs each fundamental follower need with its predicted leader prototype. Response format follows the ILT measure they used (Offermann & Coats, 2018): 10-point, 1 = not at all characteristic of a leader, 10 = extremely characteristic.",
+  "citation": "Traits and factor structure from Offermann, L. R., Kennedy, J. K., & Wirtz, P. W. (1994). Implicit leadership theories: Content, structure, and generalizability. The Leadership Quarterly, 5(1), 43-58 — reproduced in Appendix A of Bhatia, S., Olivola, C. Y., Bhatia, N. & Ameen, A. (2022), The Leadership Quarterly 33(5), 101535. The femininity and ethics dimensions are the two Sheng, Andrews & van Vugt (2026) added themselves, quoted from their footnote 13. Response format follows Sheng et al.: 10-point, 1 = not at all characteristic of a leader, 10 = extremely characteristic.",
   "license": "",
-  "note": "This is NOT the 51-item Offermann & Coats ILT scale. It uses the source paper's own need-to-ideal mapping, so each dimension here corresponds one-to-one with an FFNI subscale, which is what H4 predicts. Dual model alignment (Cheng et al., 2013): protection_ideal and status_ideal are the dominance side; affiliation_ideal, vision_ideal, expertise_ideal and fairness_ideal are the prestige side. Scores are not comparable to published ILT norms.",
+  "note": "RECONSTRUCTION, not the instrument Sheng et al. administered. They used Offermann & Coats (2018), a 46-item nine-factor revision, plus femininity and ethics, for 51 items. This is the 1994 41-trait eight-factor ancestor plus those same two additions: 10 of their 11 dimensions, missing only creativity, which is new in 2018. The 2018 paper's own finding is that seven of the eight 1994 factors replicated, and that attractiveness became well-groomed. Two known defects: the source appendix lists 40 traits where its body text says 41, so one trait may be missing; and neither the 1994 nor the 2018 wording has been checked against the original article. Dual model alignment (Cheng et al., 2013): strength, tyranny, masculinity and attractiveness are the dominance side — the four dimensions Sheng et al. found protection and status predicting; sensitivity, dedication, charisma, intelligence and ethics are the prestige side. Replaces a 12-adjective scale taken from Sheng et al.'s Table 1, which was a theory-exposition table rather than an administered instrument and gave every subscale only 2 items. `predicts` maps each FFNI need onto the ILT dimensions it should move, taken from Sheng et al.'s own Study 5 (Sample B) results rather than invented: protection -> Strength; status -> Tyranny, Masculinity, Well-Groomed; vision -> Sensitivity, Dedication, Charisma; expertise -> Sensitivity, Charisma, Intelligence; fairness -> Dedication, Intelligence, Ethics. Creativity is dropped from vision's list because it does not exist in the 1994 factor structure. Affiliation is the one theoretical entry: their text groups it with the prestige-side dimensions but reports no per-dimension increment for it, so sensitivity is assigned on the Table 1 grounds (compassionate, friendly) rather than on a published coefficient.",
   "subscales": {
-    "protection_ideal": [
+    "strength": [
       "strong",
-      "tough"
+      "bold"
     ],
-    "affiliation_ideal": [
-      "compassionate",
-      "friendly"
-    ],
-    "status_ideal": [
+    "tyranny": [
       "domineering",
-      "power-hungry"
+      "pushy",
+      "dominant",
+      "manipulative",
+      "power-hungry",
+      "conceited",
+      "selfish",
+      "obnoxious",
+      "demanding",
+      "loud"
     ],
-    "vision_ideal": [
+    "masculinity": [
+      "male",
+      "masculine"
+    ],
+    "attractiveness": [
+      "well-groomed",
+      "attractive",
+      "well-dressed",
+      "classy"
+    ],
+    "sensitivity": [
+      "sympathetic",
+      "sensitive",
+      "compassionate",
+      "understanding",
+      "sincere",
+      "warm",
+      "forgiving",
+      "helpful"
+    ],
+    "dedication": [
+      "dedicated",
+      "motivated",
+      "hardworking",
+      "goal-oriented"
+    ],
+    "charisma": [
+      "energetic",
       "charismatic",
-      "courageous"
+      "inspiring",
+      "enthusiastic",
+      "dynamic"
     ],
-    "expertise_ideal": [
+    "intelligence": [
+      "intellectual",
       "educated",
-      "intelligent"
+      "intelligent",
+      "knowledgeable",
+      "clever"
     ],
-    "fairness_ideal": [
+    "femininity": [
+      "female",
+      "feminine"
+    ],
+    "ethics": [
+      "fair",
       "honest",
       "ethical"
+    ]
+  },
+  "predicts": {
+    "protection": [
+      "strength"
+    ],
+    "status": [
+      "tyranny",
+      "masculinity",
+      "attractiveness"
+    ],
+    "affiliation": [
+      "sensitivity"
+    ],
+    "vision": [
+      "sensitivity",
+      "dedication",
+      "charisma"
+    ],
+    "expertise": [
+      "sensitivity",
+      "charisma",
+      "intelligence"
+    ],
+    "fairness": [
+      "dedication",
+      "intelligence",
+      "ethics"
     ]
   }
 }

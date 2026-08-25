@@ -277,7 +277,13 @@ def need_outcome_links(
                     continue
                 rows[name]["need"].append(value)
 
-                ideal = ideal_scores.get(pid, {}).get(f"{name}_ideal", float("nan"))
+                # The need's predicted prototype dimensions, averaged. Many-to-one because
+                # that is the shape of the source paper's result: status reached tyranny,
+                # masculinity and well-groomed, not one matching dimension.
+                predicted = ideals.predicts.get(name, ()) if ideals else ()
+                mine = ideal_scores.get(pid, {})
+                ideal = mean([mine.get(dim, float("nan")) for dim in predicted]) \
+                    if predicted else float("nan")
                 rows[name]["ideal"].append(ideal)
 
                 for slot, key in (("effect_a", 0), ("effect_b", 1)):

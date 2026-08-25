@@ -367,6 +367,8 @@ rather than with the new hypotheses.
 
 ## 12. Still open
 
+- `measure-check` validates only the self-report instrument, so `leader_ideal` is
+  unchecked and `effectiveness` cannot be checked this way at all — see section 19.
 - No manipulation check is administered by any study — see section 13 for what was
   retired, what it measured, and the loader change needed to give `ffni_mediation` one.
 - ~~`leadership_style` reaches the system prompt~~ — removed 2026-08-26, see section 17.
@@ -888,3 +890,66 @@ The bootstrap still resamples respondents rather than runs, so it ignores that n
 inside one run watched the same discussion. Measured above at about 2 points of
 false-positive rate, against the 8 the centring fixes. Marked `ponytail:` in the
 docstring; switch to resampling runs if the observed ICC comes out high.
+
+---
+
+## 19. `leader_ideal` replaced with a reconstructed ILT scale (2026-08-26)
+
+The prototype layer was 12 adjectives lifted from Sheng et al.'s Table 1. That table is
+theory exposition, not an administered instrument, and it gave every subscale 2 items.
+It is now a 45-item, 10-dimension reconstruction of the scale they actually used.
+
+### Why not just drop the layer instead
+
+Because it is not only H4's positive control. Section 11 established that the paper
+measured ILT in the US and UK samples and effectiveness in the Chinese one, with no
+sample carrying both — so it could not test whether the layers connect, and we can,
+because all four layers are measured on the same agents in one session. That question is
+the strongest thing this design has, and it needs the prototype layer measured.
+
+### What the reconstruction is, and is not
+
+Sheng et al. used Offermann & Coats (2018): a 46-item nine-factor revision, plus a
+femininity dimension and three ethics items they added, for 51 items. Neither the 2018
+items nor the article are available here.
+
+What is available is Offermann, Kennedy & Wirtz (1994), the 41-trait eight-factor
+ancestor, reproduced verbatim in Appendix A of Bhatia et al. (2022, *The Leadership
+Quarterly*), plus the femininity and ethics items quoted in Sheng et al.'s own footnote
+13. Together that covers **10 of the 11 dimensions they administered**, missing only
+creativity, which is new in 2018. The 2018 paper's own headline is that seven of the
+eight 1994 factors replicated and attractiveness became well-groomed.
+
+Two defects recorded rather than hidden: the source appendix lists 40 traits where its
+own body text says 41, so one may be missing; and no wording has been checked against
+the original 1994 or 2018 article.
+
+### What it buys
+
+All four dominance-side dimensions Sheng et al. reported are now present under their own
+names — protection -> Strength, status -> Tyranny, Masculinity, Well-Groomed. H4 moves
+from "does a need track two adjectives we chose" to something much closer to a direct
+replication of a published result, and subscales get 2-10 items instead of 2.
+
+### The one-to-one mapping had to go, and that is a code change
+
+`need_outcome_links` looked the prototype up by naming convention, `f"{name}_ideal"`,
+which silently assumed each need has exactly one matching dimension. The real result is
+many-to-many. Instruments now carry an explicit `predicts` block, validated at load
+against the instrument's own subscale names, and the analysis averages a need's
+predicted dimensions. The mapping is taken from their Study 5 results, not invented; the
+single theoretical entry is affiliation -> sensitivity, since their text groups
+affiliation with the prestige side but reports no per-dimension increment for it.
+
+### Costs accepted
+
+45 items answered in one call is a real straight-lining risk, and it is larger than the
+22-item FFNI that already forced the P3 ceiling up. `SURVEY_MAX_TOKENS` goes 3000 ->
+4500. Item count does not change call count — `_administer` sends a whole battery in one
+call — so the cost is output tokens only.
+
+Nothing validates this instrument yet: `measure-check` runs on `study.self_report` only,
+so `leader_ideal` and `effectiveness` are unchecked for differentiation, straight-lining
+and reliability. `leader_ideal` could be added to it — `about: prototype` needs no rating
+target, so it can be administered twice with no discussion, exactly like the FFNI.
+`effectiveness` cannot: it asks about "the meeting you just had". That remains open.
