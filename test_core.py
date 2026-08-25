@@ -83,6 +83,28 @@ def test_balanced_sampler_exhausts_pool_before_repeating() -> None:
     assert sorted(batch[:3]) == [0, 1, 2] and len(batch) == 4, batch
 
 
+def test_a_run_never_seats_the_same_persona_twice() -> None:
+    """8 neutrals taken 3 at a time run the queue dry in the middle of run 3's draw.
+    Refilling with a fresh cycle of all 8 could hand back somebody already in that
+    cast, and TinyWorld rejects the duplicate name — the study died on run 3."""
+    sampler = BalancedSampler(8)
+    for run_no in range(1, 30):
+        cast = sampler.take(3)
+        assert len(set(cast)) == 3, f"run {run_no} drew {cast}"
+
+    # Every id still appears before any repeats: 8 runs of 3 is three full cycles.
+    counts: dict[int, int] = {}
+    fresh = BalancedSampler(8)
+    for _ in range(8):
+        for i in fresh.take(3):
+            counts[i] = counts.get(i, 0) + 1
+    assert sorted(counts) == list(range(8))
+    assert max(counts.values()) - min(counts.values()) <= 1, counts
+
+    # A draw wider than the pool has no choice but to repeat, and still may.
+    assert len(BalancedSampler(3).take(4)) == 4
+
+
 def test_balanced_sampler_is_seeded_so_conditions_align() -> None:
     # Run i must draw the same positions in every condition, or the two conditions
     # are compared across different casts.

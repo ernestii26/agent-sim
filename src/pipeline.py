@@ -38,7 +38,16 @@ class BalancedSampler:
         while len(drawn) < n:
             if not self._queue:
                 self._queue = self._rng.sample(range(self._size), self._size)
-            drawn.append(self._queue.pop(0))
+            index = self._queue.pop(0)
+            # A cycle boundary inside one draw must not seat the same persona twice in
+            # one room: 8 neutrals taken 3 at a time run the queue dry mid-draw on run
+            # 3, and the fresh cycle can hand back somebody already in this cast. Send
+            # the repeat to the back of the new cycle instead. A draw wider than the
+            # pool still repeats — it has no other option.
+            if index in drawn and len(drawn) < self._size:
+                self._queue.append(index)
+                continue
+            drawn.append(index)
         return drawn
 
 
