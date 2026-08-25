@@ -21,12 +21,17 @@ SILENCE_THRESHOLD = 0.80  # a persona below this stayed quiet at least sometimes
 # Discussion metrics                                                           #
 # --------------------------------------------------------------------------- #
 
-def group_metrics(record: RunRecord, group_key: str) -> dict[str, float]:
-    """Votes received, speech rate, and words per spoken turn for one group in one run."""
+def group_metrics(
+    record: RunRecord, group_key: str, *, voters: tuple[str, ...] | None = None
+) -> dict[str, float]:
+    """Votes received, speech rate, and words per spoken turn for one group in one run.
+
+    `voters` restricts which groups' ballots count towards the vote metric.
+    """
     turns = record.turns(group_key)
     spoken = [t for t in turns if t["spoke"]]
     return {
-        "votes": float(record.votes_for(group_key)),
+        "votes": float(record.votes_for(group_key, by=voters)),
         "speech_rate": (len(spoken) / len(turns)) if turns else float("nan"),
         "words_per_turn": mean([float(t["word_count"]) for t in spoken]) if spoken else float("nan"),
     }
@@ -83,7 +88,15 @@ def summarize_contrast(
     words per spoken turn. `supported` refers to the votes metric at p < .05.
     """
     a, b = condition.contrast
-    per_run = [(group_metrics(r, a), group_metrics(r, b)) for r in records]
+    # The contrasted groups are the candidates. Letting them vote in their own contest
+    # puts a rival's ballot into the dependent variable: in the 10-agent runs that was
+    # 2 of 10 votes and moved the gap by ~0.1, but at a cast of 5 it is 2 of 5. So the
+    # electorate is everyone not standing. Falls back to the whole room if a study
+    # contrasts every group it has.
+    voters = tuple(k for k in study.groups if k not in (a, b)) or None
+    per_run = [
+        (group_metrics(r, a, voters=voters), group_metrics(r, b, voters=voters)) for r in records
+    ]
 
     metrics: dict[str, Any] = {}
     for key in ("votes", "speech_rate", "words_per_turn"):
@@ -110,6 +123,13 @@ def summarize_contrast(
             for r, (ma, mb) in zip(records, per_run)
         ],
         "wins": sum(1 for ma, mb in per_run if ma["votes"] > mb["votes"]),
+        "electorate": list(voters) if voters else None,
+        # Kept out of the test but not thrown away: how the two candidates rated each
+        # other is the dominance side's own read on the prestige side, and vice versa.
+        "candidate_votes": {
+            a: sum(r.votes_for(a, by=(b,)) for r in records),
+            b: sum(r.votes_for(b, by=(a,)) for r in records),
+        },
         "metrics": metrics,
         # Sampled groups are the ones run.py validate cannot judge — it only looks at
         # always-present groups. A leader who never spoke is unratable, so the vote in

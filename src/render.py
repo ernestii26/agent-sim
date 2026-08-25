@@ -66,6 +66,14 @@ def render_contrast(study: Study, condition: Condition, summary: dict[str, Any])
         print(f"Hypothesis: {summary['hypothesis']}")
     print()
 
+    if summary.get("electorate"):
+        voting = ", ".join(study.label_of(g) for g in summary["electorate"])
+        cv = summary["candidate_votes"]
+        print(f"Electorate: {voting} only — the two contrasted groups stand, so they do not vote.")
+        print(f"  (set aside: {label_b} gave {label_a} {cv[a]} votes, "
+              f"{label_a} gave {label_b} {cv[b]})")
+        print()
+
     print(f"  {'Run':>3}  {label_a + ' votes':>16}  {label_b + ' votes':>16}  {'Diff':>6}")
     print("  " + "-" * 48)
     for row in summary["per_run"]:

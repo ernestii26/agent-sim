@@ -200,9 +200,9 @@ each, plus `tools/interaction_test.py` for the primary test.
 
 | test | result |
 |---|---|
-| H1 (collaborative: P > D votes) | NOT supported, p = 0.440 (P wins 8/20) |
-| H2 (threat: D > P votes) | **supported**, p = 0.003 (D wins 15/20, mean 6.25 vs 2.20) |
-| **Interaction** (threat's D-P gap > collaborative's) | **supported**, p = 0.011 (mean D-P: threat +4.05, collaborative -0.20) |
+| H1 (collaborative: P > D votes) | NOT supported, p = 0.483 (P wins 8/20) |
+| H2 (threat: D > P votes) | **supported**, p = 0.002 (D wins 15/20, mean 5.80 vs 1.65) |
+| **Interaction** (threat's D-P gap > collaborative's) | **supported**, p = 0.007 (mean D-P: threat +4.15, collaborative -0.05) |
 
 The interaction is the test that actually matches the claim in decision 3 — threat
 does not merely favor D in isolation, it favors D **relative to** an otherwise-neutral
@@ -212,7 +212,7 @@ threat isn't just an existing D advantage getting amplified, since there was no 
 advantage to begin with under collaboration.
 
 Threat's speech-rate gap (0.98 vs 0.85, p = 0.008) is real but far too small to explain
-a 6.25-vs-2.20 vote gap on its own. `words_per_turn`'s p = 1.000 in both reports is a
+a 5.80-vs-1.65 vote gap on its own. `words_per_turn`'s p = 1.000 in both reports is a
 reporting artifact, not a finding — `summarize_contrast` always tests contrast[0] >
 contrast[1] one-sided, and P consistently talks *more* per turn than D in both
 conditions, so that metric's one-sided test is checking the wrong direction; read the
@@ -434,7 +434,7 @@ conflict) manipulate deadlines. The 48 hours was ours.
 ### Why it is retired rather than kept
 
 Its job was to make a null in Step 1 interpretable, and Step 1 produced no null that
-needed it: H2 p = 0.003, interaction p = 0.011. It costs roughly 20% more API calls
+needed it: H2 p = 0.002, interaction p = 0.007. It costs roughly 20% more API calls
 per run, and the effect it verified (5.38 vs 3.21, matching a smaller pilot to within
 0.1) is stable enough to cite rather than re-measure.
 
@@ -698,3 +698,51 @@ dominant cost line.
 Now incomparable to new data on two counts rather than one — the sampling fixes in
 section 13's header, and this cast change. They remain valid as the pilot that
 established the behavioural effect and the effect size 30 runs was sized against.
+
+---
+
+## 16. The electorate excludes the candidates (2026-08-26)
+
+`summarize_contrast` now counts only ballots cast by groups that are not in the
+condition's contrast. `RunRecord.votes_for` takes a `by=` filter; `group_metrics` passes
+it through; the summary carries `electorate` and a `candidate_votes` block, and
+`render_contrast` prints both.
+
+### Why
+
+Everyone in the room votes and nobody may vote for themselves, so P and D were voting in
+the contest they are the candidates in. They cross-vote heavily — under threat, D chose
+P 11 times out of 20, more often than it chose any neutral.
+
+At a cast of 10 that was 2 ballots in 10 and barely moved anything. At the cast of 5
+adopted in section 15 it is 2 in 5, and D can receive at most 4 votes, one of them from
+its direct rival. Same design detail, double the weight.
+
+### What it changes in the existing 20-run results
+
+| test | all voters | neutrals only |
+|---|---|---|
+| H1, collaborative P > D | 2.95 vs 2.75, p = 0.440 | 2.55 vs 2.50, p = 0.483 |
+| H2, threat D > P | 6.25 vs 2.20, p = 0.003 | **5.80 vs 1.65, p = 0.002** |
+| Interaction | +4.25, p = 0.011 | **+4.20, p = 0.007** |
+| mean D-P, threat | +4.05 | +4.15 |
+| mean D-P, collaborative | -0.20 | -0.05 |
+
+Every conclusion stands and both supported tests get stronger. H1's null gets slightly
+deeper, which costs nothing — it was never close.
+
+All figures quoted in `docs/weekly-report-2026-08-25.md` were updated to the restricted
+electorate. Anything citing 6.25 vs 2.20 predates this.
+
+### Why not simply stop P and D voting
+
+Their ballots are data. D choosing P over every neutral is the dominance side's own read
+on the prestige side, and the vote reasons attached to those ballots are the only place
+a candidate explains what it saw in its rival. So they are still collected, still stored,
+and reported as a set-aside line rather than folded into the test.
+
+### Alignment this buys
+
+H6's outcome is a neutral's binary endorsement (design decisions of 2026-08-26). The
+vote-level tests now run on exactly the same ballots, so the behavioural layer and the
+mediation layer are no longer computed from different electorates.

@@ -50,8 +50,16 @@ class RunRecord:
             return self.transcript
         return [t for t in self.transcript if t["group"] == group]
 
-    def votes_for(self, group: str) -> int:
-        return sum(1 for v in self.votes if v["voted_for_group"] == group)
+    def votes_for(self, group: str, *, by: tuple[str, ...] | None = None) -> int:
+        """Votes received by `group`, optionally counting only voters in `by`.
+
+        The contrasted groups are candidates in their own contest, so restricting the
+        electorate to everyone else is what keeps a rival's ballot out of the DV.
+        """
+        return sum(
+            1 for v in self.votes
+            if v["voted_for_group"] == group and (by is None or v["voter_group"] in by)
+        )
 
     def members(self, group: str) -> list[str]:
         return self.members_by_group.get(group, [])

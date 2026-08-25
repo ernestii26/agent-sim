@@ -142,11 +142,18 @@ def _record(run_no: int = 1, p_votes: int = 2, neutrals: tuple[str, ...] = ()) -
             spoke = (i + r) % 2 == 0  # each neutral is quiet exactly half the time
             tr.append({"round": r, "persona_id": pid, "group": "N",
                        "spoke": spoke, "word_count": 12 if spoke else 0})
-    voters = ["P1", "D1"] + list(neutrals)
+    # `p_votes` counts NEUTRAL ballots for P; the two candidates cross-vote, the way
+    # they do in the real records, so the electorate restriction has something to strip.
     votes = [
-        {"voter_id": v, "voted_for_id": "P1" if i < p_votes else "D1",
+        {"voter_id": pid, "voter_group": "N",
+         "voted_for_id": "P1" if i < p_votes else "D1",
          "voted_for_group": "P" if i < p_votes else "D", "reason": ""}
-        for i, v in enumerate(voters)
+        for i, pid in enumerate(neutrals)
+    ] + [
+        {"voter_id": "P1", "voter_group": "P",
+         "voted_for_id": "D1", "voted_for_group": "D", "reason": ""},
+        {"voter_id": "D1", "voter_group": "D",
+         "voted_for_id": "P1", "voted_for_group": "P", "reason": ""},
     ]
     return RunRecord.from_dict(
         {"run_no": run_no, "condition": "collaborative",
@@ -182,16 +189,21 @@ def test_ttest_direction_and_degenerate_input() -> None:
     assert t_flat != t_flat
 
 
-def test_summarize_contrast_follows_the_conditions_direction() -> None:
+def test_summarize_contrast_counts_only_the_electorate() -> None:
+    """The contrasted groups stand for election, so their own ballots stay out of the DV."""
     study = load_study("prestige_dominance")
-    records = [_record(1, p_votes=2), _record(2, p_votes=1)]  # P gets 2 then 1 vote
+    ns = ("N1", "N2", "N3")
+    records = [_record(1, p_votes=2, neutrals=ns), _record(2, p_votes=3, neutrals=ns)]
 
     collab = summarize_contrast(study, study.condition("collaborative"), records)
-    assert collab["contrast"] == ["P", "D"]
-    assert collab["per_run"] == [{"run_no": 1, "P": 2.0, "D": 0.0},
-                                 {"run_no": 2, "P": 1.0, "D": 1.0}]
-    assert collab["wins"] == 1
-    assert collab["metrics"]["votes"]["P"]["mean"] == 1.5
+    assert collab["electorate"] == ["N"]
+    # Each candidate voted for the other; neither ballot reaches per_run.
+    assert collab["candidate_votes"] == {"P": 2, "D": 2}, collab["candidate_votes"]
+    assert collab["per_run"] == [{"run_no": 1, "P": 2.0, "D": 1.0},
+                                 {"run_no": 2, "P": 3.0, "D": 0.0}]
+    assert collab["wins"] == 2
+    assert collab["metrics"]["votes"]["P"]["mean"] == 2.5
+    assert collab["metrics"]["votes"]["D"]["mean"] == 0.5
 
     # The threat condition flips the contrast, so the same records must reverse.
     threat = summarize_contrast(study, study.condition("threat"), records)
