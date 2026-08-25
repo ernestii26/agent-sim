@@ -1,0 +1,27 @@
+digraph layers {
+  rankdir=TB;
+  bgcolor="white";
+  node [shape=box style="rounded,filled" fontname="Helvetica" fontsize=13
+        color="#8a9099" penwidth=1.2 margin="0.22,0.14"];
+  edge [color="#5b6470" penwidth=1.6 arrowsize=0.8 fontname="Helvetica" fontsize=11];
+
+  ctx [label="SITUATION\ncollaborative  vs  threat" fillcolor="#e8e3d9" color="#a89f8d" fontsize=14];
+
+  n1 [label=<<b>① NEEDS</b> &#8212; what I want from a leader<br/>
+      <font point-size="11" color="#5b6470">FFNI &#183; 22 items &#183; 1&#8211;7 &#183; about: self<br/>
+      measured before AND after the scenario</font>> fillcolor="#dde7f0"];
+
+  n2 [label=<<b>② IDEALS</b> &#8212; what counts as &quot;a leader&quot; in general<br/>
+      <font point-size="11" color="#5b6470">leader_ideal &#183; 12 adjectives &#183; 1&#8211;10 &#183; about: prototype<br/>
+      names nobody in the room</font>> fillcolor="#dde7f0"];
+
+  n3 [label=<<b>③ EVALUATION</b> &#8212; how good would <i>this person</i> be<br/>
+      <font point-size="11" color="#5b6470">effectiveness &#183; 1 item per candidate &#183; 1&#8211;7<br/>
+      absolute rating, everyone can score high</font>> fillcolor="#dde7f0"];
+
+  n4 [label=<<b>④ VOTE</b> &#8212; who should lead this team<br/>
+      <font point-size="11" color="#5b6470">forced choice, 1 of 9 &#183; zero-sum<br/>
+      the only thing pd_matched measured</font>> fillcolor="#f6dfd6" color="#c98d76"];
+
+  ctx -> n1 -> n2 -> n3 -> n4;
+}

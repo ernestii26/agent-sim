@@ -1,0 +1,35 @@
+digraph gap {
+  rankdir=LR; bgcolor="white"; nodesep=0.45; ranksep=0.95;
+  node [shape=box style="rounded,filled" fontname="Helvetica" fontsize=13
+        color="#8a9099" penwidth=1.2 margin="0.19,0.13"];
+  edge [penwidth=2.0 arrowsize=0.9 fontname="Helvetica" fontsize=12];
+
+  hn [label=<<b>&#9312; NEEDS</b><br/><font point-size="11">FFNI, 22 items</font>> shape=plaintext style="" fontsize=14 fontcolor="#5b6470"];
+  hi [label=<<b>&#9313; IDEALS</b><br/><font point-size="11">12 adjectives, &#8220;a leader&#8221; in general</font>> shape=plaintext style="" fontsize=14 fontcolor="#5b6470"];
+  he [label=<<b>&#9314; EFFECTIVENESS</b><br/><font point-size="11">&#8776;50 leader <i>descriptions</i>, one week later</font>> shape=plaintext style="" fontsize=14 fontcolor="#5b6470"];
+  hx [label=<<b>A REAL PERSON</b><br/><font point-size="11">someone you just watched lead</font>> shape=plaintext style="" fontsize=14 fontcolor="#b5473a"];
+  hn -> hi -> he -> hx [style=invis];
+
+  dn [label=<<b>Protection &#183; Status</b><br/><font point-size="11" color="#5b6470">dominance-side needs</font>> fillcolor="#f6e7d6"];
+  di [label=<strong, tough,<br/>domineering, power-hungry> fillcolor="#f6e7d6"];
+  de [label=<Authoritarianism,<br/>Narcissism, Dominance> fillcolor="#f2f2f2" color="#b8bcc2" fontcolor="#8a9099"];
+
+  pn [label=<<b>Vision &#183; Expertise &#183; Fairness</b><br/><font point-size="11" color="#5b6470">prestige-side needs</font>> fillcolor="#dde7f0"];
+  pi [label=<charismatic, educated,<br/>honest, friendly &#8230;> fillcolor="#dde7f0"];
+  pe [label=<Transformational,<br/>Benevolent leadership> fillcolor="#dde7f0"];
+
+  gap [label=<<b>NEVER TESTED</b><br/><font point-size="11">by anyone, either side</font>>
+       fillcolor="#fbf0ee" color="#b5473a" style="rounded,filled,dashed" penwidth=2.2 fontcolor="#b5473a"];
+
+  pn -> pi [label="  supported  " color="#4a7a4a" fontcolor="#4a7a4a"];
+  pi -> pe [label="  supported  " color="#4a7a4a" fontcolor="#4a7a4a"];
+  dn -> di [label="  supported  " color="#4a7a4a" fontcolor="#4a7a4a"];
+  di -> de [label="  NOT supported  " color="#b5473a" fontcolor="#b5473a" style=dashed penwidth=2.4];
+  de -> gap [style=dotted color="#b5473a" penwidth=1.8];
+  pe -> gap [style=dotted color="#b5473a" penwidth=1.8];
+
+  {rank=same; hn; dn; pn;}
+  {rank=same; hi; di; pi;}
+  {rank=same; he; de; pe;}
+  {rank=same; hx; gap;}
+}

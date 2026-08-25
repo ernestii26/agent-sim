@@ -142,7 +142,7 @@ At 20 runs the design resolves only a large effect — D taking roughly twice P'
 |---|---|---|
 | 1 | Vote prompt changed to *"Based on what you observed, who should lead this team?"* | The previous wording asked who you most **trust**, and trust is prestige's defining currency in the dual model (Henrich & Gil-White 2001; Cheng et al. 2013). It loaded the dependent variable against H2. Applied to all three studies; no data existed yet, so the change was free. |
 | 2 | 20 runs per condition, declared a **pilot for estimating effect size**, not a confirmatory test | Section 4: 20 runs only resolves r >= 2. Reporting a p-value from it and extending if borderline would be optional stopping. Confirmatory n gets chosen from the observed r. |
-| 3 | The **interaction is the primary test**; per-condition t-tests are descriptive | Section 4, and it is what the hypothesis claims. Not yet implemented — `summarize_contrast` handles one condition at a time. |
+| 3 | The **interaction is the primary test**; per-condition t-tests are descriptive | Section 4, and it is what the hypothesis claims. `summarize_contrast` handles one condition at a time, so `tools/interaction_test.py` runs the test over the two saved summaries' `per_run` values; result in section 8. |
 | 4 | Added `instruments/threat_check.json` — 3 items, `about: self`, `post` only, N respondents | Without it a null is uninterpretable: no way to separate "threat does not shift preference" from "the scenario did not feel threatening". Costs 8 calls per run (+20%). Mentions no leader or person, so it cannot prime the vote. Post-only because the between-condition difference is the check; a pre-scenario baseline would measure trait threat-sensitivity instead. FFNI's protection subscale was not borrowed for it, for three reasons in order of weight: it measures a *need* for a protective leader, not felt threat; that need is exactly H6's mediator, so checking the manipulation with it would be circular; and every item names a leader, which the check must not do. (Licensing is a distant fourth — the full 22 items are reproduced verbatim under CC BY-NC-ND, which is permitted, but carving 4 of them out as a standalone short scale would be abridging.) |
 | 5 | Rounds stays at 3; verify on the 3-run smoke test before committing | `P1` and `D1` are both low-extraversion (necessarily — they are a matched pair). Each appears in roughly 3.3 of 20 runs, so about 30% of runs could carry a near-silent leader with no impression to vote on. `run.py validate` cannot catch this: `summarize_validation` judges only groups with `sample is None`, i.e. N alone. |
 | 6 | Contrast report now prints per-persona speech rate for the **sampled** groups | Closes the gap in decision 5. Flags any contrasted persona speaking in a third of their turns or less. `analysis.summarize_contrast` gained a `personas` key; `render._render_sampled_speech` prints it. |
@@ -317,10 +317,56 @@ grouping costs no personality-matching precision. Design and power sim not yet d
 see section 4's caveat, a 3-way design (life-history x condition x P/D) needs
 re-running the power simulation before committing to a run count.
 
-## 11. Still open
+## 11. The FFNI paper, checked against the PDF (2026-08-25)
 
-- The interaction test itself (decision 3) has no implementation. Both conditions'
-  summaries save `per_run` values, so it is a small script over two saved summaries.
+Everything `studies/ffni_mediation/study.json` claimed about Sheng, Andrews & van Vugt
+(2026) had been recorded from an earlier reading and never re-verified. Checked against
+`docs/ffni-paper.pdf` (90-page preprint; the article's own page N is PDF page N+2).
+
+**Confirmed as recorded.** All 22 FFNI items are verbatim from Table 4 — only difference
+is our JSON uses ASCII `'` where the paper has `’`. All six Table 1 leadership-ideal
+adjective pairs match `instruments/leader_ideal.json`. The Study 5 dominance-side null is
+real (p.42): protection and status "failed to predict perceived effectiveness of
+dominance-based leadership styles ... while [they] may influence leadership prototypes,
+they did not necessarily translate to effectiveness perceptions."
+
+**Two corrections, both of which understated the study's contribution.**
+
+1. **The paper names four gaps, not two.** Beyond mediation (p.45-46, "often assume yet
+   do not empirically test the mediating role of follower needs") and moderation (p.42,
+   "would inter-group conflict situations ... strengthen the FFN
+   protection-authoritarianism link?"), the Limitations name two more this design
+   already satisfies: they call for "experimental manipulations (e.g., vignettes or
+   **simulations** of threat, inequality, or uncertainty)" (p.49) because their own work
+   was "entirely self-report measures and correlational designs"; and they call for
+   "behavioral consequences ... such as **voting in elections**, leader support,
+   resistance" (p.45-46, p.49) because they measured only cognitive and perceptual
+   outcomes. The vote has been the DV here since before any of this was read.
+
+2. **Their "effectiveness" layer never involved observing a person.** Study 5 administered
+   the FFNI at T1 and, one week later at T2, asked participants to rate ~50 abstract
+   leadership *descriptions* for how effective those people would be as their leader.
+   So the paper's layers 2 and 3 are both abstract, and the break sits between two
+   abstract measures. Rating someone you just watched lead a pressured meeting is
+   untested on **both** sides — not just the dominance side. That is a larger opening
+   than "replicate their null", and it is why H5 was rewritten: a dominance-side effect
+   appearing here would be attributable to the shift from description to observed
+   behaviour, not to a failed replication.
+
+Also worth knowing: the paper anchors "intergroup conflict raises preference for dominant
+leaders" on Laustsen & Petersen (2017), Laustsen et al. (2025) and Spisak et al. (2012),
+not on Kakkar & Sivanathan (2017), which is where this project's threat manipulation came
+from. Both lines are legitimate; the former are the citations to engage if writing back at
+this paper.
+
+**Structural risk to name out loud:** Step 2's instruments, layer framework, hypotheses
+and entire rationale come from this single 2026 paper, which is new enough to have no
+independent validation yet. H4 is the mitigation — it is a positive control, so failing to
+reproduce an already-supported result would indicate a problem with this environment
+rather than with the new hypotheses.
+
+## 12. Still open
+
 - `leadership_style: "prestige" | "dominance"` remains in the persona and reaches the
   system prompt, so agents are told their own style. That is a demand characteristic.
   Cheap to test later: drop the field, keep traits/influence/speech, re-run.

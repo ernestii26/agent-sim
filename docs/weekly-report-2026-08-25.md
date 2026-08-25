@@ -121,106 +121,164 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 
 :::
 
-# Three layers the paper separates
+# Four layers, and what measures each
 
-- **Needs** — what I want from a leader (FFNI)
-- **Cognition** — what counts as "a leader" in the abstract
-- **Evaluation** — how effective *this specific person* would be
-- Each layer gets its own instrument
-- The layers do not have to agree
+![](figs/layers.png)
 
 ::: notes
 
-**為什麼要分三層**
+**這張圖是整份報告的骨架，後面每一頁都掛在它上面**
 
-這是論文一個很有用的區分。「追隨者怎麼看領導者」其實是三件不同的事，而且它們可能互相矛盾：
+論文把「追隨者怎麼看領導者」拆成三層，我們的實驗再往下接一層（投票）。四層的差別在於**問句指向誰**——程式裡 instrument 檔案的 `about` 欄位就是在記這件事。
 
-**第一層：需求（Needs）— 用 FFNI 測**
-「我想要領導者給我什麼？」這是動機層次，前一頁的六個需求。
+**① 需求（NEEDS）— `about: self`**
+問「我」。我想從領導者身上得到什麼。用 FFNI，22 題，7 點量表。
+**這一層是情境前後各測一次**（baseline 和 post），因為 H3 要看的是同一個人的需求**怎麼被情境改變**。其他三層都只在情境後測。
 
-**第二層：認知／原型（Cognition）— 用 leader_ideal 測**
-「一般而言，什麼樣的人算是領導者？」注意這一層問的是**抽象的刻板印象**，不指涉任何具體的人。作答時的指示語是「想想一般的領導者——不是這場會議裡的任何人」。
+**② 原型（IDEALS）— `about: prototype`**
+問「領導者這個類別」。一般而言什麼樣的人算是領導者。用 12 個形容詞，10 點量表。指示語明確講「不是這場會議裡的任何人」——這一層刻意不指涉任何具體對象。
 
-論文把每個需求對應到它預測的領導者原型形容詞（10 點量表評「這個特質有多符合領導者」）：
+**③ 評價（EVALUATION）— `about: each_candidate`**
+問「這個人」。對剛才真的觀察過的每一位參與者各評一次，7 點量表單題。
 
-- protection → **strong, tough**（強壯、強悍）
-- status → **domineering, power-hungry**（專橫、渴求權力）
-- affiliation → **compassionate, friendly**（有同理心、友善）
-- vision → **charismatic, courageous**（有魅力、有勇氣）
-- expertise → **educated, intelligent**（有學識、聰明）
-- fairness → **honest, ethical**（誠實、合乎倫理）
+**④ 投票（VOTE）**
+**注意投票不是論文的三層之一**，它是我們實驗的行為結果，在三層的下游。
 
-**第三層：評價（Evaluation）— 用 effectiveness 測**
-「剛剛開會的那個人，當我的領導者會有多稱職？」這一層針對**真實觀察到的具體個人**，會議結束後對每一位其他參與者各評一次（7 點量表，單題）。
+**③ 和 ④ 的差別很關鍵**：
+- 第三層是**絕對評分**，每個人獨立打分，互不影響——你可以給兩個人都打 6 分。
+- 投票是**強迫選擇**，只能選一個，是零和的。
+
+所以兩者會分離。你可能覺得 P 和 D 都很稱職（評分都高），但被迫選一個時選了 D。這個分離本身就是資料：如果評分差不多但投票一面倒，代表決定投票的因素不在評分裡。
+
+**而本週的 pd_matched 只測了第 ④ 層**，前三層一個都沒測——這就是它有結果卻沒有機制的原因。
+
+:::
+
+# The layers do not have to agree
+
+- Each layer has its own instrument and its own target
+- You can want protection in the abstract...
+- ...and still rate a protective person poorly
+- That mismatch is where the paper's results break
+- It is also where our vote-reason finding lands
+
+::: notes
+
+**第②層的完整對應表**
+
+論文把每個需求對應到它預測的領導者原型形容詞，這 12 個字就是 `leader_ideal` 量表的全部內容（10 點量表，評「這個特質有多符合領導者」）：
+
+| 需求 | 對應原型形容詞 | 雙路徑歸屬 |
+|---|---|---|
+| protection | strong, tough | 支配側 |
+| status | domineering, power-hungry | 支配側 |
+| affiliation | compassionate, friendly | 聲望側 |
+| vision | charismatic, courageous | 聲望側 |
+| expertise | educated, intelligent | 聲望側 |
+| fairness | honest, ethical | 聲望側 |
+
+**注意這不是標準的 ILT 量表**。Offermann & Coats 的內隱領導理論量表有 51 題，我們沒有用。這裡用的是**論文自己的需求對原型的對應**，因為 H4 要檢驗的就是這個一對一的對應關係。代價是分數不能跟已發表的 ILT 常模比較。
 
 **為什麼三層不一定一致——這是重點**
 
-你可能在抽象層說「領導者就是要強悍」，但真的遇到一個強悍的人時卻給他低分。抽象的理想和具體的評價是兩回事。下一頁講的就是論文自己在這裡撞到的牆。
+你可能在抽象層說「領導者就是要強悍」，但真的遇到一個強悍的人時卻給他低分。抽象的理想和具體的評價是兩回事，而且**它們用的是不同的心理歷程**：原型是從記憶裡調出來的刻板印象，評價是對眼前這個人的即時判斷。
+
+下一頁的圖就是論文自己在這裡撞到的牆。
 
 :::
 
 # Where their own results broke down
 
-- Needs → abstract ideals: **supported**
-- Needs → rating a real person: **only the prestige side**
-- Protection and Status did *not* predict rating dominant people well
-- So the dominance half of the mechanism is unconfirmed
-- Their Study 5 is where this shows up
+![](figs/paper_gap.png)
 
 ::: notes
 
-**論文自己的結果出現了不對稱**
+**這張圖是整個研究能切入的縫隙，最重要的一張**（內容已對照原文 PDF 核實）
 
-這是我們的研究能切入的縫隙。
+兩條路徑並排：上排聲望側，下排支配側。
 
-**第二層（抽象原型）：預測成立**
-需求確實能預測抽象的領導者原型。需要保護的人，確實比較認為「強壯、強悍」是領導者該有的樣子。六個需求對六組形容詞，對應關係成立。
+**下排第二段斷掉**——這是他們論文 p.42 的原話：
 
-**第三層（評價真實的人）：只有聲望側成立**
-- Vision、Expertise、Fairness 這些**聲望側**的需求，確實能預測受試者給出的實際效能評分——**成立**。
-- Protection、Status 這些**支配側**的需求，**卻預測不了**受試者對支配型人物的實際評分——**不成立**。
+> "Contrary to expectations, the FFNs for protection and status **failed to predict** perceived effectiveness of dominance-based leadership styles (e.g., Authoritarianism, Narcissism, Dominance), despite their established relationships with dominance-based implicit leadership theories... this **intriguing discrepancy** suggested that while FFNs for protection and status may influence leadership **prototypes**, they did **not necessarily translate to effectiveness perceptions**."
 
-**這代表什麼**
+**但這裡有一個關鍵細節，比原本以為的更有利於我們**
 
-追隨者在抽象層說「我需要保護，所以領導者要強悍」，但當一個真的很強悍的人站在他面前時，這個需求**沒有轉換成好評**。支配這一半的機制在真實評價的層次上是斷掉的。
+他們的第③層**不是在評價真人**。Study 5 的作法是：Time 1 填 FFNI，**一週後**的 Time 2 給受試者看**大約 50 條抽象的領導者描述**，問「如果這些人是你的領導者，你覺得多有效」。受試者從頭到尾**沒有觀察過任何人**。
 
-**兩種可能的解釋**（論文沒能區分）：
-1. 這個機制在真實評價中根本不運作——抽象的偏好不會落實成行為。
-2. 他們的研究設計看不到它——受試者是看文字情境或短影片，沒有真的經歷過一個支配型的人在壓力下主導會議。
+所以他們的②和③其實**都是抽象的**——②是形容詞（「領導者該是什麼樣子」），③是描述句（「這種領導者有多有效」）。兩者之間的距離比我原先畫的小很多。
 
-**注意這跟我們後來的發現遙相呼應**：我們掃描投票理由時發現「恐懼／強制」語言 0%，投票者全都用「果斷、負責」來解釋投給支配型的票。這跟論文的斷裂是同一個現象的兩個側面——支配型明明拿到了支持，但支持它的理由從來不是理論說的那個理由。
+**真正的空白在最右邊**：讓受試者**真的看著一個人主導一場有壓力的會議，然後評價那個人**——這件事**兩側都沒有人做過**。不是支配側失敗、聲望側成功，而是整個「真人」欄位是空的。
+
+**這就是我們的位置**。我們的 agent 是真的坐在那場會議裡，看著 D 打斷別人、關掉討論、逕自決定，然後才評分和投票。如果在這種條件下支配側那條線變綠，那是新發現；如果依然是紅的，那就是在遠比問卷嚴苛的條件下複製了他們的斷裂——兩種結果都有價值。
+
+**注意這跟我們的投票理由掃描是同一件事的兩面**：0% 恐懼語言 = 支配型拿到了支持，但支持它的理由從來不是理論說的那個理由。
 
 :::
 
-# The two questions the paper leaves open
+# Their design vs ours
 
-- Do follower needs **mediate** the threat → dominance effect?
-- Does threat **strengthen** the protection → dominance link?
-- Both named explicitly by the authors as untested
-- Testing them needs threat manipulated, not just measured
-- That is exactly what a simulation can do cheaply
+| | Sheng et al. | Ours |
+|---|---|---|
+| Threat | measured | **manipulated** |
+| Target rated | ~50 descriptions | **a person just observed** |
+| Needs | once, or 1 week apart | **before and after** |
+| Outcome | ratings | ratings **+ a vote** |
 
 ::: notes
 
-**作者自己點名的兩個未解問題**
+**這張表把前面兩頁的差異收攏成四行**
 
-論文在討論章節明確寫出兩個他們沒有測、但認為該測的問題：
+**第一行 — 威脅**：他們是**測量**個體差異（誰比較容易感到威脅），我們是**操弄**情境（同一批人格，兩種情境）。這是相關性設計和實驗設計的差別，也是他們 Limitations 第三點自己指出的缺陷。
 
-**問題一：中介（mediation）**
-「威脅 → 偏好支配型」這個效果是已知的，FFNI 六個需求是已測量的，但**沒有人把兩者串起來**：需求真的是中間那一環嗎？
+**第二行 — 評價對象**：他們給的是約 50 條抽象的領導者描述句，受試者沒見過任何人。我們是評價一個剛剛一起開了三輪會的具體對象。**這是最大的差異**，也是「真人」那一欄從來沒被填過的原因。
 
-中介的意思是：威脅不是直接改變領導偏好，而是先改變需求（拉高保護需求），再由需求改變偏好。要證明中介，必須同時有這三樣東西的資料——情境操弄、需求測量、偏好結果。論文有後兩樣，缺第一樣。
+**第三行 — 需求的測量時機**：他們在 Study 5 是 Time 1 測 FFNI、一週後 Time 2 測效能評價，中間沒有任何事件。我們是同一場情境的**前後測**，中間夾著操弄，所以可以看到需求**被情境改變**的量。
 
-**問題二：調節（moderation）**
-「保護需求 → 偏好支配型」這條連結，在有群際衝突／威脅時會不會**變得更強**？也就是威脅不只是拉高需求的量，還可能改變需求轉換成偏好的效率。
+**第四行 — 結果變項**：他們只有評分（知覺層次）。我們有評分**加上一場強迫選擇的投票**（行為層次）——正是他們 Limitations 第四點說該做但沒做的。
 
-**為什麼他們沒做**
+**要誠實補一句**：我們的「真人」是 LLM 扮演的，不是真人。這一欄贏得沒有那麼乾淨。但相對於「讀 50 條描述句」，經歷一場實際互動仍然是明顯不同的心理歷程。
 
-因為要測這兩個問題，威脅必須是**被操弄的**（實驗者主動製造不同情境並比較），而不只是被測量的。他們的研究大多是橫斷面的問卷和情境評分，要真的把人放進一個有生存壓力的團體、觀察互動、再測需求，成本非常高。
+:::
 
-**這就是模擬的機會**
+# Four gaps the authors name themselves
 
-在多智能體模擬裡，情境是我們寫的，威脅要多強就多強，可以重複跑幾十次，還能在完全相同的人格上比較兩種情境——這在真人研究裡不可能。
+- **Mediation** — do needs carry the context → endorsement effect?
+- **Moderation** — does conflict strengthen protection → dominance?
+- **Manipulation** — "vignettes or **simulations** of threat"
+- **Behaviour** — go beyond ratings to "**voting**, leader support"
+- Their own design was self-report, correlational, one week apart
+
+::: notes
+
+**四個空白，全部是作者自己在論文裡寫出來的**（已逐句對照 PDF 原文）
+
+我原本以為是兩個，讀完發現是四個，而且我們的設計四個都打到。
+
+**① 中介（p.45–46，Directions for Future Research）**
+
+> "...prior research has shown that **intergroup conflict increases preference for dominant leaders** (Laustsen & Petersen, 2017; Spisak et al., 2012)... these studies **often assume yet do not empirically test the mediating role of follower needs**—likely due to a lack of validated measures."
+
+他們明講：這個效果大家都知道，但沒人測過需求是不是中間那一環，因為以前沒有經過驗證的量表。FFNI 補上了工具，但他們自己沒做這個實驗。
+
+**② 調節（p.42，緊接在 Study 5 的斷裂之後）**
+
+> "would **inter-group conflict situations** (e.g., trade wars, organizational crises) **strengthen the FFN protection-authoritarianism link**?"
+
+這句話幾乎就是我們 H7 的原文。
+
+**③ 操弄方法（p.49，Limitations 第三點）**
+
+> "our research relied **entirely on self-report measures and correlational designs**, limiting causal inference... Future studies should use experimental manipulations (e.g., vignettes or **simulations** of threat, inequality, or uncertainty)..."
+
+他們自己寫了「simulations」。我們做的正好是這個。
+
+**④ 行為結果（p.45–46 與 p.49，Limitations 第四點）**
+
+> "we focused primarily on **cognitive and perceptual outcomes**... rather than **behavioral consequences**... Future research should also go beyond cognitive and perceptual outcomes to examine behavioral consequences of follower needs, such as **voting in elections**, leader support, resistance, or insubordination."
+
+我們的依變項就是一場投票。這是他們點名要但沒有的東西。
+
+**他們自己的設計限制（對照用）**：全部線上問卷（Prolific、Credamo）、自陳量表、相關性設計、Time 1 到 Time 2 隔一週。沒有操弄、沒有互動、沒有行為結果。
 
 :::
 
@@ -245,6 +303,26 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 **Step 2 是 `ffni_mediation`**：在同樣的架構上加掛三份量表（FFNI、leader_ideal、effectiveness），去測前一頁那兩個未解問題。
 
 接下來的投影片是 Step 1 的細節和結果，最後再回到 Step 2 的規劃。
+
+:::
+
+# What Step 1 can and cannot see
+
+![](figs/blackbox.png)
+
+::: notes
+
+**這張圖說明本週工作的位置和它的天花板**
+
+**兩端都有資料**：左邊的情境是我們操弄的，右邊的投票是我們測量的。所以「威脅會讓支配型勝出」這個因果宣稱，Step 1 可以支持。
+
+**中間全是黑箱**：前面講的三層——需求、原型、評價——**一層都沒測**。所以任何「為什麼」的問題，Step 1 原理上都答不出來。
+
+**唯一的一次窺探（右邊那條虛線）**：投票理由的文字掃描。這是想從既有資料裡逆推機制，成本是零（理由本來就存著）。但結果是 0% 的恐懼／強制語言——它只能告訴我們「他們沒說什麼」，推不出「他們心裡在運作什麼」。
+
+**為什麼這不算失敗**：Step 1 的設計目標就只是把行為效果建立乾淨。刻意不加量表，是因為每加一份量表就多一批 API 呼叫和一批可能出錯的地方，而在效果本身還沒確立之前，那些成本是浪費的。黑箱是預期中的，不是疏漏。
+
+**但它確實劃出了 Step 2 的必要性**：要打開這個黑箱，只能真的把量表放進去測。
 
 :::
 
@@ -815,6 +893,37 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 
 :::
 
+# H6: the mediation model
+
+![](figs/mediation.png)
+
+::: notes
+
+**這是 Step 2 的核心，也是原論文明確點名沒測過的問題**
+
+**中介（mediation）是什麼意思**
+
+一般的說法是「威脅 → 偏好支配型」，一支箭頭直接過去。中介模型主張中間還有一站：威脅先改變**需求**，需求再改變**偏好**。
+
+圖上三條路徑：
+
+- **H3（左邊實線）**：威脅 → 保護需求變高。這是鏈條第一段，用 FFNI 的前後測比較。
+- **H5（右邊實線）**：保護需求 → 支持支配型。這是第二段。**注意這正是原論文斷掉的那一段**（前面那張圖的紅色虛線），所以我們預期它不成立——但如果在真實互動的條件下它成立了，那就是新發現。
+- **虛線（直接路徑）**：把需求那一站的影響扣掉之後，威脅本身還剩下多少直接效果。
+
+**怎麼判讀**
+
+- 如果 H3 和 H5 都成立，而且虛線的直接路徑扣掉後幾乎消失 → **完全中介**，需求就是機制。
+- 如果直接路徑還很強 → **部分中介**，需求只解釋一部分，還有別的東西在運作。
+- 如果 H3 成立但 H5 不成立 → 威脅確實改變了需求，但需求不是通往偏好的那條路。這會複製原論文的斷裂，而且是在有真實互動的條件下複製，本身就是一個結果。
+
+**H7 是調節（moderation），跟中介不同**
+它問的不是「有沒有中間站」，而是「保護需求 → 支配型」這條連結的**強度**會不會被威脅改變。同樣的需求水準，在威脅情境下是不是更容易轉換成對支配型的支持。
+
+**為什麼原論文做不了**：要測這兩個，威脅必須是**被操弄的**，而且需求要在情境前後各測一次。真人研究要做到這個成本非常高，模擬則幾乎免費。
+
+:::
+
 # Step 2 hypotheses
 
 - **H3** — threat raises Protection and Status needs
@@ -903,7 +1012,11 @@ Step 2 問的是「威脅**透過什麼**改變偏好」（機制）。這一條
 **我們威脅／合作操弄的原始出處。** 14 萬名受試者、69 國、跨二十年，發現經濟不確定性提升對支配型領袖的支持，中介變項是「個人失去掌控感」。注意它已經提出了一個中介變項（掌控感），而 FFNI 提供的是另一組更細緻的候選中介變項。
 
 **Sheng, X., Andrews, W., & van Vugt, M. (2026).** The psychology of following: Conceptualizing and validating the Fundamental Follower Needs Inventory. *Journal of Applied Psychology*, 111(6), 768–801.
-**Step 2 的核心文獻。** 六個追隨者需求的量表與驗證，三層架構（需求／認知／評價），以及他們自己點名未測的兩個問題（中介、調節）。
+**Step 2 的核心文獻**，也是整個 Step 2 的單一來源：量表、六個需求、三層架構、12 個原型形容詞（Table 1）、效能評分格式、H3–H7 的預測方向、以及四個未測問題，全部出自這一篇。一份預印本在 `docs/ffni-paper.pdf`（90 頁，正文從 PDF 第 3 頁開始）。
+
+**這個單一來源依賴是 Step 2 最大的結構風險**，值得在報告時主動講：那篇 2026 年才發表，FFNI 大概還沒有任何獨立團隊驗證過。好處是搶先，壞處是地基未經檢驗。緩解方式是 H4 當正對照——如果連他們已支持的結果都複製不出來，就知道問題出在我們的環境而不是新假設。
+
+**另外**：那篇引用來支持「群際衝突提升支配型偏好」的是 Laustsen & Petersen (2017)、Laustsen et al. (2025)、Spisak et al. (2012)，不是 Kakkar & Sivanathan。我們的威脅操弄源自後者，兩條線都成立，但如果要跟那篇對話，前面那三篇是他們的錨點。
 
 **Safra, L., Algan, Y., Tecu, T., Grèzes, J., Baumard, N., & Chevallier, C. (2017).** Childhood harshness predicts long-lasting leader preferences. *Evolution and Human Behavior*, 38(5), 645–651.
 生活史路線的直接先例。童年環境嚴苛預測成年後偏好威權／支配型領袖，且與當前處境無關。

@@ -1,0 +1,20 @@
+digraph med {
+  bgcolor="white"; nodesep=0.8; ranksep=1.0;
+  labelloc="b"; fontname="Helvetica"; fontsize=14; fontcolor="#b5473a";
+  label=<<br/><b>H6</b>: does the change in need carry the effect?&#160;&#160;&#183;&#160;&#160;<b>H7</b>: is the need&#8594;dominance link stronger under threat?<br/><font point-size="12" color="#8a9099">dashed = the direct path, whatever is left once the need is accounted for</font>>;
+  node [shape=box style="rounded,filled" fontname="Helvetica" fontsize=14
+        color="#8a9099" penwidth=1.2 margin="0.22,0.15"];
+  edge [penwidth=2.0 arrowsize=0.9 fontname="Helvetica" fontsize=13];
+
+  m [label=<<b>PROTECTION need</b><br/><font point-size="11" color="#5b6470">FFNI, before &#8594; after</font>> fillcolor="#f6e7d6"];
+  x [label=<<b>THREAT</b><br/><font point-size="11" color="#5b6470">vs collaborative</font>> fillcolor="#e8e3d9" color="#a89f8d"];
+  y [label=<<b>DOMINANCE endorsed</b><br/><font point-size="11" color="#5b6470">rating + vote</font>> fillcolor="#f6dfd6" color="#c98d76"];
+  sp [shape=point style=invis width=0.01];
+
+  {rank=same; x; sp; y;}
+  x -> sp -> y [style=invis];
+
+  x -> m [label="  H3  " color="#3d6a99" fontcolor="#3d6a99"];
+  m -> y [label="  H5  " color="#3d6a99" fontcolor="#3d6a99"];
+  x -> y [color="#8a9099" style=dashed constraint=false];
+}
