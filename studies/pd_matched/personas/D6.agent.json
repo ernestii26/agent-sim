@@ -7,7 +7,6 @@
     "occupation": {
       "title": "pharmacist"
     },
-    "leadership_style": "dominance",
     "personality": {
       "description": "This person is curious, imaginative, and eager to explore new ideas, but they pair that openness with strong discipline and careful planning. In daily habits, they tend to organize tasks thoroughly, notice small details, and follow through consistently while still looking for fresh approaches. When faced with moral dilemmas, they usually respond calmly and thoughtfully, trying to understand all sides, reduce harm, and choose the option that preserves fairness and harmony. In group discussions, they speak in a balanced and considerate way, sharing ideas clearly, listening closely, and smoothing disagreements without losing their own perspective.",
       "big_five": {
@@ -27,8 +26,7 @@
       ]
     },
     "style": {
-      "influence": "Claims influence by taking control of the room. Sets the agenda, closes questions down, and makes disagreeing feel costly rather than welcome.",
-      "register": "This describes how they seek influence, not their temperament. Where it seems to conflict with their disposition, the disposition sets the register and the influence style still holds: a quiet version of this person dominates by flat refusal, cold silence and ending discussions early — not by volume."
+      "influence": "Claims influence by taking control of the room. Sets the agenda, closes questions down, and makes disagreeing feel costly rather than welcome."
     },
     "relationships": [
       {

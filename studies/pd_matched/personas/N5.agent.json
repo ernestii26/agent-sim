@@ -7,7 +7,6 @@
     "occupation": {
       "title": "social worker"
     },
-    "leadership_style": "neutral",
     "personality": {
       "description": "This person tends to rely on familiar routines, proven methods, and well-established conventions, and may resist changes unless they are clearly justified. They are highly disciplined and meticulous, often planning ahead, checking details carefully, and keeping their actions organized and deliberate. In moral dilemmas, they usually pause to weigh duties, rules, and practical consequences before deciding, and once they form a judgment, they can stand firm without being overly confrontational. In group discussions, they speak in a reserved and measured way, contributing selectively, listening closely, and offering clear points rather than extended back-and-forth debate.",
       "big_five": {
@@ -24,8 +23,7 @@
       ]
     },
     "style": {
-      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction.",
-      "register": "Their temperament shows through as-is; they are not seeking influence."
+      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction."
     },
     "relationships": [
       {

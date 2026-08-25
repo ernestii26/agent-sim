@@ -7,7 +7,6 @@
     "occupation": {
       "title": "hospital administrator"
     },
-    "leadership_style": "neutral",
     "personality": {
       "description": "This person tends to explore new ideas enthusiastically, but does so in a structured way, often planning carefully and paying close attention to details. They usually keep a small circle of interaction, preferring calm settings, thoughtful one-on-one exchanges, and time alone to reflect. When faced with moral dilemmas, they try to understand everyone’s feelings, look for fair and balanced solutions, and avoid escalating conflict unless a clear principle is at stake. In group discussions, they speak thoughtfully and precisely, listening more than they talk, and when they do contribute, their tone is calm, considerate, and cooperative.",
       "big_five": {
@@ -24,8 +23,7 @@
       ]
     },
     "style": {
-      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction.",
-      "register": "Their temperament shows through as-is; they are not seeking influence."
+      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction."
     },
     "relationships": [
       {

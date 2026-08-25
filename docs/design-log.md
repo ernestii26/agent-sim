@@ -369,9 +369,7 @@ rather than with the new hypotheses.
 
 - No manipulation check is administered by any study — see section 13 for what was
   retired, what it measured, and the loader change needed to give `ffni_mediation` one.
-- `leadership_style: "prestige" | "dominance"` remains in the persona and reaches the
-  system prompt, so agents are told their own style. That is a demand characteristic.
-  Cheap to test later: drop the field, keep traits/influence/speech, re-run.
+- ~~`leadership_style` reaches the system prompt~~ — removed 2026-08-26, see section 17.
 - Environment: `.venv` on CPython 3.12.14 via `uv` (the system Python is 3.14.5 and
   `tinytroupe` fails to install there).
 
@@ -746,3 +744,67 @@ and reported as a set-aside line rather than folded into the test.
 H6's outcome is a neutral's binary endorsement (design decisions of 2026-08-26). The
 vote-level tests now run on exactly the same ballots, so the behavioural layer and the
 mediation layer are no longer computed from different electorates.
+
+---
+
+## 17. The `leadership_style` label removed from personas (2026-08-26)
+
+`tools/sample_bank.py` no longer writes `leadership_style` or `style.register` into a
+persona spec. `studies/pd_matched/personas/` regenerated at the same seed; the diff is
+those two keys and nothing else — same names, Big Five, occupations, traits, speech
+examples, same six pairs.
+
+### How bad the leak actually was
+
+Worse than a stray field. `tinytroupe/agent/tiny_person.py:319`:
+
+    template_variables["persona"] = json.dumps(self._persona.copy(), indent=4)
+
+The whole persona dict goes verbatim into the system prompt, under a `## Persona`
+heading, in a template that says "You interpret the persona described below. You indeed
+think you ARE that person" and "the persona characteristics ALWAYS OVERRIDE ANY BUILT-IN
+CHARACTERISTICS you might have". So each agent was reading `"leadership_style":
+"dominance"` as a self-description it had been instructed to embody.
+
+That is the textbook demand characteristic: the risk was never that dominance behaviour
+would be absent, but that we would be measuring the model's stereotype of the word
+rather than the behaviour the style block describes.
+
+`style.register` went for the same reason. It read "This describes how they seek
+influence, not their temperament..." — meta-language about the specification, which cues
+the manipulation and also contradicts TinyTroupe's own instruction that the agent must
+never suggest it is following a persona spec.
+
+### It cost nothing to remove
+
+`leadership_style` was written by `sample_bank.py` and read by nothing. Group membership
+comes from `study.json`'s `groups.ids` and is passed to `load_personas` explicitly, so
+no analysis path ever consulted the field.
+
+The timing was free too: sections 13, 15 and 16 already made the existing 40 runs
+incomparable, so there was no baseline to preserve and no separate comparison run to
+pay for. A dedicated labelled-vs-unlabelled comparison would have measured a design
+that no longer exists.
+
+### What still carries the manipulation
+
+`style.influence` ("Claims influence by taking control of the room..."), the six
+behavioural `traits` ("treats a challenge as something to be shut down, not examined")
+and four `speech_examples` ("We're doing it this way. Next."). Concrete behaviour, no
+construct name.
+
+### The accepted cost
+
+`register` was what told a low-extraversion dominant how to dominate quietly — "flat
+refusal, cold silence and ending discussions early, not by volume". Pair 1 (Hugo
+Marchand / Xavier Dubois) is the low-extraversion profile and may now go quieter than
+before. The speech-rate warning in the contrast report is the thing that catches it;
+watch pair 1 specifically on the next run.
+
+### A landmine found on the way
+
+`pair_bank.py` regenerated `study.json` as well as the personas, from hardcoded
+defaults — so simply re-running it to refresh personas silently reverted `pair_with`,
+`N.sample`, the corrected vote prompt, the matched deadline and the note. It now writes
+`study.json` only when the file is absent and says so when it declines. Regenerating
+personas is a routine thing to want; losing a week of design decisions to it is not.

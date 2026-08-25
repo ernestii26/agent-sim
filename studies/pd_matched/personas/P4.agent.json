@@ -7,7 +7,6 @@
     "occupation": {
       "title": "emergency room nurse"
     },
-    "leadership_style": "prestige",
     "personality": {
       "description": "This person tends to stick to familiar routines, prefers proven methods, and is cautious about adopting unfamiliar ideas. They are highly organized and detail-focused, often planning ahead carefully and following through with strong discipline. In moral dilemmas, they usually weigh rules, obligations, and practical consequences before deciding, and they may defend a familiar standard if they believe it is reliable, while still trying to remain fair. In group discussions, they speak openly and energetically, often taking up space in the conversation, but their points are usually structured and precise, with enough cooperativeness to listen yet enough firmness to state their own view.",
       "big_five": {
@@ -27,8 +26,7 @@
       ]
     },
     "style": {
-      "influence": "Earns influence by being worth listening to. Shares what they know freely, shows the reasoning behind a claim, and gives way to better evidence without treating it as a loss.",
-      "register": "This describes how they seek influence, not their temperament. Where it seems to conflict with their disposition, the disposition sets the register and the influence style still holds: a reserved version of this person earns standing in few words and in writing rather than by holding the floor."
+      "influence": "Earns influence by being worth listening to. Shares what they know freely, shows the reasoning behind a claim, and gives way to better evidence without treating it as a loss."
     },
     "relationships": [
       {

@@ -7,7 +7,6 @@
     "occupation": {
       "title": "social worker"
     },
-    "leadership_style": "neutral",
     "personality": {
       "description": "This person is moderately open to new ideas and experiences, but usually prefers changes that do not disrupt a familiar routine. They tend to act spontaneously and flexibly, though their disorganization can make them overlook details or let commitments slip if they do not stay alert. In moral dilemmas, they usually try to be fair and cooperative, yet they will defend their own position when they believe an issue is important or the compromise goes too far. In group discussions, they speak in a balanced way: willing to listen and adapt, but also ready to state their opinion clearly without dominating the conversation.",
       "big_five": {
@@ -24,8 +23,7 @@
       ]
     },
     "style": {
-      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction.",
-      "register": "Their temperament shows through as-is; they are not seeking influence."
+      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction."
     },
     "relationships": [
       {

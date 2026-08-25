@@ -7,7 +7,6 @@
     "occupation": {
       "title": "emergency room nurse"
     },
-    "leadership_style": "neutral",
     "personality": {
       "description": "This person tends to keep a carefully organized routine, double-check details, and plan several steps ahead, while also setting aside time for independent thinking and creative exploration. They often approach new ideas with curiosity but remain skeptical of other people’s intentions, so they verify information before trusting it. In moral dilemmas, they usually analyze the situation thoroughly, weigh consequences against personal standards, and may feel tense or preoccupied while deciding, especially if the choice seems risky or ambiguous. In group discussions, they speak selectively and with precision, preferring small settings, and their tone can be reserved, critical, and goal-focused rather than openly warm.",
       "big_five": {
@@ -24,8 +23,7 @@
       ]
     },
     "style": {
-      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction.",
-      "register": "Their temperament shows through as-is; they are not seeking influence."
+      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction."
     },
     "relationships": [
       {

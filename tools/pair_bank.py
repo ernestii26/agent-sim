@@ -185,13 +185,27 @@ def main() -> None:
         "persona_bank": {"source": args.bank, "setting": args.setting,
                          "seed": args.seed, "matching": "P_i and D_i share one bank row"},
     }
-    (out_dir / "study.json").write_text(
-        json.dumps(study, indent=2, ensure_ascii=False), encoding="utf-8")
+    # Only bootstrap study.json; never overwrite one. Regenerating personas is a routine
+    # thing to want (a style block changes, a leaked field is removed), but this dict is
+    # built from hardcoded defaults and would silently revert every design decision made
+    # in the file since: pair_with, sample sizes, the vote prompt, scenario edits, notes.
+    # ponytail: refuse rather than merge — a merge would need to know which side is newer.
+    study_path = out_dir / "study.json"
+    if study_path.exists():
+        wrote_study = False
+    else:
+        study_path.write_text(json.dumps(study, indent=2, ensure_ascii=False), encoding="utf-8")
+        wrote_study = True
     (out_dir / "bank_sample.json").write_text(
         json.dumps({"bank": args.bank, "setting": args.setting, "seed": args.seed,
                     "personas": provenance}, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    print(f"\nWrote {len(specs)} personas + study.json to {out_dir}")
+    print(f"\nWrote {len(specs)} personas to {out_dir}")
+    if wrote_study:
+        print("  study.json created")
+    else:
+        print("  study.json left alone — it already exists and holds hand-made design "
+              "decisions.\n  Delete it first if you really want the generated defaults back.")
     print(f"  {args.pairs} matched pairs, {args.neutrals} neutrals")
     print("  matching verified: Big Five, occupation, age group, parental status")
     print("\nMatched pairs:")

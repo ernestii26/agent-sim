@@ -7,7 +7,6 @@
     "occupation": {
       "title": "pharmacist"
     },
-    "leadership_style": "neutral",
     "personality": {
       "description": "This person tends to spend time exploring new ideas privately, often keeping a notebook of thoughts, plans, or creative possibilities. They are meticulous and organized in daily habits, carefully checking details and preparing ahead so that situations unfold smoothly. In moral dilemmas, they usually respond with calm reflection, weighing different viewpoints, looking for a fair compromise, and trying to reduce harm while preserving harmony. In group discussions, they speak thoughtfully and briefly, listen closely, and prefer measured, considerate contributions over dominating the conversation.",
       "big_five": {
@@ -24,8 +23,7 @@
       ]
     },
     "style": {
-      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction.",
-      "register": "Their temperament shows through as-is; they are not seeking influence."
+      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction."
     },
     "relationships": [],
     "speech_examples": [

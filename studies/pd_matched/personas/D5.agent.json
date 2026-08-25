@@ -7,7 +7,6 @@
     "occupation": {
       "title": "emergency room nurse"
     },
-    "leadership_style": "dominance",
     "personality": {
       "description": "This person tends to stick with familiar routines, prefers proven methods, and is cautious about adopting unfamiliar ideas too quickly. They are moderately organized, keeping enough structure to stay on track while still adapting when needed, and they usually respond to moral dilemmas by weighing practical consequences, relying on established principles, and seeking a fair middle ground before taking a firm stand if necessary. In group discussions, they speak easily and energetically, often taking initiative in conversation, but they may push back when an idea clashes with their own view or with what feels dependable. They are generally cooperative and socially warm, though they can become somewhat tense under pressure before regaining composure.",
       "big_five": {
@@ -27,8 +26,7 @@
       ]
     },
     "style": {
-      "influence": "Claims influence by taking control of the room. Sets the agenda, closes questions down, and makes disagreeing feel costly rather than welcome.",
-      "register": "This describes how they seek influence, not their temperament. Where it seems to conflict with their disposition, the disposition sets the register and the influence style still holds: a quiet version of this person dominates by flat refusal, cold silence and ending discussions early — not by volume."
+      "influence": "Claims influence by taking control of the room. Sets the agenda, closes questions down, and makes disagreeing feel costly rather than welcome."
     },
     "relationships": [
       {
