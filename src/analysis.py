@@ -307,29 +307,42 @@ def summarize_mediation(
     *,
     need: str,
     outcome_group: str,
-    effectiveness: Instrument,
     bootstrap: int = 1000,
     seed: int = 0,
 ) -> dict[str, Any]:
     """H6: does `need` carry the condition effect onto endorsement of `outcome_group`?
 
-    Path a  condition -> need        (difference in post-discussion need scores)
-    Path b  need -> endorsement      (slope, pooled across conditions)
+    Path a  condition -> induced need   (difference in post-minus-baseline change)
+    Path b  induced need -> endorsement (within-condition-centred slope, pooled)
     Indirect a*b with a percentile bootstrap CI. Deliberately a simple product-of-paths
-    estimate rather than SEM: with ~20 runs per condition the extra machinery would imply
-    a precision the data does not have.
+    estimate rather than SEM: at this many runs the extra machinery would imply a
+    precision the data does not have.
+
+    The mediator is the CHANGE in the need, not its level. The source paper's null is
+    about the chronic, trait-like reading of a need; the claim here is about the state
+    a situation induces, and a level score mixes the two. The outcome is the respondent's
+    own vote, which is the behavioural consequence the paper named as untested — and
+    keeping it distinct from the effectiveness rating is what stops H6 and H5 from
+    resting on the same coefficient with opposite predictions.
+
+    ponytail: the bootstrap resamples respondents, not runs, so it still ignores that
+    neutrals inside one run watched the same discussion. Simulated, that clustering moves
+    the false-positive rate by about 2 points (12% -> 14% as ICC goes 0 -> .25), against
+    the 8 points the centring above fixes. Switch to resampling runs if the observed ICC
+    turns out high.
     """
     per_condition: dict[str, list[tuple[float, float]]] = {}
     for condition_key, records in by_condition.items():
         pairs: list[tuple[float, float]] = []
         for record in records:
-            ratings = record.ratings(effectiveness)
-            targets = record.members(outcome_group)
-            for pid, scores in record.needs(POST, needs).items():
-                value = scores.get(need, float("nan"))
-                given = mean([ratings.get(pid, {}).get(t, float("nan")) for t in targets])
-                if not (math.isnan(value) or math.isnan(given)):
-                    pairs.append((value, given))
+            before = record.needs(BASELINE, needs)
+            after = record.needs(POST, needs)
+            for pid, scores in after.items():
+                base = before.get(pid, {}).get(need, float("nan"))
+                induced = scores.get(need, float("nan")) - base
+                endorsed = record.vote_of(pid)
+                if not math.isnan(induced) and endorsed is not None:
+                    pairs.append((induced, 1.0 if endorsed == outcome_group else 0.0))
         per_condition[condition_key] = pairs
 
     keys = sorted(per_condition)
@@ -339,7 +352,19 @@ def summarize_mediation(
 
     def estimate(data: dict[str, list[tuple[float, float]]]) -> tuple[float, float, float]:
         a = mean([v for v, _ in data[hi_key]]) - mean([v for v, _ in data[lo_key]])
-        pooled = data[lo_key] + data[hi_key]
+        # Path b is centred within condition. Pooling the raw scores instead makes the
+        # mediator and the outcome both functions of condition — threat raises the
+        # induced need AND raises endorsement directly, which is H2 — so the pooled
+        # slope is positive even when the need does nothing. Simulated at this design,
+        # that put the false-positive rate at 13% (5 agents, 30 runs) to 20% (10 agents,
+        # 20 runs) against a nominal 5%, and the bias does not shrink with n: only the
+        # CI does, so more runs made it worse. Centring returns it to ~7%.
+        pooled: list[tuple[float, float]] = []
+        for pairs in (data[lo_key], data[hi_key]):
+            if not pairs:
+                continue
+            centre = mean([v for v, _ in pairs])
+            pooled += [(v - centre, y) for v, y in pairs]
         b, _, _ = slope([v for v, _ in pooled], [y for _, y in pooled])
         return a, b, a * b
 

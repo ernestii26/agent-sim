@@ -176,8 +176,9 @@ def render_mediation(study: Study, med: dict[str, Any]) -> None:
           f"{study.label_of(med['outcome_group'])} endorsement")
     print("=" * 88)
     rows = [
-        (f"path a   {lo} -> {hi} shift in {med['need']}", _fmt(med["path_a"], 3)),
-        (f"path b   {med['need']} -> effectiveness slope", _fmt(med["path_b"], 3)),
+        (f"path a   {lo} -> {hi} shift in induced {med['need']}", _fmt(med["path_a"], 3)),
+        (f"path b   induced {med['need']} -> endorsement (centred within condition)",
+         _fmt(med["path_b"], 3)),
         ("indirect a*b", _fmt(med["indirect"], 3)),
         (f"95% CI   percentile bootstrap, {med['bootstrap_draws']} draws",
          f"[{_fmt(med['ci95'][0], 3)}, {_fmt(med['ci95'][1], 3)}]"),

@@ -306,20 +306,35 @@ def test_cronbach_alpha_high_when_items_agree_and_nan_when_flat() -> None:
     assert math.isnan(cronbach_alpha([[1, 2, 3]]))                # too few respondents
 
 
-def _needs_record(run_no: int, protection: int, d_rating: int, p_rating: int = 4) -> RunRecord:
-    """A run where every neutral reports the same protection need and rates the same way."""
+def _needs_record(run_no: int, protection: int, d_rating: int, p_rating: int = 4,
+                  baseline_protection: int | None = None, d_voters: int = 0) -> RunRecord:
+    """A run where every neutral reports the same protection need and rates the same way.
+
+    `baseline_protection` defaults to `protection`, i.e. the scenario induced no change.
+    `d_voters` is how many of the four neutrals endorse D; the rest endorse P.
+    """
     ffni_answers = {}
     for name, count in (("protection", 4), ("affiliation", 4), ("status", 4),
                         ("vision", 3), ("expertise", 3), ("fairness", 4)):
         for i in range(1, count + 1):
             ffni_answers[f"{name}_{i}"] = protection if name == "protection" else 4
     neutrals = ["N1", "N2", "N3", "N4"]
+    base_answers = dict(ffni_answers)
+    if baseline_protection is not None:
+        for i in range(1, 5):
+            base_answers[f"protection_{i}"] = baseline_protection
+    votes = [
+        {"voter_id": pid, "voter_group": "N",
+         "voted_for_id": "D1" if i < d_voters else "P1",
+         "voted_for_group": "D" if i < d_voters else "P", "reason": ""}
+        for i, pid in enumerate(neutrals)
+    ]
     return RunRecord.from_dict({
         "run_no": run_no, "condition": "threat",
         "members": {"P": ["P1"], "D": ["D1"], "N": neutrals},
-        "transcript": [], "votes": [],
+        "transcript": [], "votes": votes,
         "measures": {
-            "baseline": {"ffni": {pid: dict(ffni_answers) for pid in neutrals}},
+            "baseline": {"ffni": {pid: dict(base_answers) for pid in neutrals}},
             "post": {
                 "ffni": {pid: dict(ffni_answers) for pid in neutrals},
                 "effectiveness": {
@@ -351,34 +366,52 @@ def test_summarize_needs_reports_the_within_persona_change() -> None:
 
 
 def test_mediation_finds_the_indirect_path_when_it_is_there() -> None:
-    """Threat raises protection, and higher protection goes with rating D as effective."""
+    """Threat induces more protection, and within a condition a bigger induced change
+    goes with endorsing D."""
     study = load_study("ffni_mediation")
     ffni = next(i for i in study.instruments if i.key == "ffni")
-    effectiveness = next(i for i in study.instruments if i.key == "effectiveness")
+
+    def runs(spec):  # (induced change, how many of 4 neutrals endorse D), x3 runs each
+        spec = spec * 3
+        return [_needs_record(i, protection=3 + rise, d_rating=4,
+                              baseline_protection=3, d_voters=dv)
+                for i, (rise, dv) in enumerate(spec, 1)]
 
     by_condition = {
-        "collaborative": [_needs_record(i, protection=p, d_rating=d)
-                          for i, (p, d) in enumerate([(3, 2), (4, 3), (3, 3), (4, 2)], 1)],
-        "threat": [_needs_record(i, protection=p, d_rating=d)
-                   for i, (p, d) in enumerate([(6, 6), (7, 7), (6, 5), (7, 6)], 1)],
+        "collaborative": runs([(0, 0), (0, 1), (1, 1), (1, 2)]),
+        "threat": runs([(2, 2), (2, 3), (3, 3), (3, 4)]),
     }
     med = summarize_mediation(
-        study, by_condition, ffni,
-        need="protection", outcome_group="D", effectiveness=effectiveness, bootstrap=300,
+        study, by_condition, ffni, need="protection", outcome_group="D", bootstrap=300,
     )
-    assert med["path_a"] > 0, med["path_a"]       # threat raises protection
-    assert med["path_b"] > 0, med["path_b"]       # protection tracks D effectiveness
+    assert med["path_a"] > 0, med["path_a"]       # threat induces more protection
+    assert med["path_b"] > 0, med["path_b"]       # within condition, more change -> more D
     assert med["indirect"] > 0
     assert med["supported"] is True
 
-    # A design with no condition difference must not produce mediation.
-    flat = {"collaborative": by_condition["collaborative"],
-            "threat": [_needs_record(i, protection=3, d_rating=2) for i in range(1, 5)]}
-    null = summarize_mediation(
-        study, flat, ffni,
-        need="protection", outcome_group="D", effectiveness=effectiveness, bootstrap=300,
+
+def test_mediation_is_not_fooled_by_a_condition_difference_alone() -> None:
+    """The regression test for the pooled-slope bug: threat shifts BOTH the induced need
+    and endorsement, but within a condition the two are unrelated. Estimating path b on
+    raw pooled scores reports mediation here; centring within condition does not."""
+    study = load_study("ffni_mediation")
+    ffni = next(i for i in study.instruments if i.key == "ffni")
+
+    def runs(spec):
+        return [_needs_record(i, protection=3 + rise, d_rating=4,
+                              baseline_protection=3, d_voters=dv)
+                for i, (rise, dv) in enumerate(spec, 1)]
+
+    by_condition = {
+        "collaborative": runs([(0, 1), (0, 1), (1, 1), (1, 1)]),   # endorsement flat at 1/4
+        "threat": runs([(2, 3), (2, 3), (3, 3), (3, 3)]),          # flat at 3/4
+    }
+    med = summarize_mediation(
+        study, by_condition, ffni, need="protection", outcome_group="D", bootstrap=300,
     )
-    assert abs(null["path_a"]) < 1.0
+    assert med["path_a"] > 0, med["path_a"]        # the condition really did shift the need
+    assert abs(med["path_b"]) < 1e-9, med["path_b"]  # but nothing within condition
+    assert med["supported"] is False, med["ci95"]
 
 
 def test_need_outcome_links_separates_cognition_from_evaluation() -> None:

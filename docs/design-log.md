@@ -633,7 +633,8 @@ the 7-agent design 7 points and the 5-agent design 2.
 
 30 runs was chosen over 40 because it is the point where cost actually falls: 41 calls
 x 30 = 1,230 against 136 x 20 = 2,720, and ~81,000 cumulative transcript words against
-~105,840. 40 runs would have restored the power but spent the same as before.
+~105,840. **Revised to 40 in section 18** — fixing path b cost real power that had to be
+bought back; 40 runs still costs 1,640 calls against the old 2,720.
 
 ### Two costs the simulation cannot price
 
@@ -808,3 +809,82 @@ defaults — so simply re-running it to refresh personas silently reverted `pair
 `N.sample`, the corrected vote prompt, the matched deadline and the note. It now writes
 `study.json` only when the file is absent and says so when it declines. Regenerating
 personas is a routine thing to want; losing a week of design decisions to it is not.
+
+---
+
+## 18. H6's estimator rebuilt: induced need, the vote, and a within-condition path b
+
+`summarize_mediation` changed on all three of its parts. The first two implement design
+decisions taken in the same session; the third fixes a bug those decisions exposed.
+
+### Path b was measuring the condition, not the need
+
+The old estimator pooled both conditions and regressed endorsement on the raw need:
+
+    pooled = data[lo_key] + data[hi_key]
+    b, _, _ = slope([v for v, _ in pooled], [y for _, y in pooled])
+
+Threat raises the need (that is path a) and raises endorsement of D directly (that is
+H2, a large effect). Both variables therefore move with condition, so the pooled slope
+comes out positive even when the need does nothing within either condition.
+
+Simulated against this design with path b set to exactly zero:
+
+| design | ICC = 0 | ICC = .10 | ICC = .25 |
+|---|---|---|---|
+| 5 agents, 30 runs | 12% | 13% | 14% |
+| 10 agents, 20 runs | 20% | 20% | 20% |
+
+Against a nominal 5%. Two things to note. Clustering is the smaller problem — it moves
+the rate about 2 points, while the confound accounts for the rest, and it is already
+12% at ICC = 0. And **the bias does not shrink with n**: the estimate is systematically
+positive, only the CI narrows, so adding runs raises the false-positive rate rather than
+lowering it.
+
+Centring the mediator within each condition before pooling returns it to about 7%, at
+the cost of the power that was never real:
+
+| | pooled (old) | centred (new) |
+|---|---|---|
+| null, b = 0 (want 5%) | 13% | **7%** |
+| real effect, b = 0.10 | 85% | **73%** |
+
+`RUNS` goes 30 -> 40 to bring honest power back to roughly 80%. That still costs less
+than the original 10-agent, 20-run design: 41 calls x 40 = 1,640 against 136 x 20 =
+2,720.
+
+`test_mediation_is_not_fooled_by_a_condition_difference_alone` is the regression test —
+threat shifts both the need and endorsement, nothing relates them within a condition,
+and the estimator must report no mediation.
+
+### The mediator is now the induced need, not the level
+
+`post` minus `baseline`, per respondent. The source paper's dominance-side null is about
+the **chronic** reading of a need — its Study 5 measured FFNI at T1 and effectiveness at
+T2 a week later with no event in between, so all of its variance is trait-like. The
+claim being tested here is about the **state** a situation induces. A level score mixes
+the two and would have made H6 partly a re-run of the null it is trying to explain.
+
+`run.py mediate` now refuses to run if the self-report instrument has no baseline timing,
+rather than silently mediating through a level.
+
+### The outcome is now the respondent's own vote
+
+Binary: 1 if that neutral endorsed the outcome group, 0 otherwise, including when they
+endorsed a fellow neutral — voting for a quiet bystander genuinely is not endorsing the
+dominant candidate, and dropping those ballots would be a non-random exclusion of
+exactly the low-need respondents.
+
+This also resolves a contradiction in the hypothesis set. H5 predicts protection will
+NOT predict D's effectiveness rating, replicating the paper. H6 requires the mediator to
+reach D. While both ran on the effectiveness rating they were the same coefficient with
+opposite predictions, so H6 was predicted to fail by construction. Now H5 uses the
+chronic level against the rating, H6 uses the induced change against the vote, and they
+share neither end.
+
+### What was skipped
+
+The bootstrap still resamples respondents rather than runs, so it ignores that neutrals
+inside one run watched the same discussion. Measured above at about 2 points of
+false-positive rate, against the 8 the centring fixes. Marked `ponytail:` in the
+docstring; switch to resampling runs if the observed ICC comes out high.

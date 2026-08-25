@@ -25,6 +25,7 @@ from analysis import (  # noqa: E402
     summarize_needs, summarize_validation,
 )
 from config import RunConfig  # noqa: E402
+from instrument import BASELINE  # noqa: E402
 from pipeline import load_records, run_condition, run_measure_check  # noqa: E402
 from render import (  # noqa: E402
     plot_contrast, render_contrast, render_layers, render_mediation, render_measure_check,
@@ -162,10 +163,12 @@ def cmd_mediate(args: argparse.Namespace) -> None:
     config = RunConfig.from_ini(_PROJECT_DIR / "config.ini")
     study = load_study(args.study)
     needs = study.self_report
-    effectiveness = study.candidate_rating
-    if needs is None or effectiveness is None:
+    if needs is None:
+        raise SystemExit(f"Study '{study.name}' has no self-report instrument to mediate through.")
+    if BASELINE not in needs.timing:
         raise SystemExit(
-            f"Study '{study.name}' needs both a self-report and an each_candidate instrument."
+            f"'{needs.key}' is not administered at baseline, so there is no induced change "
+            f"to mediate through — H6's mediator is post minus baseline, not the level."
         )
 
     by_condition = {
@@ -175,8 +178,7 @@ def cmd_mediate(args: argparse.Namespace) -> None:
         print(f"  {key}: {len(records)} runs")
 
     med = summarize_mediation(
-        study, by_condition, needs,
-        need=args.need, outcome_group=args.group, effectiveness=effectiveness,
+        study, by_condition, needs, need=args.need, outcome_group=args.group,
     )
     render_mediation(study, med)
     save_summary(med, Path(config.output_dir) / study.name, f"mediation_{args.need}")

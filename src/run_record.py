@@ -61,6 +61,10 @@ class RunRecord:
             if v["voted_for_group"] == group and (by is None or v["voter_group"] in by)
         )
 
+    def vote_of(self, voter_id: str) -> str | None:
+        """The group this persona endorsed, or None if it cast no usable vote."""
+        return next((v["voted_for_group"] for v in self.votes if v["voter_id"] == voter_id), None)
+
     def members(self, group: str) -> list[str]:
         return self.members_by_group.get(group, [])
 
