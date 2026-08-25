@@ -36,7 +36,7 @@
     },
     "N": {
       "label": "Neutral",
-      "sample": null,
+      "sample": 3,
       "ids": [
         "N1",
         "N2",

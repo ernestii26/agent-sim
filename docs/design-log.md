@@ -590,3 +590,111 @@ cast size or rounds, which are paid on every single call.
 Switching the survey model to something cheaper is also off the table for now: the
 instruments are the measurement, and a model change there is a change to the instrument,
 not to the budget.
+
+---
+
+## 15. Cast cut to 5, runs raised to 30 (2026-08-26)
+
+Both studies now run **1 P + 1 D + 3 of 8 N**, 30 runs per condition, replacing
+10 agents over 20 runs.
+
+### Why the vote barely notices
+
+`power_sim.py` at three cast sizes, 20 runs, reps = 1200-2000:
+
+| cast | H2 at r=2 | interaction at r=2 |
+|---|---|---|
+| 10 | 78-80% | 82% |
+| 7 | 75-76% | 78-79% |
+| 5 | 72-73% | 77-78% |
+
+The DV is the per-run D-P difference. Cutting voters shrinks its mean and its variance
+together, so the t-statistic hardly moves. Runs, not cast, are what buy vote power:
+5 agents over 30 runs reaches 90%/92%, over 40 runs 94%/96%.
+
+### Why the mediation does notice, and why more rooms beat bigger rooms
+
+H6's individual-level n is `neutrals x runs`. Simulating the estimator
+`summarize_mediation` actually uses — path a as the between-condition difference in
+induced need, path b as a linear slope of a binary endorsement, indirect = a*b with a
+percentile bootstrap over pairs — at path a = 0.5 SD and path b = +10pp per SD:
+
+| cast | runs | n/condition | ICC = .10 | ICC = .25 |
+|---|---|---|---|---|
+| 7 | 20 | 100 | 88% | 81% |
+| 5 | 20 | 60 | 63% | 61% |
+| 5 | 30 | 90 | ~88% | ~87% |
+| 5 | 33 | 99 | 91% | 89% |
+| 5 | 40 | 120 | 93% | 90% |
+
+The non-obvious result: **5 agents over 33 runs beats 7 agents over 20 at nearly
+identical n** (91%/89% vs 88%/81%). Neutrals inside one run watched the same
+discussion, so they share a run-level component; spreading the same n over more
+independent rooms shrinks that component's weight. Raising ICC from .10 to .25 costs
+the 7-agent design 7 points and the 5-agent design 2.
+
+30 runs was chosen over 40 because it is the point where cost actually falls: 41 calls
+x 30 = 1,230 against 136 x 20 = 2,720, and ~81,000 cumulative transcript words against
+~105,840. 40 runs would have restored the power but spent the same as before.
+
+### Two costs the simulation cannot price
+
+1. **The choice set shrinks from 9 to 4.** Measured on the Step 1 data, neutrals sent
+   37% of their votes to other neutrals under collaboration and only 7% under threat.
+   With 3 neutrals in the room there are 2 other neutrals to pick instead of 7, so that
+   share must fall mechanically, inflating both P's and D's vote counts. The
+   93%-vs-63% convergence contrast — threat making neutrals converge on a leadership
+   candidate at all — cannot be read off the new data, because choice-set size is now
+   confounded with it. That observation belongs to the 10-agent runs and stays there.
+2. **P and D go from 20% to 40% of the room.** Their absolute airtime is unchanged at
+   3 turns each, but the audience thins from 8 to 3. Whether dominance behaviour works
+   the same way in a 5-person room is not something a weighted-lottery simulation can
+   answer, in either direction.
+
+### Neutrals rotate again, reversing section 5
+
+Section 5 fixed the audience at 8 because rotating observers add between-run variance
+that 20 runs could not absorb. At 30 runs with 3 in the room the trade flips: fixing
+the audience would rest every conclusion on 3 specific personas with no averaging at
+all, while rotating 3 of 8 gives each neutral about 11 appearances and keeps the
+conclusion conditional on 8 observers rather than 3.
+
+### Where Step 2's money actually goes — correcting section 14
+
+Section 14 concluded cast size dominates because each discussion call carries the
+transcript so far. That is true of Step 1, which has no instruments. Step 2 inverts it.
+Transcript-weighted, per run at cast 5:
+
+| stage | calls | transcript each | weight |
+|---|---|---|---|
+| discussion | 15 | 0 -> 14 turns | 105 |
+| effectiveness | 12 | full 15 turns | **180** |
+| vote | 5 | full 15 turns | 75 |
+| FFNI post | 3 | full 15 turns | 45 |
+| leader_ideal | 3 | full 15 turns | 45 |
+| FFNI baseline | 3 | none | 0 |
+
+**The post-scenario instruments carry 77% of the transcript cost; the discussion carries
+23%.** Every survey call asks the agent about "the meeting you just had", so it drags
+the whole discussion along with it.
+
+That redirects the model-substitution question. `DISCUSSION_MODEL` should stay
+`gpt-4.1` — the discussion is the phenomenon under study, and it is the cheap quarter
+anyway. `SURVEY_MODEL` is the expensive three quarters, and unlike section 14's claim
+that swapping it is off the table, it is empirically decidable: `measure-check` exists
+to tell you whether an instrument survives on a given model, gating on subscale
+differentiation, straight-lining, alpha and test-retest. Prices per 1M tokens at
+2026-08-26: gpt-4.1 $2.00/$8.00, gpt-4.1-mini $0.40/$1.60, gpt-5-mini $0.25/$2.00,
+gpt-4.1-nano $0.10/$0.40, gpt-5-nano $0.05/$0.40. Batch API is 50% off everything but
+needs an async 24-hour window, and the discussion is turn-dependent, so it is not a
+near-term option.
+
+Plan: run `measure-check` on gpt-4.1-mini and gpt-5-mini and take the cheapest that
+clears all four gates. A few dollars to test, against roughly four fifths of the
+dominant cost line.
+
+### The existing 40 runs
+
+Now incomparable to new data on two counts rather than one — the sampling fixes in
+section 13's header, and this cast change. They remain valid as the pilot that
+established the behavioural effect and the effect size 30 runs was sized against.
