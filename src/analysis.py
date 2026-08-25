@@ -242,7 +242,35 @@ def summarize_measure_check(
         )[1]
         for name in instrument.subscales
     }
+    # Which subscales an analysis actually reads. For an instrument with a prediction
+    # map that is the dimensions it points at — femininity is measured but nothing
+    # reads it, so its reliability cannot sink the instrument. Without a map every
+    # subscale is read.
+    summary["gated_subscales"] = sorted(
+        {dim for dims in instrument.predicts.values() for dim in dims}
+        if instrument.predicts
+        else instrument.subscales
+    )
     return summary
+
+
+def weak_subscales(summary: dict[str, Any], threshold: float = 0.60) -> dict[str, float]:
+    """Read subscales whose alpha does not clear `threshold`.
+
+    Judged one subscale at a time, not on the average. `protection` reaches exactly one
+    prototype dimension — `strength`, two items — so a mean over ten subscales would
+    wave it through on the back of `tyranny`'s ten, and H4's and H6's main line would
+    rest on noise that the gate called usable. An alpha that could not be computed at
+    all does not pass either.
+    """
+    subscales = summary["subscales"]
+    gated = summary.get("gated_subscales") or list(subscales)
+    weak = {}
+    for name in gated:
+        alpha = subscales.get(name, {}).get("alpha", float("nan"))
+        if math.isnan(alpha) or alpha <= threshold:
+            weak[name] = alpha
+    return weak
 
 
 def need_outcome_links(

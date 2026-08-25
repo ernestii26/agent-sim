@@ -162,6 +162,7 @@ def run_condition(
                     participants=clone_participants(cast),
                     instrument=inst,
                     model=config.survey,
+                    rate_groups=tuple(condition.contrast),
                     on_progress=progress,
                 )
 

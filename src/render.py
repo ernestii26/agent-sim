@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from analysis import SILENCE_THRESHOLD
+from analysis import SILENCE_THRESHOLD, weak_subscales
 from instrument import BASELINE, POST
 from stats import mean, std
 from study import Condition, Study
@@ -203,7 +203,7 @@ def render_measure_check(study: Study, summary: dict[str, Any]) -> bool:
     means = [s["baseline_mean"] for s in subscales.values() if not math.isnan(s["baseline_mean"])]
     spread = std(means)
     flat = summary["straight_lining"][BASELINE]
-    alphas = [s["alpha"] for s in subscales.values() if not math.isnan(s["alpha"])]
+    weak = weak_subscales(summary)
     retest = summary["test_retest"]
     mean_retest = mean(list(retest.values()))
 
@@ -220,7 +220,7 @@ def render_measure_check(study: Study, summary: dict[str, Any]) -> bool:
     checks = {
         "differentiates subscales (SD of means > 0.30)": spread > 0.30,
         "few straight-liners (< 0.30)": not math.isnan(flat) and flat < 0.30,
-        "internal consistency (mean alpha > 0.60)": bool(alphas) and mean(alphas) > 0.60,
+        "internal consistency (every subscale read by an analysis > 0.60)": not weak,
         # Two-sided on purpose. A mediator that is a CHANGE score inverts the usual
         # logic: too low and the scale is noise, but too high and there is no state
         # variance left for a situation to move, so the change is noise too.
@@ -229,6 +229,8 @@ def render_measure_check(study: Study, summary: dict[str, Any]) -> bool:
     print()
     for label, ok in checks.items():
         print(f"  [{'PASS' if ok else 'FAIL'}]  {label}")
+    if weak:
+        print("          " + ", ".join(f"{n} alpha={_fmt(a, 2)}" for n, a in weak.items()))
     passed = all(checks.values())
     print()
     print(f"  Verdict: {'USABLE' if passed else 'NOT USABLE — do not spend a full study on this'}")

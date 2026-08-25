@@ -106,21 +106,37 @@ def clone_participants(participants: list[Participant]) -> list[Participant]:
     ]
 
 
+# Live wiring: references to the world and to peers. Stripped from the original
+# *before* deepcopy, not from the copy afterwards — a TinyWorld reaches a
+# _thread.RLock, and an agent still attached to one cannot be deep-copied at all.
+_LIVE_WIRING = (
+    "environment",
+    "current_messages",
+    "_actions_buffer",
+    "_accessible_agents",
+    "_displayed_communications_buffer",
+)
+
+
 def _clone_agent(person: Any) -> Any:
+    """A copy carrying the agent's memory but none of its live wiring.
+
+    This used to deep-copy first and strip afterwards, with a bare `except: return
+    person`. After a discussion that combination always fired — the agent still held
+    its TinyWorld, deepcopy hit the world's RLock, and the caller was silently handed
+    the *original* agent. Post-discussion surveys then wrote their items into the very
+    agent that voted next. A copy that cannot be made is now an error, never a
+    contaminated measurement.
+    """
+    saved = {attr: getattr(person, attr) for attr in _LIVE_WIRING if hasattr(person, attr)}
+    for attr in saved:
+        setattr(person, attr, None if attr == "environment" else [])
     try:
         cloned = copy.deepcopy(person)
-    except Exception:
-        return person
+    finally:
+        for attr, value in saved.items():
+            setattr(person, attr, value)
 
-    for attr in (
-        "environment",
-        "current_messages",
-        "_actions_buffer",
-        "_accessible_agents",
-        "_displayed_communications_buffer",
-    ):
-        if hasattr(cloned, attr):
-            setattr(cloned, attr, None if attr == "environment" else [])
     for counter in ("actions_count", "stimuli_count", "_current_episode_event_count"):
         if hasattr(cloned, counter):
             setattr(cloned, counter, 0)
@@ -229,6 +245,14 @@ def run_discussion(
             if did_speak and text:
                 world.broadcast(text, source=participant.agent)
 
+    # Tear the world down. Every agent holds a reference to it and it holds every
+    # agent, so leaving it attached both defeats cloning (see _clone_agent) and keeps
+    # one world per run alive in TinyWorld's registry for the length of a study.
+    for participant in participants:
+        if hasattr(participant.agent, "environment"):
+            participant.agent.environment = None
+    TinyWorld.all_environments.pop(world.name, None)
+
     return transcript
 
 
@@ -291,11 +315,29 @@ def run_vote(
     return votes
 
 
+def rated_by(
+    participants: list[Participant], rater: Participant, rate_groups: tuple[str, ...] = ()
+) -> list[Participant]:
+    """Who a rater rates on an about=each_candidate instrument.
+
+    `rate_groups` narrows it to the candidates — the groups being contrasted. Everyone
+    else in the room is someone no analysis asks about, and each rating is its own API
+    call carrying the whole transcript, so rating them is the most expensive way in the
+    design to collect data nothing reads. Empty means everyone, which is what a study
+    with no contrast gets.
+    """
+    return [
+        p for p in participants
+        if p.persona_id != rater.persona_id and (not rate_groups or p.group in rate_groups)
+    ]
+
+
 def run_survey(
     *,
     participants: list[Participant],
     instrument: Instrument,
     model: ModelSettings,
+    rate_groups: tuple[str, ...] = (),
     on_progress: Any = None,
 ) -> dict[str, Any]:
     """Administer `instrument` to every participant whose group it targets.
@@ -320,8 +362,7 @@ def run_survey(
         if instrument.about == ABOUT_EACH_CANDIDATE:
             results[participant.persona_id] = {
                 other.persona_id: _administer(participant, instrument, target=other, ask=ask)
-                for other in participants
-                if other.persona_id != participant.persona_id
+                for other in rated_by(participants, participant, rate_groups)
             }
         else:
             results[participant.persona_id] = _administer(

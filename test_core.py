@@ -12,6 +12,7 @@ import math
 import random
 import sys
 import tempfile
+import threading
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -19,9 +20,11 @@ sys.path.insert(0, str(PROJECT_DIR / "src"))
 
 from analysis import (  # noqa: E402
     group_metrics, need_outcome_links, persona_metrics, straight_lining, summarize_contrast,
-    summarize_mediation, summarize_needs, summarize_validation,
+    summarize_mediation, summarize_needs, summarize_validation, weak_subscales,
 )
-from discussion import APIQuotaExhausted, AgentTransport, _administer  # noqa: E402
+from discussion import (  # noqa: E402
+    APIQuotaExhausted, AgentTransport, _administer, _clone_agent, rated_by,
+)
 from instrument import (  # noqa: E402
     ABOUT_SELF, Instrument, load_instrument, subscale_scores,
 )
@@ -658,6 +661,98 @@ def test_assigned_style_reaches_the_generation_prompt() -> None:
     # contain unrelated braces (the rendered score dict does).
     assert "{existing_names}" in dominance
     assert dominance.replace("{existing_names}", "Ana, Bo").count("Ana, Bo") == 1
+
+
+def test_a_survey_clone_never_shares_memory_with_the_agent_that_votes() -> None:
+    """After a discussion the agent still holds its TinyWorld, and the world holds a
+    lock deepcopy cannot follow. That failure used to be swallowed and the ORIGINAL
+    agent handed back, so every post-discussion survey wrote its items into the agent
+    that voted moments later. The lock here stands in for the live world."""
+
+    class FakeAgent:
+        def __init__(self) -> None:
+            self.environment = threading.RLock()
+            self._accessible_agents: list = []
+            self.episodic_memory = ["turn 1", "turn 2"]
+            self.actions_count = 7
+
+    original = FakeAgent()
+    world = original.environment
+    clone = _clone_agent(original)
+
+    assert clone is not original, "a survey must never run on the agent that votes"
+    assert clone.episodic_memory == ["turn 1", "turn 2"]   # the discussion carries over
+    clone.episodic_memory.append("SURVEY ITEM")
+    assert "SURVEY ITEM" not in original.episodic_memory
+    assert clone.environment is None and clone.actions_count == 0
+    assert original.environment is world, "the original's wiring must be put back"
+
+    # A copy that genuinely cannot be made is an error, not a silent original.
+    broken = FakeAgent()
+    broken.episodic_memory = threading.RLock()    # not live wiring, so not detachable
+    try:
+        _clone_agent(broken)
+    except Exception:
+        pass
+    else:
+        raise AssertionError("an impossible clone must raise, not return the original")
+
+
+def test_alpha_gate_judges_each_read_subscale_not_the_average() -> None:
+    """A mean over ten subscales waves a dead one through on the back of the long ones.
+    It matters here because `protection` reaches exactly one prototype dimension."""
+    summary = {
+        "subscales": {
+            "strength": {"alpha": 0.05},        # 2 items, and protection's only outlet
+            "tyranny": {"alpha": 0.92},         # 10 items
+            "sensitivity": {"alpha": 0.88},     # 8 items
+            "femininity": {"alpha": float("nan")},
+        },
+        "gated_subscales": ["sensitivity", "strength", "tyranny"],
+    }
+    assert (0.05 + 0.92 + 0.88) / 3 > 0.60, "the old mean-based gate would have passed this"
+    assert set(weak_subscales(summary)) == {"strength"}
+
+    summary["subscales"]["strength"]["alpha"] = 0.71
+    assert weak_subscales(summary) == {}
+
+    # An alpha that could not be computed does not pass either.
+    summary["gated_subscales"].append("femininity")
+    assert set(weak_subscales(summary)) == {"femininity"}
+
+
+def test_the_gate_covers_every_prototype_dimension_an_analysis_reads() -> None:
+    """`gated_subscales` comes from the prediction map, so a dimension added to
+    `predicts` is gated automatically and one nothing reads never blocks a study."""
+    ideals = load_study("ffni_mediation").prototype
+    read = {dim for dims in ideals.predicts.values() for dim in dims}
+    assert read <= set(ideals.subscales)
+    assert ideals.predicts["protection"] == ("strength",), \
+        "protection has one outlet; if that changes, the alpha gate's stakes change too"
+    assert "femininity" in ideals.subscales and "femininity" not in read
+
+
+def test_each_candidate_rates_only_the_candidates() -> None:
+    """Every rating is its own API call carrying the whole transcript, and
+    need_outcome_links reads only the contrasted groups — so rating the neutrals is
+    the most expensive way in the design to collect data nothing looks at."""
+    room = [
+        Participant(agent=None, persona_id=pid, name=pid, group=g)
+        for pid, g in (("P4", "P"), ("D4", "D"), ("N4", "N"), ("N7", "N"), ("N8", "N"))
+    ]
+    rater = room[2]                                   # N4
+
+    everyone = rated_by(room, rater)                  # no contrast: the whole room
+    assert [p.persona_id for p in everyone] == ["P4", "D4", "N7", "N8"]
+
+    candidates = rated_by(room, rater, ("D", "P"))
+    assert [p.persona_id for p in candidates] == ["P4", "D4"]
+    assert rater not in candidates, "nobody rates themselves"
+
+    # At a cast of 5 that is 6 calls per run instead of 12.
+    neutrals = [p for p in room if p.group == "N"]
+    assert sum(len(rated_by(room, n, ("D", "P"))) for n in neutrals) == 6
+    assert sum(len(rated_by(room, n)) for n in neutrals) == 12
 
 
 if __name__ == "__main__":

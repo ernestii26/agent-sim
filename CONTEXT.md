@@ -83,6 +83,13 @@ One simulated meeting: a cast is drawn, discusses for some rounds, then endorses
 **Cast**:
 The agents in one run. Drawn per run for sampled groups, fixed for the rest.
 
+**Fork**:
+A throwaway copy of an agent, used so that answering an instrument never changes the
+agent that goes on to discuss or endorse. Everything the agent has lived through carries
+over; nothing the fork does comes back. A fork that cannot be made is an error, never a
+measurement taken on the original.
+_Avoid_: clone, copy
+
 **Matched pair**:
 A Prestige persona and a Dominance persona built from the same bank row, so they are
 identical in personality, occupation, age and parental status by construction. Only
