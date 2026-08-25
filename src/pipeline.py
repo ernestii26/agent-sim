@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from config import RunConfig
-from instrument import BASELINE, POST
+from instrument import BASELINE, POST, Instrument
 from persona_store import Participant
 from run_record import RunRecord
 from study import Condition, Study
@@ -216,15 +216,20 @@ def load_records(output_dir: Path) -> list[RunRecord]:
 def run_measure_check(
     study: Study,
     config: RunConfig,
+    instruments: tuple[Instrument, ...],
     *,
     on_progress: Callable[[str], None] | None = None,
 ) -> RunRecord:
-    """Administer the self-report instrument twice per persona, nothing else.
+    """Administer each instrument twice per persona, nothing else.
 
     Cheap by design: no discussion, no votes. The two administrations are stored as
     baseline and post of a single run record so the ordinary needs analysis applies —
     with no discussion between them, the "change" is measurement noise, which is
     exactly the test-retest reliability we want to see before paying for a study.
+
+    Only instruments that ask about the respondent or about the leader category can be
+    checked this way. One that rates a specific person cannot: with no meeting, there is
+    nobody to rate.
     """
     from discussion import clone_participants, run_survey
     from persona_store import load_personas
@@ -233,29 +238,27 @@ def run_measure_check(
         if on_progress:
             on_progress(msg)
 
-    instrument = study.self_report
-    if instrument is None:
-        raise SystemExit(f"Study '{study.name}' has no self-report instrument to check.")
+    if not instruments:
+        raise SystemExit(f"Study '{study.name}' has no instrument that can be checked.")
 
     pool = load_personas(
         study.personas_dir,
         {pid: g.key for g in study.groups.values() for pid in g.ids},
     )
-    # Every persona answers, not just the instrument's usual targets — a check of the
-    # scale itself should cover the whole cast.
-    wide = replace(instrument, targets=())
 
-    administrations = []
-    for pass_no in (1, 2):
-        progress(f"  Administration {pass_no}/2")
-        administrations.append(
-            run_survey(
+    measures: dict[str, dict[str, Any]] = {BASELINE: {}, POST: {}}
+    for instrument in instruments:
+        # Every persona answers, not just the instrument's usual targets — a check of the
+        # scale itself should cover the whole cast.
+        wide = replace(instrument, targets=())
+        for pass_no, timing in ((1, BASELINE), (2, POST)):
+            progress(f"  {instrument.key}: administration {pass_no}/2")
+            measures[timing][instrument.key] = run_survey(
                 participants=clone_participants(list(pool.values())),
                 instrument=wide,
                 model=config.survey,
                 on_progress=progress,
             )
-        )
 
     return RunRecord(
         run_no=1,
@@ -263,8 +266,5 @@ def run_measure_check(
         members_by_group={},
         transcript=[],
         votes=[],
-        measures={
-            BASELINE: {instrument.key: administrations[0]},
-            POST: {instrument.key: administrations[1]},
-        },
+        measures=measures,
     )

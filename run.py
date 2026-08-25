@@ -138,22 +138,34 @@ def _report(study: Study, condition, records: list, out: Path) -> None:
 
 
 def cmd_measure_check(args: argparse.Namespace) -> None:
-    """Is the self-report instrument usable on these agents, before a full study is paid for?"""
+    """Are the instruments usable on these agents, before a full study is paid for?
+
+    Covers every instrument that can be answered without a meeting: the self-report and
+    the leader prototype. An each_candidate instrument is excluded because it asks about
+    a person the respondent has just observed, and here nobody has observed anyone.
+    """
     config = RunConfig.from_ini(_PROJECT_DIR / "config.ini")
     study = load_study(args.study)
-    needs = study.self_report
-    if needs is None:
-        raise SystemExit(f"Study '{study.name}' has no self-report instrument to check.")
+    checkable = tuple(i for i in (study.self_report, study.prototype) if i is not None)
+    if not checkable:
+        raise SystemExit(f"Study '{study.name}' has no instrument that can be checked.")
 
     out = _output_dir(config, study, "measure_check")
     setup_file_logging(out / "logs")
-    print(f"\nMeasure check — {study.title} / {needs.title}")
-    print(f"  Model: {config.survey_model}   Personas: {study.personas_dir}\n")
+    print(f"\nMeasure check — {study.title}")
+    print(f"  Instruments: {', '.join(i.title for i in checkable)}")
+    print(f"  Model: {config.survey_model}   Personas: {study.personas_dir}")
+    if study.candidate_rating is not None:
+        print(f"  Not checkable here: {study.candidate_rating.title} — it rates a person "
+              f"from a meeting, and there is no meeting.")
+    print()
 
-    record = run_measure_check(study, config, on_progress=print)
-    summary = summarize_measure_check(study, record, needs)
-    passed = render_measure_check(study, summary)
-    save_summary(summary, out, "measure_check")
+    record = run_measure_check(study, config, checkable, on_progress=print)
+    passed = True
+    for instrument in checkable:
+        summary = summarize_measure_check(study, record, instrument)
+        passed &= render_measure_check(study, summary)
+        save_summary(summary, out, f"measure_check_{instrument.key}")
     if not passed:
         sys.exit(1)
 

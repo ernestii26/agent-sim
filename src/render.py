@@ -132,12 +132,14 @@ def render_needs(study: Study, summary: dict[str, Any]) -> None:
     print("=" * 88)
     print(f"{study.title.upper()} — {summary['instrument'].upper()} ({summary['runs']} runs)")
     print("=" * 88)
-    print(f"{'Subscale':<18}  {'T1 mean':>9}  {'T2 mean':>9}  {'delta':>9}  {'n_d':>5}  {'alpha':>7}")
+    print(f"{'Subscale':<18}  {'T1 mean':>9}  {'T2 mean':>9}  {'delta':>9}  "
+          f"{'delta SD':>9}  {'n_d':>5}  {'alpha':>7}")
     print("-" * 88)
     for name, s in summary["subscales"].items():
         print(
             f"{name:<18}  {_fmt(s['baseline_mean'], 2):>9}  {_fmt(s['post_mean'], 2):>9}  "
-            f"{_fmt(s['delta_mean'], 2):>9}  {s['delta_n']:>5}  {_fmt(s['alpha'], 2):>7}"
+            f"{_fmt(s['delta_mean'], 2):>9}  {_fmt(s['delta_sd'], 2):>9}  "
+            f"{s['delta_n']:>5}  {_fmt(s['alpha'], 2):>7}"
         )
     sl = summary["straight_lining"]
     print()
@@ -210,12 +212,19 @@ def render_measure_check(study: Study, summary: dict[str, Any]) -> bool:
     print("-" * 36)
     for name, r in retest.items():
         print(f"{name:<18}  {_fmt(r, 2):>14}")
+    print()
+    print("  The delta SD column above is this instrument's noise floor: how far a score")
+    print("  moves when nothing happened between the two administrations. Any change a")
+    print("  real study attributes to its scenario has to clear it.")
 
     checks = {
         "differentiates subscales (SD of means > 0.30)": spread > 0.30,
         "few straight-liners (< 0.30)": not math.isnan(flat) and flat < 0.30,
         "internal consistency (mean alpha > 0.60)": bool(alphas) and mean(alphas) > 0.60,
-        "stable across administrations (mean r > 0.50)": mean_retest > 0.50,
+        # Two-sided on purpose. A mediator that is a CHANGE score inverts the usual
+        # logic: too low and the scale is noise, but too high and there is no state
+        # variance left for a situation to move, so the change is noise too.
+        "stable but not frozen (0.40 < mean r < 0.85)": 0.40 < mean_retest < 0.85,
     }
     print()
     for label, ok in checks.items():

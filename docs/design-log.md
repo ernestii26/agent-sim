@@ -367,8 +367,9 @@ rather than with the new hypotheses.
 
 ## 12. Still open
 
-- `measure-check` validates only the self-report instrument, so `leader_ideal` is
-  unchecked and `effectiveness` cannot be checked this way at all — see section 19.
+- `effectiveness` cannot be validated before a run — it rates someone from a meeting.
+  Section 20 covers the other two instruments; this one needs a post-hoc check from
+  real run data.
 - No manipulation check is administered by any study — see section 13 for what was
   retired, what it measured, and the loader change needed to give `ffni_mediation` one.
 - ~~`leadership_style` reaches the system prompt~~ — removed 2026-08-26, see section 17.
@@ -953,3 +954,51 @@ so `leader_ideal` and `effectiveness` are unchecked for differentiation, straigh
 and reliability. `leader_ideal` could be added to it — `about: prototype` needs no rating
 target, so it can be administered twice with no discussion, exactly like the FFNI.
 `effectiveness` cannot: it asks about "the meeting you just had". That remains open.
+
+---
+
+## 20. `measure-check` extended to the prototype layer (2026-08-26)
+
+`run.py measure-check` now administers every instrument that can be answered without a
+meeting — the self-report and the prototype — twice per persona, and gates each one
+separately. It fails if any instrument fails.
+
+`effectiveness` stays out and cannot be brought in: it asks how good a person the
+respondent just watched would be as a leader, and in a measure check nobody has watched
+anyone. It can only be validated after the fact, from real run data.
+
+### Why this mattered enough to do before Step 2
+
+`leader_ideal` was rebuilt in section 19 into a 45-item battery answered in one call.
+Nothing had ever checked whether an agent can answer 45 leader adjectives without
+straight-lining, and its two smallest dimensions carry 2 items each. Finding that out
+after 40 runs would waste the whole prototype layer; finding it out now costs a few
+dollars.
+
+### Two changes to what the gates mean
+
+**`delta SD` is now printed.** `summarize_needs` had computed it since the beginning and
+`render_needs` never showed it. In a measure check there is no scenario between the two
+administrations, so this column is the instrument's **noise floor** — how far a score
+moves when nothing happened. Since H6's mediator is a change score (section 18), any
+change a real study wants to attribute to its scenario has to clear this number. It is
+the single most decision-relevant figure the check produces and it was being discarded.
+
+**The test-retest gate is now two-sided: 0.40 < mean r < 0.85**, replacing r > 0.50.
+
+The old gate was written when the mediator was a need *level*, and its reasoning was
+sound for that: an agent whose answers do not correlate with its own answers minutes
+earlier has no measurable trait to mediate. A change-score mediator inverts half of it.
+The reliability of a difference is
+
+    reliability(X2 - X1) = (r_xx - r_12) / (1 - r_12)
+
+so a test-retest correlation that is too high leaves no state variance for a situation
+to move, and the change is noise for the opposite reason. Only one side of that was
+guarded.
+
+### Cost
+
+Roughly doubles the check: two administrations per instrument across the whole cast of
+20 personas. Still a few dollars, against a study whose per-run cost is 41 calls over
+80 runs.
