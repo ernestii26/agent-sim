@@ -44,8 +44,14 @@ What I want from a leader. Asked about the respondent, naming nobody.
 
 **Prototype**:
 What counts as "a leader" in general. Asked about the category, explicitly naming
-nobody in the room.
-_Avoid_: ideal, ILT, implicit leadership theory, schema
+nobody in the room. Measured on named dimensions of a leader concept (strength,
+tyranny, sensitivity…), not on one dimension per need.
+_Avoid_: ideal, schema
+
+**Prediction map**:
+Which prototype dimensions a given need is expected to move. Many-to-many: one need
+can reach several dimensions and one dimension can be reached by several needs.
+_Avoid_: mapping, matching dimension
 
 **Evaluation**:
 How good a specific observed person would be as my leader. An absolute rating, so
@@ -56,6 +62,10 @@ _Avoid_: effectiveness (the instrument key, not the concept), rating
 A respondent picking one person to lead, out of everyone else in the room. Forced
 choice and zero-sum, which is what separates it from Evaluation.
 _Avoid_: vote (the mechanism, not the concept), preference, support
+
+**Electorate**:
+The groups whose endorsements count towards a result. Never includes a group being
+contrasted — those are the candidates, and a rival's ballot is not evidence about them.
 
 ### Study structure
 
