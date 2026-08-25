@@ -443,9 +443,35 @@ per run, and the effect it verified (5.38 vs 3.21, matching a smaller pilot to w
 `ffni_mediation` now has no manipulation check either, and its nulls are the ones that
 were expected in advance — H5's dominance side by design, and H3 possibly. A null H3
 ("threat did not raise protection need") is not separable from "the scenario did not
-feel threatening" without one. The mitigation is that Step 2 reuses this scenario text
-with the deadline matched, so this section's numbers are the standing evidence that the
-manipulation lands. If Step 2's scenarios are ever rewritten, that evidence expires.
+feel threatening" without one. The mitigation is that this section's numbers stand as the evidence that the
+manipulation lands.
+
+**The deadline edit does not expire that evidence — decided 2026-08-26, deliberately.**
+Matching the deadlines rewrote one clause of each collaborative scenario, so the strict
+reading is that the numbers above describe text that no longer exists. Judged
+non-material, and the reason is item-specific rather than a general appeal to
+similarity:
+
+- The gap that carries the manipulation is **item 1, position feels insecure**: 1.96 ->
+  4.31, the largest of the three and the only one that crosses the midpoint from a real
+  floor. It is driven by the threat scenario's "people will lose their posts" and
+  "whether they have a future here at all". **The deadline clause touches none of that**
+  — a due date does not create job insecurity.
+- The item the edit does move is **item 2, urgency**, and moving it is the entire point:
+  the edit exists to stop urgency differentiating the conditions. Its gap narrowing is
+  the fix working, not the manipulation weakening.
+- So the composite will drift (collaborative rises above 3.21 as item 2 rises), but the
+  composite was never the load-bearing number — §13's own reading of the per-item table
+  is that item 2 does not belong in that average.
+
+**Residual risk, accepted:** nobody has measured the new text. If the added urgency in
+the collaborative condition turns out to raise felt insecurity too — plausible if agents
+read a deadline as a threat to standing rather than to schedule — then item 1's gap
+narrows and nothing would catch it. What would genuinely expire this evidence is a
+change to the threat scenario's stakes, or to who is in the room, not a clause about
+timing.
+
+**代價要講明**
 
 FFNI's own protection subscale cannot substitute: it measures a want, not a state; it
 is the H6 mediator, so using it would assume the conclusion; and every item names a
