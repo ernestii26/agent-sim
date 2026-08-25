@@ -55,7 +55,7 @@
     "collaborative": {
       "label": "Collaborative",
       "hypothesis": "H1: Prestige receives more peer votes than Dominance",
-      "scenario": "Your team has been missing key deliverables for two consecutive quarters. Leadership has granted your group full autonomy to diagnose the root cause and commit to one concrete change. You must reach a shared decision that everyone in the room can commit to implementing.",
+      "scenario": "Your team has been missing key deliverables for two consecutive quarters. Leadership has granted your group full autonomy to diagnose the root cause and commit to one concrete change. The decision is due in 48 hours. You must reach a shared decision that everyone in the room can commit to implementing.",
       "friction": "[Meeting context: This group has attempted to address performance issues before. A previous initiative stalled halfway through and was quietly dropped. People in this room have different — and sometimes conflicting — views on what actually went wrong and who was responsible. Not everyone trusts the last diagnosis that was made.]"
     },
     "threat": {
@@ -77,5 +77,6 @@
     "H5": "Evaluation layer: Vision/Expertise/Fairness predict Prestige effectiveness ratings (supported in Study 5); Protection/Status predict Dominance effectiveness ratings (NOT supported in Study 5 - a null here is the expected outcome). Not a straight replication either way: Study 5's criterion was ~50 abstract leadership descriptions rated one week after the FFNI, whereas effectiveness here rates a specific agent the respondent just spent three rounds of discussion with. A dominance-side effect appearing here where it did not there would be the interesting result, and is attributable to the shift from description to observed behaviour",
     "H6": "Protection need mediates the condition -> Dominance-endorsement effect (named as untested)",
     "H7": "Threat strengthens the Protection -> dominance link and narrows the gap between the cognition and evaluation layers"
-  }
+  },
+  "note": "Deadline matched across conditions so the manipulation isolates threat from time pressure. Groups are NOT paired: these personas come from prestige_dominance and are hand-written, not bank-paired, so pair_with would line up ids that share nothing. Switch personas_from to pd_matched first, then add \"pair_with\": \"P\" to group D."
 }

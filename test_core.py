@@ -72,23 +72,57 @@ def test_every_study_loads() -> None:
 
 
 def test_balanced_sampler_exhausts_pool_before_repeating() -> None:
-    sampler = BalancedSampler(["a", "b", "c"])
+    sampler = BalancedSampler(3)
     drawn = [sampler.take(1)[0] for _ in range(9)]
     for start in (0, 3, 6):
-        assert sorted(drawn[start : start + 3]) == ["a", "b", "c"], drawn
-    batch = BalancedSampler(["a", "b", "c"]).take(4)
-    assert sorted(batch[:3]) == ["a", "b", "c"] and len(batch) == 4, batch
+        assert sorted(drawn[start : start + 3]) == [0, 1, 2], drawn
+    batch = BalancedSampler(3).take(4)
+    assert sorted(batch[:3]) == [0, 1, 2] and len(batch) == 4, batch
+
+
+def test_balanced_sampler_is_seeded_so_conditions_align() -> None:
+    # Run i must draw the same positions in every condition, or the two conditions
+    # are compared across different casts.
+    a = [BalancedSampler(6, seed=7).take(1)[0] for _ in range(12)]
+    b = [BalancedSampler(6, seed=7).take(1)[0] for _ in range(12)]
+    assert a == b, (a, b)
+    assert a != [BalancedSampler(6, seed=8).take(1)[0] for _ in range(12)]
+
+
+def test_paired_groups_draw_the_matching_index() -> None:
+    # pd_matched builds P_i and D_i from one bank row; drawing them independently
+    # throws that away, which is what pair_with exists to prevent.
+    from pipeline import compose_run, make_samplers
+    from persona_store import Participant
+
+    study = load_study("pd_matched")
+    assert study.groups["D"].pair_with == "P", "pd_matched must pair D to P"
+    pool = {
+        pid: Participant(agent=None, persona_id=pid, name=pid, group=group.key)
+        for group in study.groups.values()
+        for pid in group.ids
+    }
+    samplers = make_samplers(study)
+    assert "D" not in samplers, "a paired group must not carry its own sampler"
+    for _ in range(20):
+        cast = compose_run(study, pool, samplers)
+        picked = {p.group: p.persona_id for p in cast if p.group in ("P", "D")}
+        assert picked["P"][1:] == picked["D"][1:], picked
 
 
 def test_compose_run_respects_group_sampling() -> None:
-    study = load_study("prestige_dominance")
-    from pipeline import make_samplers
+    from pipeline import compose_run, make_samplers
+    from persona_store import Participant
 
+    study = load_study("prestige_dominance")
+    pool = {
+        pid: Participant(agent=None, persona_id=pid, name=pid, group=group.key)
+        for group in study.groups.values()
+        for pid in group.ids
+    }
     samplers = make_samplers(study)
     for _ in range(20):
-        chosen: list[str] = []
-        for key, group in study.groups.items():
-            chosen.extend(group.ids if group.sample is None else samplers[key].take(group.sample))
+        chosen = [p.persona_id for p in compose_run(study, pool, samplers)]
         assert len(chosen) == len(set(chosen)), "a persona was cast twice in one run"
         for key, group in study.groups.items():
             n = sum(1 for pid in chosen if study.group_of(pid) == key)

@@ -254,31 +254,63 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 
 我原本以為是兩個，讀完發現是四個，而且我們的設計四個都打到。
 
+**先解釋投影片上的兩個術語**
+
+- **endorsement（支持／擁護）**：論文自己的用詞，從摘要就開始用。指追隨者願意把某人當領導者接受下來的程度。它是上位概念，可以用很多方式測量——給高效能評分、說願意跟隨、投票給他。我們的設計裡有兩個測量：effectiveness 評分（知覺層）和投票（行為層）。
+- **vignette（情境短文）**：實驗心理學的標準廉價操弄法——給受試者讀一段幾句話的書面情境（例如「請想像你的公司剛宣布要裁撤三分之一的部門⋯」），讀完問他的反應。它跟 simulation 的差別是：vignette 讀一段字、評價想像出來的人；simulation 真的經歷一段互動、評價實際觀察過的人。論文原文是 "vignettes **or** simulations"，並列兩個選項，而**我們做的是後面那個比較貴也比較強的**。這點很重要：如果只做 vignette，那是照著建議做一次；做 simulation 是他們列出來但成本高到沒人做的那條。
+
 **① 中介（p.45–46，Directions for Future Research）**
 
 > "...prior research has shown that **intergroup conflict increases preference for dominant leaders** (Laustsen & Petersen, 2017; Spisak et al., 2012)... these studies **often assume yet do not empirically test the mediating role of follower needs**—likely due to a lack of validated measures."
 
-他們明講：這個效果大家都知道，但沒人測過需求是不是中間那一環，因為以前沒有經過驗證的量表。FFNI 補上了工具，但他們自己沒做這個實驗。
+**白話**：「衝突會讓人偏好支配型領袖」這件事文獻上已經確立。但那些研究都**默認**中間那一環是「追隨者的需求被改變了」，卻**沒有人真的去測**——因為以前沒有經過驗證的量表可以測。
+
+FFNI 補上了工具，但他們自己沒做這個實驗。這就是 H6 的位置。
 
 **② 調節（p.42，緊接在 Study 5 的斷裂之後）**
 
 > "would **inter-group conflict situations** (e.g., trade wars, organizational crises) **strengthen the FFN protection-authoritarianism link**?"
 
-這句話幾乎就是我們 H7 的原文。
+**白話**：他們在 Study 5 沒找到「保護需求 → 支持威權」這條連結，然後自己問：**是不是要有衝突情境，這條連結才會出現？**
+
+注意這是「調節」不是「中介」——問的不是「中間有沒有一站」，而是「這條連結的**強度**會不會被情境改變」。這句話幾乎就是我們 H7 的原文。
 
 **③ 操弄方法（p.49，Limitations 第三點）**
 
-> "our research relied **entirely on self-report measures and correlational designs**, limiting causal inference... Future studies should use experimental manipulations (e.g., vignettes or **simulations** of threat, inequality, or uncertainty)..."
+這一點有兩句原文，第二句比第一句更關鍵。
 
-他們自己寫了「simulations」。我們做的正好是這個。
+先是問題的陳述：
+
+> "For instance, while followers with high protection needs endorse strong leaders, it remains unclear whether **perceived threats increase protection needs**, or whether certain individuals are **chronically inclined toward this need**."
+
+**白話，而且這是整份報告最該記住的一句**：他們承認自己分不出兩種可能——
+
+1. **狀態說**：威脅**當下拉高**了保護需求（需求是被情境激發出來的）
+2. **特質說**：某些人**本來就長期**比較需要保護（需求是穩定的個人特質）
+
+他們的設計只能測特質。因為 T1 測需求、隔一週 T2 測評價，**中間什麼事都沒發生**——沒有事件、沒有操弄。那一週只是為了讓 IV 和 DV 在時間上分開、避免共同方法變異，不是為了讓中間夾任何東西。所以他們手上的變異全部是慢性的、特質層次的。
+
+**這對我們是決定性的**：Study 5 的 null（保護需求預測不了對威權的支持）是**特質層次**的 null。它打不到我們，因為我們測的是**狀態層次**的變異——同一個 persona 在威脅情境下，保護需求被**拉高了多少**（前後測差分）。而 Kakkar & Sivanathan、Laustsen & Petersen 那整條文獻講的效果，本來就是狀態層次的。
+
+**這個論點比「我們用 agent、他們用真人」強得多**，因為它不需要主張 LLM 像人。它主張的是「特質變異和狀態變異是兩回事」，這對真人也一樣成立。
+
+接著是方法的建議：
+
+> "our research relied **entirely on self-report measures and correlational designs**, limiting causal inference... Future studies should use experimental manipulations (e.g., vignettes or **simulations** of threat, inequality, or uncertainty) to test how specific environmental cues activate FFNs and influence leadership evaluations."
+
+他們自己寫了「simulations」這個字。我們做的正好是這個，而且是兩個選項裡較強的那個。
 
 **④ 行為結果（p.45–46 與 p.49，Limitations 第四點）**
 
 > "we focused primarily on **cognitive and perceptual outcomes**... rather than **behavioral consequences**... Future research should also go beyond cognitive and perceptual outcomes to examine behavioral consequences of follower needs, such as **voting in elections**, leader support, resistance, or insubordination."
 
-我們的依變項就是一場投票。這是他們點名要但沒有的東西。
+**白話**：他們全部的依變項都是「想法」和「評分」——你覺得理想領導者長什麼樣、你覺得這個描述有多有效。**沒有任何一個是真的行為**。
 
-**他們自己的設計限制（對照用）**：全部線上問卷（Prolific、Credamo）、自陳量表、相關性設計、Time 1 到 Time 2 隔一週。沒有操弄、沒有互動、沒有行為結果。
+差別在於評分是非零和的（可以給每個人都打高分），行為是有代價的（投票只能投一個，是強迫選擇）。一個人可能嘴上說兩個候選人都不錯，真的要選一個時卻很堅定。
+
+我們的依變項就是一場強迫選擇的投票。這是他們點名要但沒有的東西。
+
+**他們自己的設計限制（對照用）**：全部線上問卷（Prolific、Credamo）、自陳量表、相關性設計、Time 1 到 Time 2 隔一週。沒有操弄、沒有互動、沒有行為結果。總樣本 N = 3,514（含前導研究），所以這些空白**不是樣本不夠造成的**，是設計本身就沒有涵蓋。
 
 :::
 

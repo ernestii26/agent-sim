@@ -367,8 +367,104 @@ rather than with the new hypotheses.
 
 ## 12. Still open
 
+- No manipulation check is administered by any study — see section 13 for what was
+  retired, what it measured, and the loader change needed to give `ffni_mediation` one.
 - `leadership_style: "prestige" | "dominance"` remains in the persona and reaches the
   system prompt, so agents are told their own style. That is a demand characteristic.
   Cheap to test later: drop the field, keep traits/influence/speech, re-run.
 - Environment: `.venv` on CPython 3.12.14 via `uv` (the system Python is 3.14.5 and
   `tinytroupe` fails to install there).
+
+---
+
+## 13. The manipulation check, retired (2026-08-25)
+
+`threat_check` is removed from `pd_matched`'s instruments list. It ran on all 40 runs
+and is not being re-run. `studies/pd_matched/instruments/threat_check.json` stays on
+disk as the record of what was asked; nothing loads it.
+
+### What it was
+
+Three items, 7-point agreement, administered post-scenario to the eight Neutral agents
+only. Deliberately mentions no leader and no person, so it can neither prime the vote
+nor be primed by it. Post-only: the between-condition difference is the check, and a
+baseline would have measured trait threat-sensitivity instead of the situation.
+
+1. My own position here feels insecure.
+2. This situation is urgent — there is very little time to get it right.
+3. If this goes wrong, the consequences for me personally will be serious.
+
+### What it found — per item, n = 160 per cell (8 N x 20 runs)
+
+| item | threat | collaborative | gap |
+|---|---|---|---|
+| 1. position feels insecure | 4.31 | 1.96 | **2.35** |
+| 2. urgent, little time | 6.84 | 4.83 | 2.01 |
+| 3. personal consequences serious | 4.99 | 2.84 | 2.15 |
+| composite | 5.38 | 3.21 | 2.17 |
+
+Straight-lining 0.00 in both conditions — no agent gave all three items the same
+score, so the scale was discriminating rather than dead.
+
+The manipulation worked, and it worked on the intended construct: item 1, the item
+closest to threat in the theoretical sense, has both the largest gap and the cleanest
+separation (1.96 -> 4.31, crossing the midpoint from a real floor).
+
+### Two things the per-item breakdown showed that the composite hid
+
+**Item 2 measures time pressure, not threat.** It is not carrying the effect (2.01 is
+the smallest of the three gaps), but it does not belong in an average with the other
+two. It also sits at 6.84/7 under threat — near ceiling, so little variance is left
+for any individual-level analysis — and at 4.83 under collaborative, above the midpoint
+in a scenario that named no deadline at all.
+
+**Urgency was bundled into the manipulation itself.** The threat scenario carried
+"48 hours" and "right now"; the collaborative scenario carried no deadline. So the
+check cannot separate threat from time pressure — time pressure is part of the
+treatment, not a nuisance. This matters because "we are on a clock, someone decide"
+is a competing explanation for the D advantage, and it fits the vote reasons (84%
+decisive/responsible, 0% fear) better than the theory's fear channel does.
+
+Both scenarios now carry a matched 48-hour deadline, so this is fixed for anything
+run after 2026-08-25 — but the 40 runs in `results/` predate the fix.
+
+Neither Kakkar & Sivanathan (economic uncertainty) nor Laustsen & Petersen (intergroup
+conflict) manipulate deadlines. The 48 hours was ours.
+
+### Why it is retired rather than kept
+
+Its job was to make a null in Step 1 interpretable, and Step 1 produced no null that
+needed it: H2 p = 0.003, interaction p = 0.011. It costs roughly 20% more API calls
+per run, and the effect it verified (5.38 vs 3.21, matching a smaller pilot to within
+0.1) is stable enough to cite rather than re-measure.
+
+### What this costs, stated plainly
+
+`ffni_mediation` now has no manipulation check either, and its nulls are the ones that
+were expected in advance — H5's dominance side by design, and H3 possibly. A null H3
+("threat did not raise protection need") is not separable from "the scenario did not
+feel threatening" without one. The mitigation is that Step 2 reuses this scenario text
+with the deadline matched, so this section's numbers are the standing evidence that the
+manipulation lands. If Step 2's scenarios are ever rewritten, that evidence expires.
+
+FFNI's own protection subscale cannot substitute: it measures a want, not a state; it
+is the H6 mediator, so using it would assume the conclusion; and every item names a
+leader.
+
+### If it is ever brought back
+
+There is a structural blocker. `load_study` allows at most one instrument per `about`
+kind, and `threat_check` declares `about: "self"` — the same kind `ffni` declares. So
+`ffni_mediation` cannot simply add it; the loader rejects the pair. A manipulation
+check is not a self-report about needs, so the fix is a fourth kind:
+
+- add `ABOUT_MANIPULATION = "manipulation"` in `instrument.py`
+- retype `threat_check.json`, add a `Study.manipulation_check` property
+- render it in `run.py::_report` separately, **per item** rather than as a composite
+
+That last point is why the item-2 problem above went unnoticed until now: `render_needs`
+prints subscale means only, and it took reading the raw checkpoints to see the three
+items apart. While `threat_check` was typed `about: "self"` it also became
+`Study.self_report`, so the needs pipeline ran on it and the report printed two blocks
+of `n/a` — a T1/delta/alpha row it can never fill, and a COGNITION vs EVALUATION table
+that has no meaning for a manipulation check.

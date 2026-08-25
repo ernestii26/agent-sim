@@ -20,28 +20,35 @@ from study import Condition, Study
 
 
 class BalancedSampler:
-    """Cycles through a pool in random order, ensuring each item appears once
-    per cycle before any item repeats. Eliminates the over-representation bias
-    that arises from repeated random.choice calls."""
+    """Cycles through positions 0..size-1 in random order, ensuring each appears once
+    per cycle before any repeats. Eliminates the over-representation bias that arises
+    from repeated random.choice calls.
 
-    def __init__(self, pool: list[str]) -> None:
-        self._pool = list(pool)
-        self._queue: list[str] = []
+    Yields positions rather than ids so that paired groups can draw the same index,
+    and carries its own seeded RNG so run i draws the same cast in every condition.
+    """
 
-    def take(self, n: int) -> list[str]:
-        drawn: list[str] = []
+    def __init__(self, size: int, seed: int = 0) -> None:
+        self._size = size
+        self._queue: list[int] = []
+        self._rng = random.Random(seed)
+
+    def take(self, n: int) -> list[int]:
+        drawn: list[int] = []
         while len(drawn) < n:
             if not self._queue:
-                self._queue = random.sample(self._pool, len(self._pool))
+                self._queue = self._rng.sample(range(self._size), self._size)
             drawn.append(self._queue.pop(0))
         return drawn
 
 
 def make_samplers(study: Study) -> dict[str, BalancedSampler]:
+    """One sampler per sampled group. A paired group has none — it reuses its source's
+    draw, which is the whole point of pairing."""
     return {
-        key: BalancedSampler(list(group.ids))
+        key: BalancedSampler(len(group.ids), study.sampler_seed)
         for key, group in study.groups.items()
-        if group.sample is not None
+        if group.sample is not None and group.pair_with is None
     }
 
 
@@ -50,15 +57,23 @@ def compose_run(
     pool: dict[str, Participant],
     samplers: dict[str, BalancedSampler],
 ) -> list[Participant]:
-    """Pick this run's cast: `sample` members per sampled group, all members otherwise."""
+    """Pick this run's cast: `sample` members per sampled group, all members otherwise.
+
+    A group declaring `pair_with` takes the positions drawn for that group, so bank-paired
+    personas (P_i and D_i from one row) appear together instead of being drawn independently.
+    """
     from discussion import clone_participants
 
+    picks: dict[str, list[int]] = {}
     chosen: list[str] = []
     for key, group in study.groups.items():
         if group.sample is None:
             chosen.extend(group.ids)
-        else:
-            chosen.extend(samplers[key].take(group.sample))
+            continue
+        source = group.pair_with or key
+        if source not in picks:
+            picks[source] = samplers[source].take(study.groups[source].sample)
+        chosen.extend(group.ids[i] for i in picks[source])
     return clone_participants([pool[pid] for pid in chosen])
 
 
@@ -102,13 +117,16 @@ def run_condition(
     records: list[RunRecord] = []
 
     for run_no in range(1, runs + 1):
+        # Drawn before the checkpoint check: the sampler must advance once per run
+        # number either way, or a resumed condition re-draws run 1's cast and loses
+        # both the balanced cycle and the alignment with the other condition.
+        cast = compose_run(study, pool, samplers)
         ckpt = ckpt_dir / f"run_{run_no:03d}.json"
         if ckpt.exists():
             progress(f"\nRun {run_no}/{runs}  [checkpoint]")
             records.append(RunRecord.from_dict(json.loads(ckpt.read_text(encoding="utf-8"))))
             continue
 
-        cast = compose_run(study, pool, samplers)
         members: dict[str, list[str]] = {}
         for p in cast:
             members.setdefault(p.group, []).append(p.persona_id)

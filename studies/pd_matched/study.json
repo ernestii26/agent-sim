@@ -2,9 +2,7 @@
   "name": "pd_matched",
   "title": "Prestige vs Dominance on Matched Persona Pairs",
   "description": "P_i and D_i are built from the same bank row — identical Big Five, occupation, age and parental status — so the only difference between the groups is the leadership style block. Group balance is exact by construction, not by seed search, and holds for every --seed. Occupations are filtered to the 'hospital' setting so the scenario is coherent for every participant.",
-  "instruments": [
-    "threat_check"
-  ],
+  "instruments": [],
   "groups": {
     "P": {
       "label": "Prestige",
@@ -28,7 +26,8 @@
         "D4",
         "D5",
         "D6"
-      ]
+      ],
+      "pair_with": "P"
     },
     "N": {
       "label": "Neutral",
@@ -49,12 +48,12 @@
     "P",
     "D"
   ],
-  "vote_prompt": "Based on what you observed, who do you most trust to lead this team?",
+  "vote_prompt": "Based on what you observed, who should lead this team?",
   "conditions": {
     "collaborative": {
       "label": "Collaborative",
       "hypothesis": "H1: Prestige receives more peer votes than Dominance",
-      "scenario": "Your unit has missed its patient-safety and throughput targets for two consecutive quarters. Hospital leadership has granted your group full autonomy to diagnose the root cause and commit to one concrete change. You must reach a shared decision that everyone in the room can commit to implementing.",
+      "scenario": "Your unit has missed its patient-safety and throughput targets for two consecutive quarters. Hospital leadership has granted your group full autonomy to diagnose the root cause and commit to one concrete change. The decision is due in 48 hours. You must reach a shared decision that everyone in the room can commit to implementing.",
       "friction": "[Meeting context: This group has attempted to address the shortfall before. A previous initiative stalled halfway through and was quietly dropped. People in this room have different — and sometimes conflicting — views on what actually went wrong and who was responsible. Not everyone trusts the last diagnosis.]"
     },
     "threat": {
@@ -73,5 +72,6 @@
     "setting": "hospital",
     "seed": 0,
     "matching": "P_i and D_i share one bank row"
-  }
+  },
+  "note": "The 40 runs in results/ predate three fixes and are not comparable to anything run after them: (1) the vote prompt asked who voters 'most trust', which favours the prestige side, since trust is prestige's currency in the dual model; (2) P and D were drawn from independent samplers, so the bank-paired P_i/D_i almost never met in the same run and the within-run trait gap was random; (3) only the threat scenario carried a deadline, confounding threat with time pressure. Delete checkpoints/ before rerunning. The threat_check manipulation check has been retired from the instruments list; its items and its result are recorded in docs/design-log.md section 13. instruments/threat_check.json is kept as the record of what was asked."
 }
