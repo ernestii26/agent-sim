@@ -111,6 +111,10 @@ def summarize_contrast(
         ],
         "wins": sum(1 for ma, mb in per_run if ma["votes"] > mb["votes"]),
         "metrics": metrics,
+        # Sampled groups are the ones run.py validate cannot judge — it only looks at
+        # always-present groups. A leader who never spoke is unratable, so the vote in
+        # that run is noise, and this is the only place it shows up.
+        "personas": persona_metrics(records),
         "supported": (
             votes[a]["mean"] > votes[b]["mean"]
             and not math.isnan(votes["p"])

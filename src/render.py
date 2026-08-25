@@ -86,14 +86,37 @@ def render_contrast(study: Study, condition: Condition, summary: dict[str, Any])
             f"{title:<24}  {_fmt(m[a]['mean'], 2):>10}  {_fmt(m[b]['mean'], 2):>10}"
             f"  {_fmt(m['t']):>8}  {_fmt_p(m['p']):>8}"
         )
-    print()
 
+    print()
     print(f"  {label_a} wins in {summary['wins']}/{summary['runs']} runs")
     print(
         f"  Verdict: {'SUPPORTED' if summary['supported'] else 'NOT SUPPORTED'} "
         f"({label_a} vs {label_b} votes, p = {_fmt_p(summary['metrics']['votes']['p'])})"
     )
+    _render_sampled_speech(study, summary)
     print("=" * 74)
+
+
+def _render_sampled_speech(study: Study, summary: dict[str, Any]) -> None:
+    """Did the contrasted personas actually speak? run.py validate skips them."""
+    sampled = {g.key for g in study.groups.values() if g.sample is not None}
+    rows = [(pid, m) for pid, m in summary.get("personas", {}).items()
+            if study.group_of(pid) in sampled]
+    if not rows:
+        return
+    print()
+    print(f"{'ID':<5}  {'Group':<12}  {'Runs in':>7}  {'Speech Rate':>12}  {'Avg Words':>10}")
+    print("-" * 68)
+    mute = 0
+    for pid, m in rows:
+        rate = m["speech_rate"]
+        flag = "  <- barely spoke" if rate <= 1 / 3 else ""
+        mute += rate <= 1 / 3
+        print(f"{pid:<5}  {study.label_of(study.group_of(pid)):<12}  "
+              f"{int(m['turns']):>7}  {_fmt(rate):>12}  {_fmt(m['mean_words'], 1):>10}{flag}")
+    if mute:
+        print(f"\n  {mute} contrasted persona(s) spoke in a third of their turns or less — "
+              f"raise --rounds, or those runs carry no impression to vote on.")
 
 
 def render_needs(study: Study, summary: dict[str, Any]) -> None:

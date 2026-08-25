@@ -50,7 +50,7 @@
     "P",
     "D"
   ],
-  "vote_prompt": "Based on what you observed, who do you most trust to lead this team?",
+  "vote_prompt": "Based on what you observed, who should lead this team?",
   "conditions": {
     "collaborative": {
       "label": "Collaborative",
