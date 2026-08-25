@@ -251,10 +251,20 @@ def test_ffni_matches_the_published_instrument() -> None:
 
 
 def test_ffni_mediation_borrows_personas_instead_of_copying_them() -> None:
+    """It borrows pd_matched's, not prestige_dominance's — the mediation has to run on
+    the matched pairs, or every confound pd_matched removes comes back."""
     study = load_study("ffni_mediation")
-    assert study.personas_from == "prestige_dominance"
-    assert study.personas_dir == load_study("prestige_dominance").personas_dir
+    matched = load_study("pd_matched")
+    assert study.personas_from == "pd_matched"
+    assert study.personas_dir == matched.personas_dir
     assert (study.personas_dir / "P1.agent.json").exists()
+    assert study.groups["D"].pair_with == "P"
+    assert {k: g.ids for k, g in study.groups.items()} == {k: g.ids for k, g in matched.groups.items()}
+    # design-log section 13's manipulation evidence was measured on pd_matched's wording,
+    # so it only transfers while the wording stays identical.
+    for key, cond in study.conditions.items():
+        assert cond.scenario == matched.conditions[key].scenario, key
+        assert cond.friction == matched.conditions[key].friction, key
 
 
 def test_subscale_scores_drop_bad_ratings_rather_than_impute() -> None:
