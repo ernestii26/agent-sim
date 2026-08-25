@@ -367,11 +367,43 @@ rather than with the new hypotheses.
 
 ## 12. Still open
 
+Sections 13-20 are all from the 2026-08-26 session. Nothing in `results/` was produced
+under any of them — the 40 runs there predate the sampling fix, the cast change, the
+electorate restriction and the persona regeneration, and are kept only as the pilot that
+established the effect size everything since was sized against.
+
+### Next actions, in order
+
+1. **`python3 run.py measure-check ffni_mediation`** — the gate before spending on Step 2.
+   Judges FFNI and `leader_ideal` together (section 20). Watch four things: `leader_ideal`
+   straight-lining, since 45 items in one call has never been tried; the alphas on
+   strength, masculinity and femininity, which carry 2 items each and may simply fail;
+   `protection`'s **delta SD**, which is the noise floor H6's induced-need mediator has to
+   clear; and whether test-retest lands above 0.85, which would mean the agents are too
+   stable for a situation to move them. Roughly 80 calls, a few dollars.
+2. **Consider a cheaper `SURVEY_MODEL`.** Section 15 found the post-scenario instruments
+   carry 77% of Step 2's transcript cost, not the discussion. Run `measure-check` on
+   `gpt-4.1-mini` and `gpt-5-mini` and take the cheapest that clears every gate.
+   `DISCUSSION_MODEL` stays `gpt-4.1` — the discussion is the phenomenon.
+3. **Re-run Step 1 (`pd_matched`)** under the current design. Delete `checkpoints/` first.
+4. **Run Step 2 (`ffni_mediation`)**, which now shares pd_matched's personas, cast and
+   scenario text.
+
+### Known and accepted
+
 - `effectiveness` cannot be validated before a run — it rates someone from a meeting.
-  Section 20 covers the other two instruments; this one needs a post-hoc check from
-  real run data.
-- No manipulation check is administered by any study — see section 13 for what was
-  retired, what it measured, and the loader change needed to give `ffni_mediation` one.
+  Section 20 covers the other two instruments; this one needs a post-hoc check.
+- No manipulation check is administered by any study. Section 13 has the items, the
+  per-item results, why it was retired, and the loader change needed to bring it back.
+- `summarize_mediation`'s bootstrap resamples respondents, not runs, so it ignores that
+  neutrals in one run watched the same discussion. Worth about 2 points of false-positive
+  rate (section 18). Marked `ponytail:` in the docstring.
+- H4 rests on a reconstruction of the ILT scale, not the instrument Sheng et al. used
+  (section 19). It is a much closer replication than the 12 adjectives it replaced, but
+  a failure still has more than one reading.
+- Pair 1 (Hugo Marchand / Xavier Dubois) is the low-extraversion matched pair, and
+  section 17 removed the text that told a quiet dominant how to dominate. Watch the
+  speech-rate warning on that pair specifically in the next run.
 - ~~`leadership_style` reaches the system prompt~~ — removed 2026-08-26, see section 17.
 - Environment: `.venv` on CPython 3.12.14 via `uv` (the system Python is 3.14.5 and
   `tinytroupe` fails to install there).
