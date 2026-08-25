@@ -468,3 +468,99 @@ items apart. While `threat_check` was typed `about: "self"` it also became
 `Study.self_report`, so the needs pipeline ran on it and the report printed two blocks
 of `n/a` — a T1/delta/alpha row it can never fill, and a COGNITION vs EVALUATION table
 that has no meaning for a manipulation check.
+
+---
+
+## 14. What the 2026-08-24 session cost, and where the money goes
+
+**Observed: about US$42** for the session that produced the 40 runs in `results/`.
+That figure covers more than the 40 runs themselves — it also paid for the personas
+generated twice (the `nationality` bug in §6 invalidated the first batch), the threat
+runs discarded after that fix, `validate` and `measure-check` passes, and the deleted
+`ffni_profiles` study.
+
+### The config it was spent under
+
+```ini
+DISCUSSION_MODEL = gpt-4.1     DISCUSSION_TEMPERATURE = 0.7   DISCUSSION_MAX_TOKENS = 6000
+VOTE_MODEL       = gpt-4.1     VOTE_TEMPERATURE       = 0.2   VOTE_MAX_TOKENS       = 3000
+SURVEY_MODEL     = gpt-4.1     SURVEY_TEMPERATURE     = 0.2   SURVEY_MAX_TOKENS     = 3000
+RUNS = 20   ROUNDS = 3   MAX_ATTEMPTS = 3   EXPONENTIAL_BACKOFF_FACTOR = 3
+```
+
+Cast: 10 agents (1 P + 1 D + 8 N), two conditions.
+
+### Measured volume, from the checkpoints
+
+| quantity | value |
+|---|---|
+| runs | 40 |
+| speaking turns | 1200 (30 per run — every agent spoke every round) |
+| transcript words | 29,215 (730 per run) |
+| API calls per run | 48 = 30 discussion + 10 vote + 8 threat_check |
+| API calls, total | ~1,920 for the 40 runs alone |
+
+### Why cast size is the dominant lever
+
+Each discussion call carries the transcript so far. Summed over a run that is a
+triangular number, so the transcript the run pays for is roughly
+
+    cumulative words  ~  turns^2 x words_per_turn / 2
+
+and `turns = cast x rounds`. **Halving the cast quarters the transcript cost**, and it
+halves the number of calls on top of that. Measured here: 30 turns -> ~10,950 cumulative
+transcript words per run.
+
+Projected at rounds = 3, ~24 words per turn, threat_check retired:
+
+| cast | turns | cumulative transcript | calls/run | vs now |
+|---|---|---|---|---|
+| 10 (1P+1D+8N) | 30 | ~10,800 w | 40 | — |
+| 7 (1P+1D+5N) | 21 | ~5,300 w | 28 | **-51%** transcript |
+| 5 (1P+1D+3N) | 15 | ~2,700 w | 20 | **-75%** transcript |
+
+The same scaling applies to `ROUNDS`, which also multiplies into `turns`.
+
+### Levers, ranked by saving per unit of information lost
+
+1. **Cast 10 -> 7.** Biggest single saving, and the vote barely notices. `power_sim.py`
+   rerun at three cast sizes, 20 runs per condition, reps = 2000:
+
+   | cast | H2 at r=2 | interaction at r=2 | H2 at r=1.5 | interaction at r=1.5 |
+   |---|---|---|---|---|
+   | 10 | 78% | 82% | 37% | 53% |
+   | 7 | 75% | 79% | 36% | 51% |
+   | 5 | 72% | 77% | 36% | 50% |
+
+   The DV is the per-run D-P difference, so cutting voters shrinks its mean and its
+   variance together and the t-statistic hardly moves. Two caveats the sim cannot see:
+   it is a weighted lottery, not a model of a discussion, so it says nothing about
+   whether a room of 5 can still be *dominated* the way a room of 10 can; and the real
+   cost lands on Step 2, whose individual-level n is `neutrals x runs` — 160 -> 100 at
+   7 agents, 60 at 5. Do not go to 3 neutrals for a mediation study: 60 pairs against
+   FFNI subscales that correlate .60-.72 in the source paper will not separate anything.
+   (Those 160 were never 160 independent observations either — neutrals within a run
+   watched the same discussion. The bootstrap in `summarize_mediation` resamples pairs
+   rather than runs and so ignores that clustering, which is its own open item.)
+2. **The manipulation check, already retired** (§13): -8 calls per run, about -20%.
+3. **`measure-check` before the full study.** Costs a couple of dollars, and its whole
+   job is to stop a study that cannot work from being paid for 40 runs deep.
+4. **Checkpoints, already in place.** A resumed condition re-pays nothing. The `compose_run`
+   fix on 2026-08-26 was needed to keep that correct, not to make it cheaper.
+5. **`MAX_ATTEMPTS` 5 -> 3 and backoff 5 -> 3, already done** (§7). Truncation is
+   deterministic, so the extra attempts bought nothing but wall-clock.
+6. **Rounds 3 -> 2** is available but is the one lever that touches the manipulation:
+   3 rounds exists so that a paired P/D who are both low-extraversion still say enough
+   to be judged. Cut it only while watching the speech-rate warning in the contrast
+   report, which flags anyone speaking in a third of their turns or fewer.
+
+### What not to cut
+
+`SURVEY_MAX_TOKENS` and `DISCUSSION_MAX_TOKENS`. Both were raised to fix silent data
+corruption (P3 and P7 in `ERRORS_AND_FIXES.md`, §7 here). A ceiling only bills for what
+the model actually emits, so a generous one costs nothing until it is needed — unlike
+cast size or rounds, which are paid on every single call.
+
+Switching the survey model to something cheaper is also off the table for now: the
+instruments are the measurement, and a model change there is a change to the instrument,
+not to the budget.
