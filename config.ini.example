@@ -23,10 +23,16 @@ DISCUSSION_MAX_TOKENS = 6000
 VOTE_MAX_TOKENS = 3000
 
 ; Survey instruments (FFNI, ILT, effectiveness ratings).
-; A 22-item battery is answered in one call, so keep the token ceiling high.
+; A 22-item battery is answered in one call, so keep the token ceiling high; the
+; 45-item ILT reconstruction needs 4500.
 SURVEY_MODEL = gpt-4.1
-SURVEY_TEMPERATURE = 0.2
-SURVEY_MAX_TOKENS = 3000
+; Zero, not merely low. At 0.2 the 45-item prototype battery failed measure-check's
+; test-retest gate outright (mean r .35 against a floor of .40) and passed at 0 with
+; .47 — see docs/design-log.md section 25. A rating scale is a measurement, and the
+; decoding randomness was the largest single thing it was measuring. Note this rules
+; out the gpt-5 family here: TinyTroupe strips a non-default temperature for those.
+SURVEY_TEMPERATURE = 0
+SURVEY_MAX_TOKENS = 4500
 
 ; Main run
 RUNS = 20
