@@ -1615,3 +1615,76 @@ the discussion is shared — then a second post administration averaged to lift 
 mediator's reliability from .61 towards .76. Switching to a continuous outcome would work
 and is refused: that outcome is H5's effectiveness rating, and section 18 separated them
 on purpose.
+
+---
+
+## 27. Step 2 ran: the behavioural effect replicates, the proposed mediator does not carry it (2026-08-26)
+
+40 runs per condition, `gpt-4.1`, `SURVEY_TEMPERATURE 0`, three rounds, cast of 5, every
+fix from sections 13 through 26 in force. About six and a half hours and roughly $27.
+
+### The behavioural layer
+
+| test | result |
+|---|---|
+| H1 collaborative: P > D | **supported**, p = .017, P 1.65 vs D 0.90, P wins 25/40 |
+| H2 threat: D > P | not supported, p = .105, D 1.57 vs P 1.10, D wins 23/40 |
+| **Interaction** | **supported**, p = **.0076**, threat +0.47 against collaborative -0.75 |
+
+H2 alone missing .05 is what section 4's power table predicts: the interaction is better
+powered than either condition on its own, and it is the test that matches the claim.
+
+### The mechanism layer
+
+**H3 holds, and for exactly one need.** The induced-need difference for `protection` is
+**+0.31, CI [0.12, 0.50]**. Every other need's interval contains zero, `status` included.
+Threat moved the need the source paper names and nothing else.
+
+**H4 does not hold, on either reading.** Within-person, `protection`'s beta is .05,
+CI [-.09, .19]; between-person, -.07, CI [-.19, .05]. `status` reaches the dominance-side
+prototype at -.16, CI [-.28, -.05] — significant and in the wrong direction.
+
+**H5's dominance side is null**, replicating the paper: `protection` to Dominance
+effectiveness is -.00, CI [-.14, .13].
+
+**H6 finds no mediation:**
+
+    path a     0.310     threat did raise the induced need
+    path b    -0.006     which predicted nothing about the respondent's own vote
+    indirect  -0.002     CI [-0.027, 0.024]
+
+### The null has content
+
+The interval is narrow in absolute terms. Dividing through by path a puts path b's
+interval at roughly [-.09, .08], which excludes the `b_vote = 0.10` that section 26's
+simulation called the *small* case — and the same simulation detects a medium path b 95%
+of the time at this n. So this is not a study that failed to look; it is a study that
+looked and can rule out anything but a very small effect.
+
+    threat ─────────────────────────────────→ endorsement shifts to Dominance   (p = .008)
+       └→ protection need rises (H3)  ──✗──→ the vote (H6)
+                                      ──✗──→ the prototype (H4)
+
+Both ends are causally connected and the proposed mediator does not carry the connection.
+Sheng et al. assume this mediation and say plainly that it has never been tested
+(pp. 45-46) — that assumption is the reason this study exists. It has now been tested on
+data where the situation was manipulated rather than observed, the need was measured
+within-person before and after, and the outcome was a behaviour rather than a rating. It
+does not hold.
+
+### What could still explain it away, in order of how much they worry me
+
+- `protection`'s own reliability. Test-retest .83 after section 26's ordering fix, which
+  is the best it has been, but the measurement is still the weakest link in the chain.
+- The mediator is measured after the discussion, and the vote follows it. A need that
+  moved *during* the discussion and moved back is invisible here.
+- Path b is estimated within condition on 120 respondents clustered in 40 rooms. The
+  bootstrap resamples rooms, so the interval is honest, but a room-level common cause
+  would not show up as mediation either way.
+
+### A tool that answered the wrong question
+
+`tools/interaction_test.py` had `results/pd_matched/` hardcoded. Asked about Step 2 it
+silently reported Step 1's calibration runs instead — a different design at n = 10 — with
+nothing in its output naming the study. It takes the study as an argument now and prints
+it. The first reading of Step 2's interaction in this session came from that bug.

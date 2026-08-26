@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
-"""The primary test for pd_matched: does threat's D-P vote gap exceed collaborative's?
+"""Does threat's D-P vote gap exceed collaborative's?
 
-    python3 tools/interaction_test.py
+    python3 tools/interaction_test.py [study]
+
+The study used to be hardcoded to pd_matched, which meant asking about ffni_mediation
+silently answered about pd_matched instead — with a different n and a different design,
+and nothing in the output saying so.
 
 design-log.md decision 3 named this as the test that actually matches the H2 claim —
 per-condition t-tests (what run.py report prints) are descriptive on their own; this is
@@ -10,16 +14,17 @@ conditions through `run.py run` first.
 """
 from __future__ import annotations
 
+import argparse
 import glob
 import json
 import math
 import statistics
 
 
-def latest_summary(condition: str) -> dict:
-    files = sorted(glob.glob(f"results/pd_matched/{condition}/{condition}_*.json"))
+def latest_summary(study: str, condition: str) -> dict:
+    files = sorted(glob.glob(f"results/{study}/{condition}/{condition}_*.json"))
     if not files:
-        raise SystemExit(f"No summary found for {condition} — run it first.")
+        raise SystemExit(f"No summary found for {study}/{condition} — run it first.")
     return json.loads(open(files[-1]).read())
 
 
@@ -36,8 +41,13 @@ def welch_onesided_greater(a: list[float], b: list[float]) -> tuple[float, float
 
 
 def main() -> None:
-    threat = latest_summary("threat")
-    collab = latest_summary("collaborative")
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("study", nargs="?", default="pd_matched")
+    args = ap.parse_args()
+
+    threat = latest_summary(args.study, "threat")
+    collab = latest_summary(args.study, "collaborative")
 
     # Both per_run lists are keyed by that condition's own contrast order, so normalise
     # both to (D - P) before comparing.
@@ -46,7 +56,8 @@ def main() -> None:
 
     t, df, p = welch_onesided_greater(t_dp, c_dp)
 
-    print("Interaction test: threat's D-P vote gap exceeds collaborative's D-P gap\n")
+    print(f"Interaction test ({args.study}): threat's D-P vote gap exceeds "
+          f"collaborative's D-P gap\n")
     print(f"  threat       mean(D-P) = {statistics.mean(t_dp):+.2f}  "
           f"sd = {statistics.stdev(t_dp):.2f}  n = {len(t_dp)}")
     print(f"  collaborative mean(D-P) = {statistics.mean(c_dp):+.2f}  "
