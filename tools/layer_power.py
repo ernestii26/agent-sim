@@ -16,7 +16,7 @@ rule the reports use, run on the real `summarize_layer_moderation` and
 # ponytail: respondents are drawn independently around a per-run offset, which gives
 # the clustering the bootstrap has to survive but not the way a real discussion moves a
 # room. Effect sizes are assumptions until measure-check reports the noise floor; re-run
-# with --sd-induced set to the observed delta SD once it does.
+# with --sd-noise set to the observed delta SD once it does.
 """
 from __future__ import annotations
 
@@ -37,15 +37,25 @@ NEEDS = (("protection", 4), ("affiliation", 4), ("status", 4),
 
 def make_run(run_no: int, condition: str, rng: random.Random, *, lift: float,
              beta_proto: float, beta_eff: float, b_vote: float,
-             sd_induced: float, respondents: int) -> RunRecord:
-    """One room. `lift` is path a; the betas are how far the induced need reaches."""
+             sd_true: float, sd_noise: float, respondents: int) -> RunRecord:
+    """One room. `lift` is path a; the betas are how far the induced need reaches.
+
+    Signal and noise are separate on purpose. `sd_true` is how much respondents differ
+    in how far the situation actually moved them; `sd_noise` is what the instrument adds
+    on top, and is the delta SD measure-check reports. They pull opposite ways: the
+    prototype and the vote follow the TRUE change, while every estimator only ever sees
+    the observed one, so more noise attenuates the slopes but more true spread powers
+    them. One parameter for both, as this had, makes a lower noise floor look like lost
+    power.
+    """
     room = rng.gauss(0, 0.3)          # what this discussion did to everyone in it
     neutrals = [f"N{i}" for i in range(1, respondents + 1)]
     baseline, post, proto_base, proto_post, effect, votes = {}, {}, {}, {}, {}, []
     for pid in neutrals:
         level = rng.uniform(2.0, 6.0)
-        induced = lift + room + rng.gauss(0, sd_induced)
-        after = level + induced
+        induced = lift + room + rng.gauss(0, sd_true)      # what really moved
+        observed = induced + rng.gauss(0, sd_noise)        # what the scale reports
+        after = level + observed
         baseline[pid] = {}
         post[pid] = {}
         for name, count in NEEDS:
@@ -114,14 +124,16 @@ def main() -> None:
     ap.add_argument("--beta-proto", type=float, default=0.5)
     ap.add_argument("--beta-eff", type=float, default=0.0, help="0 = H5's expected null")
     ap.add_argument("--b-vote", type=float, default=0.10)
-    ap.add_argument("--sd-induced", type=float, default=1.0,
-                    help="measurement noise on the induced need; measure-check reports it")
+    ap.add_argument("--sd-true", type=float, default=0.5,
+                    help="spread in how far the situation really moved each respondent")
+    ap.add_argument("--sd-noise", type=float, default=0.4,
+                    help="measurement noise on the induced need; measure-check's delta SD")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
     study = load_study(args.study)
     print(f"\nlift={args.lift}  beta_proto={args.beta_proto}  beta_eff={args.beta_eff}  "
-          f"b_vote={args.b_vote}  sd_induced={args.sd_induced}")
+          f"b_vote={args.b_vote}  sd_true={args.sd_true}  sd_noise={args.sd_noise}")
     print(f"{args.reps} reps, {args.draws} bootstrap draws, "
           f"{args.respondents} respondents per run\n")
 
@@ -136,7 +148,8 @@ def main() -> None:
             for key, ok in one_rep(study, rng, runs, args.draws,
                                    respondents=args.respondents, lift=args.lift,
                                    beta_proto=args.beta_proto, beta_eff=args.beta_eff,
-                                   b_vote=args.b_vote, sd_induced=args.sd_induced).items():
+                                   b_vote=args.b_vote, sd_true=args.sd_true,
+                                   sd_noise=args.sd_noise).items():
                 hits[key] += ok
         print(f"{runs:<16}" + "".join(f"{hits[k] / args.reps:>31.0%} " for k in labels))
     print("\nH5's column is a FALSE-positive rate when --beta-eff is 0: the paper's null is")

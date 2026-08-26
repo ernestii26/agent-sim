@@ -1400,6 +1400,12 @@ The regression test for the pooled-slope bug is what caught it.
 
 ### What 40 runs can actually resolve in the layer hypotheses
 
+**Superseded by section 26.** This table was computed with a single `sd_induced`
+parameter standing in for both measurement noise and real individual differences,
+and against a noise floor of 1.0 that only held while item order was re-randomised
+per administration. Both are gone. Kept for the record of how the question was
+first framed; the numbers to use are in section 26.
+
 `tools/layer_power.py`, 100 reps, 200 bootstrap draws, 3 respondents per run, detection
 defined as the estimator's own interval clearing zero. `beta_eff = 0` throughout, so the
 H5 column is a **false-positive rate**, not power — the paper's null is the expected
@@ -1521,3 +1527,91 @@ and `ethics` (.76) carry the average — exactly how a dead `strength` used to p
 alpha gate. It matters because `status`, the other dominance-side need, has its composite
 averaged over `tyranny` (.68), `masculinity` (.01) and `attractiveness` (.28): two of its
 three outlets are noise. Gating retest per read subscale would fail `leader_ideal` again.
+
+---
+
+## 26. Item order was the noise floor, and what that does to the sample size (2026-08-26)
+
+Three `measure-check` runs, `gpt-4.1`, 144 calls each. The question was where the noise
+that failed `leader_ideal` in section 25 was coming from.
+
+### Temperature was a third of it; item order was the rest
+
+| | mean test-retest | | | protection noise SD |
+|---|---|---|---|---|
+| temperature 0.2, order re-shuffled per administration | FFNI .64 / ILT **.35** | | | 1.01 |
+| temperature 0, order re-shuffled | FFNI .65 / ILT .47 | | | 1.01 |
+| temperature 0, **order fixed per respondent** | FFNI **.89** / ILT **.76** | | | **0.40** |
+
+Every noise floor roughly halves in the third row. `protection` .21 -> .26 -> **.83**;
+`strength` .23 -> .46 -> **.81**; `masculinity` -.04 -> .01 -> .63.
+
+`_administer` drew a fresh item order on every call, so the same persona met a different
+order at baseline and at post and the difference between them carried order sensitivity.
+That difference is H3's dependent variable and H6's mediator. The order is now drawn from
+a generator keyed on the instrument and the persona: items are still randomly presented,
+orders still differ between people so position bias does not accumulate, and one
+respondent sees one order throughout.
+
+The first framing of this was wrong and is worth recording as such. Removing the shuffle
+looked like departing from a published protocol to flatter a reliability number. The
+protocol asks for randomly presented items; it does not ask for a respondent to be
+re-randomised against themselves between two waves of the same measure.
+
+### The gate's upper bound had to go
+
+With order fixed and temperature at 0, two administrations with nothing in between are
+the same prompt. Test-retest stops measuring whether an agent holds a stable position and
+starts measuring whether the same prompt returns the same answer. The FFNI promptly
+"failed" at .89 for being too stable, which is not a finding about the FFNI.
+
+The bound was there to catch agents too frozen for a situation to move them (section 12).
+That question cannot be asked by administering a scale twice with nothing happening
+between; H3's path a asks it, on data where something did happen. The gate is now
+one-sided: a scale that cannot reproduce itself under identical conditions is broken, and
+a scale that can is doing its job. Both instruments pass.
+
+### The power simulation was parameterised wrongly, and it flattered H6
+
+`layer_power.py` had one `sd_induced` standing in for two different things: how far the
+situation really moves different respondents, and what the instrument adds on top. They
+pull opposite ways — the prototype and the vote follow the true change, while every
+estimator sees only the observed one — so a single parameter made a *lower* noise floor
+look like *lost* power. Split into `--sd-true` and `--sd-noise`, the second being
+measure-check's delta SD.
+
+With `sd_noise = 0.40` measured and `sd_true = 0.5` assumed:
+
+| runs | H3 | H4 within | H5 false positive | H6 (b .10) | H6 (b .25) |
+|---|---|---|---|---|---|
+| 20 | 92% | 65% | **13%** | 20% | — |
+| 40 | 100% | 94% | 2% | 31% | **95%** |
+| 60 | 100% | 97% | 4% | 44% | 100% |
+
+### The sample size decision, settled
+
+**40 runs per condition. Not 60.**
+
+- H3 is now saturated. Halving the noise floor took it from 84% to 100%, which is the
+  clearest return on the ordering fix.
+- H5's false-positive rate is 13% at 20 runs and nominal at 40. This remains the reason
+  40 is a floor, and the reason is not power.
+- H4 within-person sits at 94%.
+- **H6 is a cliff, not a slope.** At a small path b it is 31% at 40 runs and still only
+  44% at 60; at a medium one it is 95% at 40 and 100% at 60. The extra 50% of budget
+  buys nothing at either end — it cannot rescue the small case and is not needed for the
+  medium one. Section 24's reading, that 60 runs was worth considering for H6, was an
+  artefact of the conflated parameter.
+
+H6's fate is therefore decided by how strongly an induced need actually reaches a vote,
+not by how much is spent. Worth stating plainly in the write-up rather than discovering
+afterwards: **the links of the chain are each well powered and the product of them is
+not.** H2 (p = .028, measured), H3 (100%) and H4 (94%) can each carry mechanism evidence
+on their own; H6 asks one coefficient to claim the whole path at once.
+
+If H6 comes back with an interval spanning zero, the levers in order of leverage are more
+respondents per run rather than more runs — path b is a respondent-level regression and
+the discussion is shared — then a second post administration averaged to lift the
+mediator's reliability from .61 towards .76. Switching to a continuous outcome would work
+and is refused: that outcome is H5's effectiveness rating, and section 18 separated them
+on purpose.

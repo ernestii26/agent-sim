@@ -292,10 +292,13 @@ def render_measure_check(study: Study, summary: dict[str, Any]) -> bool:
         "differentiates subscales (SD of means > 0.30)": spread > 0.30,
         "few straight-liners (< 0.30)": not math.isnan(flat) and flat < 0.30,
         "internal consistency (every subscale read by an analysis > 0.60)": not weak,
-        # Two-sided on purpose. A mediator that is a CHANGE score inverts the usual
-        # logic: too low and the scale is noise, but too high and there is no state
-        # variance left for a situation to move, so the change is noise too.
-        "stable but not frozen (0.40 < mean r < 0.85)": 0.40 < mean_retest < 0.85,
+        # One-sided since 2026-08-26. The upper bound was there to catch agents too
+        # stable for a situation to move, but item order is now fixed per respondent
+        # (design-log section 26), so two administrations with nothing in between are
+        # the same prompt and a high r means the scale reproduces itself — which is
+        # what a measurement is for. Whether a situation can move the score is not
+        # answerable by asking twice with nothing happening; H3's path a answers it.
+        "reproduces its own answers (mean r > 0.40)": mean_retest > 0.40,
     }
     print()
     for label, ok in checks.items():
