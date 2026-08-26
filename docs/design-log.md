@@ -1313,3 +1313,73 @@ The scenario is a hospital under threat and the mediator is protection.
 The eleven ILT scales ran alpha .76 to .92 on humans. Section 20's gate asks for .60,
 which is lenient against that benchmark — reasonable for a first look at whether agents
 can answer the scale at all, but not a claim that the instrument performs as published.
+
+---
+
+## 24. Step 2's design, grilled (2026-08-26)
+
+Four findings, each of which would have cost a full study to discover afterwards.
+
+### H5 and H7 were reading the column section 23 had just condemned
+
+Section 23 moved H4 onto the increment over the other five needs. H5 and H7 were left on
+`slope(...)`. The paper's effectiveness analysis is the same hierarchical regression as
+its ILT analysis — "these relationships remained significant even after controlling for
+all other FFNs" — so the null H5 is built around ("the FFNs for protection and status
+failed to predict perceived effectiveness of dominance-based leadership") is a null on
+the incremental statistic. Reading the bivariate column there would have manufactured a
+positive result on the study's headline comparison, in the one place a null is the
+expected and interesting outcome. Both layers now come from the same six-need fit, and
+`layer_gap` is a difference of two standardised betas rather than of two correlations.
+
+### Eight neutrals could not identify the need regressions
+
+H4 and H5 regress a respondent's six need scores on their ratings. A need level is
+largely a property of the persona, so the count of DISTINCT neutrals caps the
+between-person variance no matter how many runs are collected: eight profiles against
+six predictors, repeated fifteen times each, is a saturated model wearing an n of 120.
+The paper fitted the same regressions on 261 independent people.
+
+`pair_bank.py` already defaulted to 24 neutrals and draws from the 3,645-row bank with
+no API call, so the pool was free to widen. The obstacle was that names came from a pool
+shuffled by the same rng that had already drawn the persona rows — asking for more
+neutrals renamed every persona, P and D included. Name assignment is now taken from the
+personas already on disk, with only new ids drawing from what is unused, so it is
+append-only by construction. 24 also divides evenly by the draw of 3, so every neutral
+appears exactly 5 times over 40 runs and the sampler's cycle boundary never falls inside
+a run.
+
+### Four of seven hypotheses could be printed but not decided
+
+H3 and H7 are claims about the difference between conditions. `run.py report` renders one
+condition at a time, so neither comparison was computed anywhere — `cmd_mediate`'s
+docstring claimed H7 and `summarize_mediation` has no moderation term. H4 and H5 reported
+a coefficient with no interval, which leaves an expected null indistinguishable from
+having found nothing.
+
+`run.py layers` computes all four from both conditions' checkpoints, pooled with each
+condition centred on its own means (threat moves the needs and the ratings together; a
+raw pooled fit reports that shared shift as a need-to-rating link — section 18's trap).
+**Its bootstrap resamples runs rather than respondents**, which discharges the clustering
+caveat section 18 marked `ponytail:` and accepted for H6.
+
+### The prototype now has a baseline, so the cognition layer is within-person
+
+`leader_ideal` was `post` only, so H4 correlated a post-discussion need with a
+post-discussion prototype — the cross-sectional design the paper is limited to, in a
+study whose whole advantage is that it manipulates the situation. A baseline
+administration carries no transcript (section 15's weighting: it runs before the
+discussion exists), so three more calls per run at 45 items is the cheapest thing in the
+design, output tokens only.
+
+The report now carries both readings: the level-to-level beta, which is the replication,
+and the change-to-change beta, which asks whether the situation moved the prototype and
+moved it with the need. The second is the question the source paper's correlational data
+cannot ask, and it is the same logic the mediation runs on.
+
+### Cost
+
+Per run at cast 5: 3 baseline FFNI + 3 baseline `leader_ideal` + 15 discussion + 3 post
+FFNI + 3 post `leader_ideal` + 6 effectiveness + 5 votes = **38 calls**, against 35
+before this session and 41 before the `each_candidate` cut in section 21. The six
+baseline calls carry no transcript.

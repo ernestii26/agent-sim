@@ -199,13 +199,25 @@ def render_layer_moderation(study: Study, out: dict[str, Any]) -> None:
     print("H3  did the situation move the need?")
     print(f"  {'Need':<14}  {'induced ' + low:>16}  {'induced ' + high:>16}  "
           f"{'difference':>11}  {'95% CI':>16}")
-    print("  " + "-" * 82)
+    print("  " + "-" * 96)
     for name, s in out["needs"].items():
         ind = s["induced"]
         print(f"  {name:<14}  {_fmt(ind[low], 2):>16}  {_fmt(ind[high], 2):>16}  "
               f"{_fmt(ind['difference'], 2):>11}  {ci(ind['ci95']):>16}")
 
     label_a = study.label_of(out.get("outcome_group", "D"))
+    print()
+    print("H4  within a person: did the change in the need go with the change in the prototype?")
+    print(f"  {'Need':<14}  {'induced b':>10} {'95% CI':>16}  "
+          f"{low + ' b':>16}  {high + ' b':>16}  {'difference':>11}")
+    print("  " + "-" * 96)
+    for name, s in out["needs"].items():
+        ind = s["cognition_induced"]
+        by = s["cognition_induced_by_condition"]
+        print(f"  {name:<14}  {_fmt(ind['beta'], 2):>10} {ci(ind['ci95']):>16}  "
+              f"{_fmt(by.get(low, float('nan')), 2):>16}  {_fmt(by.get(high, float('nan')), 2):>16}  "
+              f"{_fmt(s['cognition_induced_difference'], 2):>11}")
+
     print()
     print("H4 / H5 / H7  which layer does the need reach, and does threat change that?")
     print(f"  {'Need':<14}  {'proto b':>8} {'95% CI':>14}  {'eff ' + label_a:>8} {'95% CI':>14}  "

@@ -854,7 +854,7 @@ def _layer_run(run_no: int, condition: str, rng: random.Random, lift: float) -> 
     an incremental one should agree here — the point of the fixture is the layer gap
     and the condition difference, not the collinearity H4 was fixed for."""
     neutrals = [f"N{i}" for i in range(1, 4)]
-    baseline, post, ideals, effect, votes = {}, {}, {}, {}, []
+    baseline, post, ideals, ideals_base, effect, votes = {}, {}, {}, {}, {}, []
     for pid in neutrals:
         level = rng.uniform(2.0, 6.0)
         base, after = level, level + lift + rng.gauss(0, 0.2)
@@ -866,9 +866,12 @@ def _layer_run(run_no: int, condition: str, rng: random.Random, lift: float) -> 
             for i in range(1, count + 1):
                 baseline[pid][f"{name}_{i}"] = noise
                 post[pid][f"{name}_{i}"] = noise
-        # Prototype tracks protection; effectiveness of the observed person does not.
-        ideals[pid] = {"strength_1": after + rng.gauss(0, 0.3),
-                       "strength_2": after + rng.gauss(0, 0.3)}
+        # Prototype tracks protection at both times, so the within-person change in one
+        # goes with the within-person change in the other. Effectiveness does not.
+        ideals_base[pid] = {"strength_1": base + rng.gauss(0, 0.1),
+                            "strength_2": base + rng.gauss(0, 0.1)}
+        ideals[pid] = {"strength_1": after + rng.gauss(0, 0.1),
+                       "strength_2": after + rng.gauss(0, 0.1)}
         effect[pid] = {"D1": {"effectiveness_1": rng.uniform(2, 6)},
                        "P1": {"effectiveness_1": rng.uniform(2, 6)}}
         endorsed = "D" if after > 4.5 else "P"
@@ -879,7 +882,7 @@ def _layer_run(run_no: int, condition: str, rng: random.Random, lift: float) -> 
         "run_no": run_no, "condition": condition,
         "members": {"P": ["P1"], "D": ["D1"], "N": neutrals},
         "transcript": [], "votes": votes,
-        "measures": {"baseline": {"ffni": baseline},
+        "measures": {"baseline": {"ffni": baseline, "leader_ideal": ideals_base},
                      "post": {"ffni": post, "leader_ideal": ideals,
                               "effectiveness": effect}},
     })
@@ -907,9 +910,17 @@ def test_layer_moderation_separates_the_two_layers_and_the_two_conditions() -> N
     assert protection["induced"]["difference"] > 1.0
     assert protection["induced"]["ci95"][0] > 0, protection["induced"]
 
-    # H4: protection reaches its prototype dimension.
+    # H4, between persons: protection reaches its prototype dimension.
     assert protection["cognition"]["beta"] > 0.5
     assert protection["cognition"]["ci95"][0] > 0
+
+    # H4, within a person: the change in the need went with the change in the prototype.
+    # This is the reading the level scores cannot give, and it is why leader_ideal is
+    # administered at baseline as well.
+    induced = protection["cognition_induced"]
+    assert induced["beta"] > 0.4, induced
+    assert induced["ci95"][0] > 0, induced
+    assert set(protection["cognition_induced_by_condition"]) == {"collaborative", "threat"}
 
     # H5: it does not reach the effectiveness of the person in the room.
     assert abs(protection["evaluation_a"]["beta"]) < 0.3

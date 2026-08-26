@@ -507,11 +507,17 @@ def _layer_rows(
         before = record.needs(BASELINE, needs)
         after = record.needs(POST, needs)
         ideal_scores = record.needs(POST, ideals) if ideals else {}
+        ideal_base = record.needs(BASELINE, ideals) if ideals else {}
         ratings = record.ratings(effectiveness) if effectiveness else {}
         rows: list[dict[str, Any]] = []
         for pid, scores in after.items():
             mine = ideal_scores.get(pid, {})
+            was = ideal_base.get(pid, {})
             base = before.get(pid, {})
+
+            def dimensions(name: str, source: dict[str, float]) -> float:
+                predicted = ideals.predicts.get(name, ()) if ideals else ()
+                return mean([source.get(d, nan) for d in predicted]) if predicted else nan
             given = {}
             for slot, key in (("a", 0), ("b", 1)):
                 targets = record.members(contrast[key]) if contrast else []
@@ -520,10 +526,12 @@ def _layer_rows(
             rows.append({
                 "level": [scores.get(n, nan) for n in names],
                 "induced": [scores.get(n, nan) - base.get(n, nan) for n in names],
-                "composite": {
-                    n: mean([mine.get(d, nan) for d in ideals.predicts.get(n, ())])
-                    if ideals and ideals.predicts.get(n) else nan
-                    for n in names
+                "composite": {n: dimensions(n, mine) for n in names},
+                # The within-person move in the prototype. Available only because the
+                # prototype is administered at baseline too, which a baseline fork makes
+                # nearly free — it carries no transcript.
+                "induced_composite": {
+                    n: dimensions(n, mine) - dimensions(n, was) for n in names
                 },
                 "eff_a": given["a"],
                 "eff_b": given["b"],
@@ -595,6 +603,20 @@ def summarize_layer_moderation(
                 "model_r2": r2, "n": n,
             }
         out["cognition"] = cognition
+        # The same link asked within the person: did the change in the need go with the
+        # change in the prototype? Level scores cannot separate a standing disposition
+        # from what the situation did; a pre-post difference on both sides can.
+        moved = [r["induced"] for r in rows]
+        induced: dict[str, Any] = {}
+        for i, name in enumerate(names):
+            betas, drops, r2, n = partial_betas(
+                moved, [r["induced_composite"][name] for r in rows], with_deltas=deltas)
+            induced[name] = {
+                "beta": betas[i] if betas else float("nan"),
+                "delta_r2": drops[i] if drops else float("nan"),
+                "model_r2": r2, "n": n,
+            }
+        out["cognition_induced"] = induced
         return out
 
     def centred(runs: list[list[dict[str, Any]]]) -> list[dict[str, Any]]:
@@ -609,11 +631,17 @@ def summarize_layer_moderation(
         for key in ("eff_a", "eff_b"):
             for r, value in zip(rows, _centre([r[key] for r in rows])):
                 r[key] = value
-        for name in names:
-            column = _centre([r["composite"][name] for r in rows])
+        for i in range(len(names)):
+            column = _centre([r["induced"][i] for r in rows])
             for r, value in zip(rows, column):
-                r["composite"] = dict(r["composite"])
-                r["composite"][name] = value
+                r["induced"] = list(r["induced"])
+                r["induced"][i] = value
+        for field in ("composite", "induced_composite"):
+            for name in names:
+                column = _centre([r[field][name] for r in rows])
+                for r, value in zip(rows, column):
+                    r[field] = dict(r[field])
+                    r[field][name] = value
         return rows
 
     def estimate(sample: dict[str, list[list[dict[str, Any]]]], *, deltas: bool) -> dict[str, Any]:
@@ -638,6 +666,14 @@ def summarize_layer_moderation(
                             "difference": induced(high) - induced(low)},
                 # H4 and H5, pooled
                 "cognition": pooled["cognition"][name],
+                "cognition_induced": pooled["cognition_induced"][name],
+                "cognition_induced_by_condition": {
+                    key: per_key[key]["cognition_induced"][name]["beta"] for key in keys
+                },
+                "cognition_induced_difference": (
+                    per_key[high]["cognition_induced"][name]["beta"]
+                    - per_key[low]["cognition_induced"][name]["beta"]
+                ),
                 "evaluation_a": {
                     "beta": pooled["eff_a"]["beta"][i] if pooled["eff_a"]["beta"] else float("nan"),
                     "delta_r2": pooled["eff_a"]["delta_r2"][i]
@@ -694,6 +730,10 @@ def summarize_layer_moderation(
         entry = point["needs"][name]
         entry["induced"]["ci95"] = interval(["needs", name, "induced", "difference"])
         entry["cognition"]["ci95"] = interval(["needs", name, "cognition", "beta"])
+        entry["cognition_induced"]["ci95"] = interval(
+            ["needs", name, "cognition_induced", "beta"])
+        entry["cognition_induced_difference_ci95"] = interval(
+            ["needs", name, "cognition_induced_difference"])
         entry["evaluation_a"]["ci95"] = interval(["needs", name, "evaluation_a", "beta"])
         entry["evaluation_b"]["ci95"] = interval(["needs", name, "evaluation_b", "beta"])
         entry["layer_gap_ci95"] = interval(["needs", name, "layer_gap"])
