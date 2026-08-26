@@ -70,7 +70,7 @@ def cronbach_alpha(rows: list[list[float]]) -> float:
 
 
 def partial_betas(
-    predictors: list[list[float]], outcome: list[float]
+    predictors: list[list[float]], outcome: list[float], *, with_deltas: bool = True
 ) -> tuple[list[float], list[float], float, int]:
     """Standardised betas, each predictor's delta R2, the model R2, and n.
 
@@ -120,5 +120,6 @@ def partial_betas(
 
     every = list(range(k))
     beta, r2 = fit(every)
-    deltas = [r2 - fit([c for c in every if c != i])[1] for i in every]
+    # Each delta costs a refit, and a bootstrap wants only the betas.
+    deltas = [r2 - fit([c for c in every if c != i])[1] for i in every] if with_deltas else nan_k
     return [float(b) for b in beta], deltas, r2, int(n)

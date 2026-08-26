@@ -6,6 +6,8 @@
     python3 run.py measure-check <study>
     python3 run.py run      <study> <condition> [--runs N] [--rounds N]
     python3 run.py report   <study> <condition>
+    python3 run.py mediate  <study>            H6
+    python3 run.py layers   <study>            H3, H4, H5, H7
 
 Every theme-specific detail (groups, personas, scenarios) lives in studies/<study>/.
 """
@@ -21,15 +23,15 @@ sys.path.insert(0, str(_PROJECT_DIR / "src"))
 os.chdir(_PROJECT_DIR)  # TinyTroupe reads config.ini from the CWD
 
 from analysis import (  # noqa: E402
-    need_outcome_links, summarize_contrast, summarize_measure_check, summarize_mediation,
-    summarize_needs, summarize_validation,
+    need_outcome_links, summarize_contrast, summarize_layer_moderation,
+    summarize_measure_check, summarize_mediation, summarize_needs, summarize_validation,
 )
 from config import RunConfig  # noqa: E402
 from instrument import BASELINE  # noqa: E402
 from pipeline import load_records, run_condition, run_measure_check  # noqa: E402
 from render import (  # noqa: E402
-    plot_contrast, render_contrast, render_layers, render_mediation, render_measure_check,
-    render_needs, render_validation, save_summary,
+    plot_contrast, render_contrast, render_layer_moderation, render_layers,
+    render_mediation, render_measure_check, render_needs, render_validation, save_summary,
 )
 from runtime import setup_file_logging  # noqa: E402
 from study import Study, list_studies, load_study  # noqa: E402
@@ -171,7 +173,10 @@ def cmd_measure_check(args: argparse.Namespace) -> None:
 
 
 def cmd_mediate(args: argparse.Namespace) -> None:
-    """H6/H7: pool both conditions' checkpoints and test the indirect path."""
+    """H6: pool both conditions' checkpoints and test the indirect path.
+
+    H7 lives in `run.py layers`, which compares the two conditions directly.
+    """
     config = RunConfig.from_ini(_PROJECT_DIR / "config.ini")
     study = load_study(args.study)
     needs = study.self_report
@@ -196,6 +201,42 @@ def cmd_mediate(args: argparse.Namespace) -> None:
     save_summary(med, Path(config.output_dir) / study.name, f"mediation_{args.need}")
 
 
+def cmd_layers(args: argparse.Namespace) -> None:
+    """H3, H4, H5 and H7: both conditions at once, since all four compare them.
+
+    `run.py report` renders one condition, so a hypothesis about the difference between
+    conditions had nowhere to be computed. This is that place.
+    """
+    config = RunConfig.from_ini(_PROJECT_DIR / "config.ini")
+    study = load_study(args.study)
+    needs = study.self_report
+    if needs is None:
+        raise SystemExit(f"Study '{study.name}' has no self-report instrument.")
+    if BASELINE not in needs.timing:
+        raise SystemExit(
+            f"'{needs.key}' is not administered at baseline, so H3 has no induced change "
+            f"to report and H7 has no mediator to moderate."
+        )
+
+    by_condition = {key: load_records(_output_dir(config, study, key)) for key in study.conditions}
+    for key, records in by_condition.items():
+        print(f"  {key}: {len(records)} runs")
+
+    # Slot "a" must be the group the report talks about, or the effectiveness column is
+    # labelled Dominance while holding Prestige's ratings.
+    pair = tuple(next(iter(study.conditions.values())).contrast)
+    if args.group not in pair:
+        raise SystemExit(f"--group {args.group} is not one of the contrasted groups {pair}")
+    contrast = (args.group, *(g for g in pair if g != args.group))
+    out = summarize_layer_moderation(
+        study, by_condition, needs,
+        ideals=study.prototype, effectiveness=study.candidate_rating,
+        contrast=contrast, need=args.need, outcome_group=args.group,
+    )
+    render_layer_moderation(study, out)
+    save_summary(out, Path(config.output_dir) / study.name, "layers")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -212,6 +253,13 @@ def main() -> None:
     med.add_argument("--need", default="protection", help="mediator subscale (default: protection)")
     med.add_argument("--group", default="D", help="endorsed group key (default: D)")
     med.set_defaults(func=cmd_mediate)
+
+    lay = sub.add_parser("layers", help="H3/H4/H5/H7 across both conditions, with intervals")
+    lay.add_argument("study")
+    lay.add_argument("--need", default="protection",
+                     help="which need's induced change is followed to the vote (default: protection)")
+    lay.add_argument("--group", default="D", help="endorsed group key (default: D)")
+    lay.set_defaults(func=cmd_layers)
 
     for name, func, help_text in (
         ("validate", cmd_validate, "check the silence mechanism produces variation"),

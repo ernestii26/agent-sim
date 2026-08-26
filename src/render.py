@@ -180,6 +180,55 @@ def render_layers(study: Study, links: dict[str, Any]) -> None:
     print("=" * 88)
 
 
+def render_layer_moderation(study: Study, out: dict[str, Any]) -> None:
+    """H3, H4, H5 and H7 with intervals, so each one can be decided rather than admired."""
+    low, high = out["conditions"]["low"], out["conditions"]["high"]
+    runs = out["runs"]
+
+    def ci(bounds: list[float]) -> str:
+        return f"[{_fmt(bounds[0], 2)}, {_fmt(bounds[1], 2)}]"
+
+    print()
+    print("=" * 100)
+    print(f"LAYERS ACROSS CONDITIONS — {low} ({runs.get(low, 0)} runs) vs "
+          f"{high} ({runs.get(high, 0)} runs)")
+    print("=" * 100)
+    print(f"Intervals are percentile bootstrap over RUNS ({out['bootstrap_draws']} draws), not")
+    print("over respondents: three neutrals in a room saw one discussion between them.")
+    print()
+    print("H3  did the situation move the need?")
+    print(f"  {'Need':<14}  {'induced ' + low:>16}  {'induced ' + high:>16}  "
+          f"{'difference':>11}  {'95% CI':>16}")
+    print("  " + "-" * 82)
+    for name, s in out["needs"].items():
+        ind = s["induced"]
+        print(f"  {name:<14}  {_fmt(ind[low], 2):>16}  {_fmt(ind[high], 2):>16}  "
+              f"{_fmt(ind['difference'], 2):>11}  {ci(ind['ci95']):>16}")
+
+    label_a = study.label_of(out.get("outcome_group", "D"))
+    print()
+    print("H4 / H5 / H7  which layer does the need reach, and does threat change that?")
+    print(f"  {'Need':<14}  {'proto b':>8} {'95% CI':>14}  {'eff ' + label_a:>8} {'95% CI':>14}  "
+          f"{'gap':>6}  {'gap diff':>8} {'95% CI':>14}")
+    print("  " + "-" * 96)
+    for name, s in out["needs"].items():
+        c, e = s["cognition"], s["evaluation_a"]
+        print(f"  {name:<14}  {_fmt(c['beta'], 2):>8} {ci(c['ci95']):>14}  "
+              f"{_fmt(e['beta'], 2):>8} {ci(e['ci95']):>14}  {_fmt(s['layer_gap'], 2):>6}  "
+              f"{_fmt(s['layer_gap_difference'], 2):>8} {ci(s['layer_gap_difference_ci95']):>14}")
+
+    es = out["endorsement_slope"]
+    print()
+    print(f"H7  induced {out['endorsement_need']} -> endorsing {label_a}, within condition:")
+    print(f"  {low} {_fmt(es[low], 3)}   {high} {_fmt(es[high], 3)}   "
+          f"difference {_fmt(es['difference'], 3)}  {ci(es['ci95'])}")
+    print()
+    print("  A gap above zero with an interval clear of it is the paper's own result: the")
+    print("  need reaches the prototype and not the person. An effectiveness interval that")
+    print("  contains zero is the null being replicated, not a failure to find anything.")
+    print("=" * 100)
+
+
 def render_mediation(study: Study, med: dict[str, Any]) -> None:
     lo, hi = med["conditions"]["low"], med["conditions"]["high"]
     print()

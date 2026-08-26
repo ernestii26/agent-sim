@@ -484,3 +484,224 @@ def summarize_mediation(
         # suggestive, not confirmatory.
         "supported": not math.isnan(ci[0]) and (ci[0] > 0) == (ci[1] > 0),
     }
+
+
+def _layer_rows(
+    records: list[RunRecord],
+    needs: Instrument,
+    ideals: Instrument | None,
+    effectiveness: Instrument | None,
+    contrast: tuple[str, str] | None,
+) -> list[list[dict[str, Any]]]:
+    """One list per run, one row per respondent inside it.
+
+    Runs are kept apart because the run is the sampling unit: three neutrals in a room
+    watched the same discussion, so resampling respondents would count one meeting as
+    three independent observations. Section 18 accepted that for H6's bootstrap; here it
+    is avoided instead.
+    """
+    names = list(needs.subscales)
+    nan = float("nan")
+    runs: list[list[dict[str, Any]]] = []
+    for record in records:
+        before = record.needs(BASELINE, needs)
+        after = record.needs(POST, needs)
+        ideal_scores = record.needs(POST, ideals) if ideals else {}
+        ratings = record.ratings(effectiveness) if effectiveness else {}
+        rows: list[dict[str, Any]] = []
+        for pid, scores in after.items():
+            mine = ideal_scores.get(pid, {})
+            base = before.get(pid, {})
+            given = {}
+            for slot, key in (("a", 0), ("b", 1)):
+                targets = record.members(contrast[key]) if contrast else []
+                marks = [ratings.get(pid, {}).get(t, nan) for t in targets]
+                given[slot] = mean(marks) if marks else nan
+            rows.append({
+                "level": [scores.get(n, nan) for n in names],
+                "induced": [scores.get(n, nan) - base.get(n, nan) for n in names],
+                "composite": {
+                    n: mean([mine.get(d, nan) for d in ideals.predicts.get(n, ())])
+                    if ideals and ideals.predicts.get(n) else nan
+                    for n in names
+                },
+                "eff_a": given["a"],
+                "eff_b": given["b"],
+                "vote": record.vote_of(pid),
+            })
+        runs.append(rows)
+    return runs
+
+
+def _centre(values: list[float]) -> list[float]:
+    """Subtract the column's own mean, ignoring missing entries."""
+    finite = [v for v in values if not math.isnan(v)]
+    if not finite:
+        return list(values)
+    centre = mean(finite)
+    return [v - centre for v in values]
+
+
+def summarize_layer_moderation(
+    study: Study,
+    by_condition: dict[str, list[RunRecord]],
+    needs: Instrument,
+    *,
+    ideals: Instrument | None = None,
+    effectiveness: Instrument | None = None,
+    contrast: tuple[str, str] | None = None,
+    need: str = "protection",
+    outcome_group: str = "D",
+    bootstrap: int = 1000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """H3, H4, H5 and H7 in one pass, with the run as the unit of resampling.
+
+    H3  induced need, threat minus collaborative, per need.
+    H4  need -> its predicted prototype dimensions, as a beta from a six-need fit.
+    H5  need -> effectiveness of each contrasted group, from the same design matrix.
+    H7  the same quantities per condition, and the difference between them: does threat
+        strengthen the link and close the gap between the two layers?
+
+    Every estimate is pooled with each condition centred on its own means. Threat moves
+    the needs and the ratings together, so a raw pooled fit would report that shared
+    shift as a need-to-rating link — the same trap section 18 found in path b.
+    """
+    names = list(needs.subscales)
+    per_condition = {
+        key: _layer_rows(records, needs, ideals, effectiveness, contrast)
+        for key, records in by_condition.items()
+    }
+    keys = sorted(per_condition)
+    if len(keys) != 2:
+        raise SystemExit(f"Layer moderation needs exactly two conditions, got {keys}")
+    low, high = keys
+
+    def fit_rows(rows: list[dict[str, Any]], *, deltas: bool) -> dict[str, Any]:
+        """Betas for one pool of respondents, already centred."""
+        design = [r["level"] for r in rows]
+        out: dict[str, Any] = {}
+        for slot in ("eff_a", "eff_b"):
+            betas, drops, r2, n = partial_betas(design, [r[slot] for r in rows],
+                                                with_deltas=deltas)
+            out[slot] = {"beta": betas, "delta_r2": drops, "model_r2": r2, "n": n}
+        cognition: dict[str, Any] = {}
+        for i, name in enumerate(names):
+            betas, drops, r2, n = partial_betas(design, [r["composite"][name] for r in rows],
+                                                with_deltas=deltas)
+            cognition[name] = {
+                "beta": betas[i] if betas else float("nan"),
+                "delta_r2": drops[i] if drops else float("nan"),
+                "model_r2": r2, "n": n,
+            }
+        out["cognition"] = cognition
+        return out
+
+    def centred(runs: list[list[dict[str, Any]]]) -> list[dict[str, Any]]:
+        rows = [dict(r) for run in runs for r in run]
+        if not rows:
+            return rows
+        for i in range(len(names)):
+            column = _centre([r["level"][i] for r in rows])
+            for r, value in zip(rows, column):
+                r["level"] = list(r["level"])
+                r["level"][i] = value
+        for key in ("eff_a", "eff_b"):
+            for r, value in zip(rows, _centre([r[key] for r in rows])):
+                r[key] = value
+        for name in names:
+            column = _centre([r["composite"][name] for r in rows])
+            for r, value in zip(rows, column):
+                r["composite"] = dict(r["composite"])
+                r["composite"][name] = value
+        return rows
+
+    def estimate(sample: dict[str, list[list[dict[str, Any]]]], *, deltas: bool) -> dict[str, Any]:
+        by_key = {key: centred(sample[key]) for key in keys}
+        pooled = fit_rows(by_key[low] + by_key[high], deltas=deltas)
+        per_key = {key: fit_rows(by_key[key], deltas=False) for key in keys}
+
+        result: dict[str, Any] = {"needs": {}}
+        flat = {key: [r for run in sample[key] for r in run] for key in keys}
+        for i, name in enumerate(names):
+            def induced(key: str) -> float:
+                vals = [r["induced"][i] for r in flat[key] if not math.isnan(r["induced"][i])]
+                return mean(vals) if vals else float("nan")
+
+            def gap(fit: dict[str, Any]) -> float:
+                return fit["cognition"][name]["beta"] - fit["eff_a"]["beta"][i] \
+                    if fit["eff_a"]["beta"] else float("nan")
+
+            result["needs"][name] = {
+                # H3
+                "induced": {low: induced(low), high: induced(high),
+                            "difference": induced(high) - induced(low)},
+                # H4 and H5, pooled
+                "cognition": pooled["cognition"][name],
+                "evaluation_a": {
+                    "beta": pooled["eff_a"]["beta"][i] if pooled["eff_a"]["beta"] else float("nan"),
+                    "delta_r2": pooled["eff_a"]["delta_r2"][i]
+                    if pooled["eff_a"]["delta_r2"] else float("nan"),
+                },
+                "evaluation_b": {
+                    "beta": pooled["eff_b"]["beta"][i] if pooled["eff_b"]["beta"] else float("nan"),
+                },
+                "layer_gap": gap(pooled),
+                # H7
+                "layer_gap_by_condition": {key: gap(per_key[key]) for key in keys},
+                "layer_gap_difference": gap(per_key[high]) - gap(per_key[low]),
+            }
+
+        # H7's other half: does the induced mediator reach the vote harder under threat?
+        for key in keys:
+            rows = [r for run in sample[key] for r in run]
+            xs = _centre([r["induced"][names.index(need)] for r in rows])
+            ys = [1.0 if r["vote"] == outcome_group else 0.0 for r in rows]
+            result.setdefault("endorsement_slope", {})[key] = slope(xs, ys)[0]
+        result["endorsement_slope"]["difference"] = (
+            result["endorsement_slope"][high] - result["endorsement_slope"][low]
+        )
+        return result
+
+    point = estimate(per_condition, deltas=True)
+
+    rng = random.Random(seed)
+    draws: list[dict[str, Any]] = []
+    for _ in range(bootstrap):
+        sample = {
+            key: [rng.choice(runs) for _ in runs] if runs else []
+            for key, runs in per_condition.items()
+        }
+        try:
+            draws.append(estimate(sample, deltas=False))
+        except (ValueError, IndexError):
+            continue
+
+    def interval(path: list[Any]) -> list[float]:
+        values = []
+        for draw in draws:
+            node: Any = draw
+            for step in path:
+                node = node[step]
+            if isinstance(node, float) and not math.isnan(node):
+                values.append(node)
+        if len(values) < 20:
+            return [float("nan"), float("nan")]
+        values.sort()
+        return [values[int(0.025 * len(values))], values[int(0.975 * len(values)) - 1]]
+
+    for name in names:
+        entry = point["needs"][name]
+        entry["induced"]["ci95"] = interval(["needs", name, "induced", "difference"])
+        entry["cognition"]["ci95"] = interval(["needs", name, "cognition", "beta"])
+        entry["evaluation_a"]["ci95"] = interval(["needs", name, "evaluation_a", "beta"])
+        entry["evaluation_b"]["ci95"] = interval(["needs", name, "evaluation_b", "beta"])
+        entry["layer_gap_ci95"] = interval(["needs", name, "layer_gap"])
+        entry["layer_gap_difference_ci95"] = interval(["needs", name, "layer_gap_difference"])
+    point["endorsement_slope"]["ci95"] = interval(["endorsement_slope", "difference"])
+    point["conditions"] = {"low": low, "high": high}
+    point["outcome_group"] = outcome_group
+    point["endorsement_need"] = need
+    point["bootstrap_draws"] = len(draws)
+    point["runs"] = {key: len(runs) for key, runs in per_condition.items()}
+    return point

@@ -20,7 +20,8 @@ sys.path.insert(0, str(PROJECT_DIR / "src"))
 
 from analysis import (  # noqa: E402
     group_metrics, need_outcome_links, persona_metrics, straight_lining, summarize_contrast,
-    summarize_mediation, summarize_needs, summarize_validation, weak_subscales,
+    summarize_layer_moderation, summarize_mediation, summarize_needs,
+    summarize_validation, weak_subscales,
 )
 from discussion import (  # noqa: E402
     APIQuotaExhausted, AgentTransport, _administer, _clone_agent, rated_by,
@@ -845,6 +846,88 @@ def test_the_neutral_pool_is_wide_enough_to_identify_the_need_regressions() -> N
         f"{len(neutrals.ids)} neutrals against {len(needs.subscales)} predictors"
     # The pool must also divide evenly by the draw, or every cycle ends on a short batch.
     assert len(neutrals.ids) % neutrals.sample == 0
+
+
+def _layer_run(run_no: int, condition: str, rng: random.Random, lift: float) -> RunRecord:
+    """A run where protection reaches the prototype, reaches nothing else, and the
+    scenario lifts it by `lift`. Every other need is noise, so a bivariate reading and
+    an incremental one should agree here — the point of the fixture is the layer gap
+    and the condition difference, not the collinearity H4 was fixed for."""
+    neutrals = [f"N{i}" for i in range(1, 4)]
+    baseline, post, ideals, effect, votes = {}, {}, {}, {}, []
+    for pid in neutrals:
+        level = rng.uniform(2.0, 6.0)
+        base, after = level, level + lift + rng.gauss(0, 0.2)
+        baseline[pid] = {f"protection_{i}": base for i in range(1, 5)}
+        post[pid] = {f"protection_{i}": after for i in range(1, 5)}
+        for name, count in (("affiliation", 4), ("status", 4), ("vision", 3),
+                            ("expertise", 3), ("fairness", 4)):
+            noise = rng.uniform(2.0, 6.0)
+            for i in range(1, count + 1):
+                baseline[pid][f"{name}_{i}"] = noise
+                post[pid][f"{name}_{i}"] = noise
+        # Prototype tracks protection; effectiveness of the observed person does not.
+        ideals[pid] = {"strength_1": after + rng.gauss(0, 0.3),
+                       "strength_2": after + rng.gauss(0, 0.3)}
+        effect[pid] = {"D1": {"effectiveness_1": rng.uniform(2, 6)},
+                       "P1": {"effectiveness_1": rng.uniform(2, 6)}}
+        endorsed = "D" if after > 4.5 else "P"
+        votes.append({"voter_id": pid, "voter_group": "N",
+                      "voted_for_id": endorsed + "1", "voted_for_group": endorsed,
+                      "reason": ""})
+    return RunRecord.from_dict({
+        "run_no": run_no, "condition": condition,
+        "members": {"P": ["P1"], "D": ["D1"], "N": neutrals},
+        "transcript": [], "votes": votes,
+        "measures": {"baseline": {"ffni": baseline},
+                     "post": {"ffni": post, "leader_ideal": ideals,
+                              "effectiveness": effect}},
+    })
+
+
+def test_layer_moderation_separates_the_two_layers_and_the_two_conditions() -> None:
+    """H3, H4, H5 and H7 have to be decidable, not just printable. Threat lifts
+    protection here, protection reaches the prototype and not the observed person, so
+    the induced difference and the layer gap must both clear zero and the effectiveness
+    link must not."""
+    study = load_study("ffni_mediation")
+    rng = random.Random(11)
+    by_condition = {
+        "collaborative": [_layer_run(i, "collaborative", rng, lift=0.0) for i in range(1, 21)],
+        "threat": [_layer_run(i, "threat", rng, lift=1.5) for i in range(1, 21)],
+    }
+    out = summarize_layer_moderation(
+        study, by_condition, study.self_report,
+        ideals=study.prototype, effectiveness=study.candidate_rating,
+        contrast=("D", "P"), bootstrap=200, seed=3,
+    )
+    protection = out["needs"]["protection"]
+
+    # H3: the scenario moved the need, and the interval says so.
+    assert protection["induced"]["difference"] > 1.0
+    assert protection["induced"]["ci95"][0] > 0, protection["induced"]
+
+    # H4: protection reaches its prototype dimension.
+    assert protection["cognition"]["beta"] > 0.5
+    assert protection["cognition"]["ci95"][0] > 0
+
+    # H5: it does not reach the effectiveness of the person in the room.
+    assert abs(protection["evaluation_a"]["beta"]) < 0.3
+    lo, hi = protection["evaluation_a"]["ci95"]
+    assert lo < 0 < hi, "a null needs an interval that contains zero, not a small point"
+
+    # H7: the gap between the layers is real, and reported per condition.
+    assert protection["layer_gap"] > 0.4
+    assert set(protection["layer_gap_by_condition"]) == {"collaborative", "threat"}
+    assert out["conditions"] == {"low": "collaborative", "high": "threat"}
+    assert out["runs"] == {"collaborative": 20, "threat": 20}
+    assert out["bootstrap_draws"] > 150
+
+    # status's prototype dimensions were never administered in this fixture, so it has
+    # to read n/a — a number invented out of missing data would be worse than no number.
+    assert math.isnan(out["needs"]["status"]["cognition"]["beta"])
+    assert math.isnan(out["needs"]["affiliation"]["cognition"]["beta"]), \
+        "affiliation has no predicted dimension at all since Table 13 removed its entry"
 
 
 if __name__ == "__main__":
