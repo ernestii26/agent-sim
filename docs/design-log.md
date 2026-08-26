@@ -1411,6 +1411,7 @@ result there.
 | 0.5 | 0.5 | 0.10 | 40 | 84% | 100% | **5%** | 67% |
 | 0.5 | 0.5 | 0.25 | 40 | 84% | 100% | 5% | 84% |
 | 0.3 | 0.3 | 0.10 | 40 | 42% | 99% | 5% | 41% |
+| 0.5 | 0.5 | 0.10 | 60 | 94% | 100% | 6% | **88%** |
 
 **The strongest argument for 40 runs is not power, it is H5.** Its false-positive rate is
 11% at 20 runs and nominal at 40, in every cell. H5's dominance side is preregistered as
@@ -1425,6 +1426,13 @@ the one the source paper's data cannot give.
 84% to 42% when the induced shift drops from 0.5 to 0.3; H6 sits at 67% at a modest path
 b and reaches 84% only at a strong one. Both are quotients of the induced shift over the
 measurement noise, and `sd_induced = 1.0` here is an assumption.
+
+**H6 is the reason to consider 60 runs.** It goes 30% -> 67% -> 88% across 20, 40 and
+60 runs at the same effect, so it is the only hypothesis for which the extra 50% of
+Step 2's budget buys a crossing of the conventional threshold rather than a refinement.
+H3 improves too (84% -> 94%); H4 and H5 are unaffected, being saturated and nominal
+already. The decision is therefore narrow: is H6 at 67% acceptable, given it is the
+hypothesis the study is named after and the one the source paper names as untested?
 
 That assumption is exactly what `measure-check` reports. Section 12 called
 `protection`'s delta SD the noise floor without saying what to do with the number; this
