@@ -1688,3 +1688,76 @@ does not hold.
 silently reported Step 1's calibration runs instead — a different design at n = 10 — with
 nothing in its output naming the study. It takes the study as an argument now and prints
 it. The first reading of Step 2's interaction in this session came from that bug.
+
+---
+
+## 28. The positive control failed on the dominance side, and that bounds what section 27 can claim (2026-08-26)
+
+Section 27 reported H4 as null and moved on. H4 is not a hypothesis this study invented:
+it is Sheng et al.'s **positive** result (Study 5, Sample B — protection to Strength at
+delta R2 = .03**, status to Tyranny, Masculinity and Well-Groomed). Section 19 built the
+prototype layer in explicitly to serve as H4's positive control. A failed positive
+control is not a footnote; it is the thing that says how far the rest of the results
+travel.
+
+### The paper-comparable test, which section 27 did not run
+
+The paper measured needs and prototypes cold, at one sitting, as levels. Section 27's H4
+used post-discussion scores on both sides. Since section 24 added a baseline
+administration of `leader_ideal`, the closer analogue was sitting in the same
+checkpoints, unanalysed: baseline need against baseline prototype, before anything
+happened. Run-level bootstrap, 600 draws, 240 respondents in 80 rooms.
+
+| need | baseline beta | 95% CI | paper | |
+|---|---|---|---|---|
+| expertise | **+0.23** | [0.12, 0.34] | + | replicates |
+| vision | **+0.13** | [0.03, 0.23] | + | replicates |
+| status | -0.03 | [-0.14, 0.10] | + | null |
+| **protection** | **-0.16** | [-0.29, -0.01] | + | **significantly reversed** |
+| fairness | -0.20 | [-0.31, -0.11] | + | significantly reversed |
+
+Three of five intervals clear zero, so this is not a scale returning noise. It is a
+structured failure: **the prestige-side needs reproduce the paper's individual-difference
+structure and the dominance-side needs do not.** The dominance side is what the study is
+about.
+
+### What this does to section 27
+
+H6's null has to be stated at two different scopes, and only the first survives:
+
+- **About this simulation**: the induced protection need does not predict these agents'
+  endorsements. The interval is narrow and rules out anything but a very small effect.
+  That claim stands.
+- **About people**: much weaker than section 27 implied. These agents fail to reproduce
+  an *established* protection-to-Strength association, and reproduce it backwards. An
+  untested mediation coming back null in a population that cannot reproduce the tested
+  association is thin evidence about the population the paper is describing.
+
+Section 27's "the null has content" stands as written about the simulation and should not
+be read as being about human followers. The behavioural result (interaction p = .0076) is
+unaffected — it does not rest on the prototype layer.
+
+### Which explanation, in order of weight
+
+1. **These are LLM personas, not people.** A persona's needs and its leader prototype are
+   both generated from one Big Five description, so the correlation between them is the
+   model's own consistency logic rather than a human individual difference. There is no
+   reason it should reproduce a human structure, and the honest reading is that where it
+   does (expertise, vision) it may be coincidence as much as fidelity.
+2. **The reconstruction is not the instrument they used** (section 19). Offermann,
+   Kennedy & Wirtz (1994) via Bhatia et al. rather than Offermann & Coats (2018), and
+   `strength` carries two items.
+3. **Ceiling compression on the dominance-side dimensions.** `strength` averages 7.39 of
+   10 with a between-person SD of 0.49. This one explains `protection` and not `fairness`,
+   whose dimensions have good reliability (dedication .84, intelligence .70, ethics .80)
+   and still come out significantly reversed.
+
+### The general lesson, recorded because it will apply to the next study too
+
+A simulated population can reproduce a behavioural effect (the interaction replicates
+twice, at n = 10 and n = 40) while failing to reproduce the individual-difference
+structure that a mechanism claim needs. Behaviour and covariance structure are separate
+things to validate, and this design validated the first and assumed the second. Any
+future mechanism study on LLM personas should treat a published positive association as a
+gate to be passed before the untested one is interpreted, not as a control to be read
+afterwards.
