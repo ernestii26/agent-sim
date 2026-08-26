@@ -1,0 +1,20 @@
+digraph result {
+  bgcolor="white"; nodesep=0.8; ranksep=1.0;
+  labelloc="b"; fontname="Helvetica"; fontsize=14; fontcolor="#b5473a";
+  label=<<br/><b>Step 2, 40 runs per condition.</b> Both ends are connected; the proposed mediator does not carry it.<br/><font point-size="12" color="#8a9099">solid = interval excludes zero&#160;&#160;&#183;&#160;&#160;dotted = interval contains zero</font>>;
+  node [shape=box style="rounded,filled" fontname="Helvetica" fontsize=14
+        color="#8a9099" penwidth=1.2 margin="0.22,0.15"];
+  edge [penwidth=2.0 arrowsize=0.9 fontname="Helvetica" fontsize=13];
+
+  x [label=<<b>THREAT</b><br/><font point-size="11" color="#5b6470">vs collaborative</font>> fillcolor="#e8e3d9" color="#a89f8d"];
+  m [label=<<b>PROTECTION need</b><br/><font point-size="11" color="#5b6470">within person, before &#8594; after</font>> fillcolor="#f6e7d6"];
+  p [label=<<b>LEADER PROTOTYPE</b><br/><font point-size="11" color="#5b6470">what a leader should be</font>> fillcolor="#eef0f2"];
+  y [label=<<b>DOMINANCE endorsed</b><br/><font point-size="11" color="#5b6470">the respondent's own vote</font>> fillcolor="#f6dfd6" color="#c98d76"];
+
+  {rank=same; m; p;}
+
+  x -> m [label=<  <b>H3</b>&#160;&#160;+0.31<br/>  [0.12, 0.50]  > color="#3d6a99" fontcolor="#3d6a99"];
+  m -> p [label=<  <b>H4</b>&#160;&#160;+0.05<br/>  [&#8722;0.09, 0.19]  > color="#b5473a" fontcolor="#b5473a" style=dotted];
+  m -> y [label=<  <b>H6</b> path b&#160;&#160;&#8722;0.006<br/>  [&#8722;0.09, 0.08]  > color="#b5473a" fontcolor="#b5473a" style=dotted];
+  x -> y [label=<  <b>interaction</b>&#160;&#160;p = .008  > color="#3d6a99" fontcolor="#3d6a99" constraint=false];
+}
