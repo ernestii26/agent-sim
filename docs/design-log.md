@@ -1119,3 +1119,110 @@ said "clone" for the same thing.
   declared dead in advance.
 - No threshold is written down for `protection`'s delta SD, which section 12 calls the
   noise floor H6's mediator has to clear.
+
+---
+
+## 22. The effect survives every fix; `gpt-4o-mini` does not carry the manipulation (2026-08-26)
+
+Section 21's fixes needed a run to prove them, and the cheap model was the obvious
+place to start. It turned into a three-cell comparison that settles two things at once.
+
+### What was run
+
+All in a scratch directory; nothing in `results/` was touched.
+
+| cell | personas | discussion model | condition | runs |
+|---|---|---|---|---|
+| pilot (section 8) | with `leadership_style` + `style.register` | `gpt-4.1` | threat | 20, cast 10 |
+| **cheap** | current (section 17) | `gpt-4o-mini` | threat + collaborative | 20 each, cast 5 |
+| **real** | current | `gpt-4.1` | threat + collaborative | 10 each, cast 5 |
+
+### The cheap model does not manipulate anything
+
+Counting turns where a contrasted persona claims the leadership rather than asking for
+it — "I'm taking point", "I've made the call", "we're done debating" against "who's
+stepping up to lead?":
+
+| cell | D claim rate | P claim rate | N speech rate |
+|---|---|---|---|
+| old personas + `gpt-4.1` | **0.25** | 0.00 | 0.71 |
+| current personas + `gpt-4.1` | **0.17** | 0.00 | 0.83 |
+| current personas + `gpt-4o-mini` | **0.00** | 0.00 | **1.00** |
+
+On `gpt-4o-mini` the dominance personas defer 14 times and claim nothing, which their
+own `speech_examples` ("We're doing it this way. Next.") directly contradict. P and D
+become behaviourally indistinguishable — the independent variable is not being
+manipulated at all. The silence mechanism dies with it: every agent speaks on every
+turn, so `run.py validate` would fail on that model.
+
+Its votes follow: prestige takes both conditions equally (threat D-P = -1.60,
+collaborative -1.70, interaction p = 0.43), which reads as a reversal of H2 but is
+really the absence of a manipulation.
+
+**`DISCUSSION_MODEL` therefore stays `gpt-4.1`, now on evidence rather than on the
+argument in section 15 that the discussion is the phenomenon.** The case for a cheaper
+`SURVEY_MODEL` is untouched and if anything strengthened: on `gpt-4o-mini` both the
+22-item FFNI and the 45-item `leader_ideal` came back complete on the first attempt,
+every item in range, for every respondent.
+
+### Removing `register` did not cost the manipulation
+
+Section 17 removed `leadership_style` and `style.register` together and accepted one
+risk: that a low-extraversion dominant would go quiet. The claim rate went 0.25 -> 0.17
+across a change of cast size and sample size that no test at these n separates from
+zero, and what still carries the style — `style.influence`, the six behavioural
+`personality.traits`, the four `speech_examples` — visibly still works on `gpt-4.1`.
+Pair 1 (Hugo Marchand / Xavier Dubois) did not go quiet: D1 spoke on every turn it had.
+
+### H2 replicates under the corrected design
+
+`gpt-4.1`, current personas, cast 5, electorate restricted to the three neutrals, no
+manipulation check priming the voters, P and D paired within the run, both conditions
+carrying a deadline — every fix from sections 13 through 21 in force at once:
+
+| | D votes/run | P votes/run | t | p | D wins |
+|---|---|---|---|---|---|
+| threat, 10 runs | 2.10 | 0.70 | 2.201 | **0.028** | 7/10 |
+
+This answers the worry section 21 raised about the pilot. The pilot's H2 was measured on
+voters primed by a three-item threat scale; it survives the priming's removal, so it was
+not an artifact of it. D taking 2.10 of 3 available votes puts `r` near 3, where section
+4's power table gives 99% at 20 runs — the calibration decision 2 of section 21 called
+for is effectively answered, and `RUNS = 40` is comfortable rather than marginal.
+
+### The interaction holds too, and more cleanly than the pilot
+
+`gpt-4.1`, current personas, 10 runs per condition:
+
+| test | result |
+|---|---|
+| H1 (collaborative: P > D) | P 1.70 vs D 0.70, p = 0.064, P wins 7/10 — direction right, short of .05 at n = 10 |
+| H2 (threat: D > P) | D 2.10 vs P 0.70, **p = 0.028**, D wins 7/10 |
+| **Interaction** (threat's D-P gap > collaborative's) | threat +1.40, collaborative -1.00, **p = 0.003** |
+
+Set against section 8's pilot — H1 p = 0.483, H2 p = 0.002, interaction p = 0.007, all
+at 20 runs per condition — the corrected design is doing better on half the data. The
+difference is in the collaborative condition. There, the pilot's D-P gap was -0.05,
+essentially nothing; here it is -1.00, so prestige actually leads when the situation is
+collaborative. That is the crossover the dual model predicts, and section 8 explicitly
+could not show it: it had to argue that H1's failure "is not a failure of the design"
+because there was no prestige advantage to amplify. There now is one.
+
+Most likely cause is the electorate restriction of section 16. In the collaborative
+condition the two candidates split their own ballots — here D gave P 10 of 10 — so
+letting them vote diluted exactly the gap H1 is about. Removing them from the count
+does not change the story under threat, where the effect is large, but it is what makes
+the collaborative side legible.
+
+H1 at p = 0.064 on 10 runs is not a result to lean on; it is a direction. `RUNS = 40`
+resolves it or it does not.
+
+### What this settles
+
+- `DISCUSSION_MODEL` stays `gpt-4.1`, on evidence.
+- Section 17's persona edit is vindicated: it removed the demand characteristic without
+  removing the manipulation.
+- Sections 13, 15, 16 and 21's fixes are collectively sound — every hypothesis points
+  the right way under all of them at once, which no run before this one could show.
+- Section 21's decision 2 (a calibration pilot before sizing Step 2) is discharged.
+  `r` is near 3 under threat; `RUNS = 40` is comfortable.
