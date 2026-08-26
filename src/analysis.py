@@ -407,32 +407,38 @@ def summarize_mediation(
     keeping it distinct from the effectiveness rating is what stops H6 and H5 from
     resting on the same coefficient with opposite predictions.
 
-    ponytail: the bootstrap resamples respondents, not runs, so it still ignores that
-    neutrals inside one run watched the same discussion. Simulated, that clustering moves
-    the false-positive rate by about 2 points (12% -> 14% as ICC goes 0 -> .25), against
-    the 8 points the centring above fixes. Switch to resampling runs if the observed ICC
-    turns out high.
+    The bootstrap resamples RUNS, not respondents: three neutrals inside one run watched
+    the same discussion, and counting them as three independent observations was worth
+    about 2 points of false-positive rate (12% -> 14% as ICC goes 0 -> .25). Same unit as
+    `summarize_layer_moderation`, so the two reports' intervals can be read against each
+    other.
     """
-    per_condition: dict[str, list[tuple[float, float]]] = {}
+    # Grouped by run, because the run is what gets resampled.
+    per_condition: dict[str, list[list[tuple[float, float]]]] = {}
     for condition_key, records in by_condition.items():
-        pairs: list[tuple[float, float]] = []
+        runs: list[list[tuple[float, float]]] = []
         for record in records:
             before = record.needs(BASELINE, needs)
             after = record.needs(POST, needs)
+            pairs: list[tuple[float, float]] = []
             for pid, scores in after.items():
                 base = before.get(pid, {}).get(need, float("nan"))
                 induced = scores.get(need, float("nan")) - base
                 endorsed = record.vote_of(pid)
                 if not math.isnan(induced) and endorsed is not None:
                     pairs.append((induced, 1.0 if endorsed == outcome_group else 0.0))
-        per_condition[condition_key] = pairs
+            runs.append(pairs)
+        per_condition[condition_key] = runs
 
     keys = sorted(per_condition)
     if len(keys) != 2:
         raise SystemExit(f"Mediation needs exactly two conditions, got {keys}")
     lo_key, hi_key = keys
 
-    def estimate(data: dict[str, list[tuple[float, float]]]) -> tuple[float, float, float]:
+    def estimate(
+        grouped: dict[str, list[list[tuple[float, float]]]]
+    ) -> tuple[float, float, float]:
+        data = {k: [pair for run in runs for pair in run] for k, runs in grouped.items()}
         a = mean([v for v, _ in data[hi_key]]) - mean([v for v, _ in data[lo_key]])
         # Path b is centred within condition. Pooling the raw scores instead makes the
         # mediator and the outcome both functions of condition — threat raises the
@@ -456,10 +462,10 @@ def summarize_mediation(
     draws: list[float] = []
     for _ in range(bootstrap):
         resampled = {
-            k: [rng.choice(v) for _ in v] if v else []
-            for k, v in per_condition.items()
+            k: [rng.choice(runs) for _ in runs] if runs else []
+            for k, runs in per_condition.items()
         }
-        if all(len(v) >= 3 for v in resampled.values()):
+        if all(sum(len(run) for run in runs) >= 3 for runs in resampled.values()):
             _, _, product = estimate(resampled)
             if not math.isnan(product):
                 draws.append(product)
@@ -474,15 +480,19 @@ def summarize_mediation(
         "need": need,
         "outcome_group": outcome_group,
         "conditions": {"low": lo_key, "high": hi_key},
-        "n": {k: len(v) for k, v in per_condition.items()},
+        "n": {k: sum(len(run) for run in runs) for k, runs in per_condition.items()},
+        "runs": {k: len(runs) for k, runs in per_condition.items()},
         "path_a": a_path,
         "path_b": b_path,
         "indirect": indirect,
         "ci95": list(ci),
         "bootstrap_draws": len(draws),
         # A CI excluding zero is the evidence for mediation; with 20 runs treat it as
-        # suggestive, not confirmatory.
-        "supported": not math.isnan(ci[0]) and (ci[0] > 0) == (ci[1] > 0),
+        # suggestive, not confirmatory. Stated as exclusion rather than as "both bounds
+        # share a sign": an interval that is exactly [0, 0], which is what a mediator
+        # doing nothing at all produces, passes the sign test and is the opposite of
+        # evidence.
+        "supported": not math.isnan(ci[0]) and (ci[0] > 0 or ci[1] < 0),
     }
 
 

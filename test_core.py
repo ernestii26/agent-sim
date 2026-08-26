@@ -440,6 +440,10 @@ def test_mediation_is_not_fooled_by_a_condition_difference_alone() -> None:
     assert med["path_a"] > 0, med["path_a"]        # the condition really did shift the need
     assert abs(med["path_b"]) < 1e-9, med["path_b"]  # but nothing within condition
     assert med["supported"] is False, med["ci95"]
+    # A mediator doing nothing produces exactly [0, 0] once the bootstrap resamples runs
+    # rather than respondents. That interval must read as no evidence, not as two bounds
+    # agreeing in sign.
+    assert med["ci95"] == [0.0, 0.0] or med["ci95"][0] <= 0 <= med["ci95"][1], med["ci95"]
 
 
 def test_need_outcome_links_separates_cognition_from_evaluation() -> None:

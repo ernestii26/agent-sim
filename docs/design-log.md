@@ -1383,3 +1383,17 @@ Per run at cast 5: 3 baseline FFNI + 3 baseline `leader_ideal` + 15 discussion +
 FFNI + 3 post `leader_ideal` + 6 effectiveness + 5 votes = **38 calls**, against 35
 before this session and 41 before the `each_candidate` cut in section 21. The six
 baseline calls carry no transcript.
+
+### H6's bootstrap now resamples runs too, and that exposed a bug in its verdict
+
+Leaving H6 on respondent resampling would have put the study's flagship hypothesis on
+looser assumptions than the report next to it, and invited the obvious question about why
+two intervals in the same write-up are built differently. Both now resample runs; the
+`ponytail:` marker section 18 left is discharged.
+
+Switching the unit made a mediator that does nothing produce an interval of exactly
+`[0, 0]` — every draw returns the same zero, where respondent resampling had produced
+scatter around it. `supported` was written as "both bounds share a sign", and `[0, 0]`
+passes that test: neither bound is above zero, so they agree. The verdict is now stated
+as the interval excluding zero, which is what was meant. `[-1, 0]` had the same defect.
+The regression test for the pooled-slope bug is what caught it.
