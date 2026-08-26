@@ -388,7 +388,15 @@ def _administer(
     test with scripted replies instead of a live agent.
     """
     items = instrument.items
-    order = random.sample(items, len(items))
+    # Shuffled per respondent, not per administration. Items must be randomly presented
+    # (the FFNI was validated that way) and position bias must not accumulate across the
+    # sample, but re-ordering the SAME person between baseline and post puts order
+    # sensitivity straight into the pre-post difference — which is H3's dependent
+    # variable and H6's mediator. Keyed on the persona and the instrument, so one
+    # respondent sees one order throughout and the orders still differ between people.
+    order = random.Random(f"{instrument.key}:{participant.persona_id}").sample(
+        items, len(items)
+    )
     low, high = instrument.scale
     low_label, high_label = instrument.anchors
 

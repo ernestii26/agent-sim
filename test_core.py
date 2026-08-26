@@ -945,6 +945,26 @@ def test_layer_moderation_separates_the_two_layers_and_the_two_conditions() -> N
         "affiliation has no predicted dimension at all since Table 13 removed its entry"
 
 
+def test_item_order_is_fixed_per_respondent_and_differs_between_them() -> None:
+    """Re-ordering the same person between baseline and post puts order sensitivity into
+    the pre-post difference, which is H3's dependent variable and H6's mediator. Order
+    still has to vary across people, or position bias accumulates over the sample."""
+    ask, calls = _scripted('{"a": 3, "b": 4}')
+    one = Participant(agent=None, persona_id="N1", name="One", group="N")
+    two = Participant(agent=None, persona_id="N2", name="Two", group="N")
+
+    _administer(one, _PROBE, target=None, ask=ask)
+    _administer(one, _PROBE, target=None, ask=ask)      # the same person, a second time
+    _administer(two, _PROBE, target=None, ask=ask)
+
+    def order(prompt: str) -> list[int]:
+        return [prompt.index(item_id) for item_id, _, _ in _PROBE.items]
+
+    assert order(calls[0]) == order(calls[1]), "one respondent must see one order"
+    orders = {tuple(order(c)) for c in calls}
+    assert len(orders) > 1, "two respondents must not share an order"
+
+
 if __name__ == "__main__":
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for test in tests:
