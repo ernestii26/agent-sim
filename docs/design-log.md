@@ -1226,3 +1226,90 @@ resolves it or it does not.
   the right way under all of them at once, which no run before this one could show.
 - Section 21's decision 2 (a calibration pilot before sizing Step 2) is discharged.
   `r` is near 3 under threat; `RUNS = 40` is comfortable.
+
+---
+
+## 23. H4 was testing the wrong column of the source paper's table (2026-08-26)
+
+Read out of `docs/2027-27008-001.pdf` Table 13, the per-dimension results of Study 5,
+Sample B (N = 261) that section 19 built the `predicts` map from without reading the
+table's own structure.
+
+### The two columns disagree completely
+
+Table 13 reports, for each of the eleven ILT dimensions, both a bivariate correlation
+with each need and the increment that need adds over the other five. For Strength —
+protection's only outlet and the dominance side of H4:
+
+| predictor | correlation r | delta R2 |
+|---|---|---|
+| **protection** | **.38*** | **.03** |
+| affiliation | .29*** | .00 |
+| status | .29*** | .01 |
+| vision | .32*** | .00 |
+| expertise | .26*** | .00 |
+| fairness | .26*** | .00 |
+
+All six needs correlate with Strength at p < .001. Only the increment picks out
+protection. This is structural, not luck: the paper's Table 8 puts the needs'
+intercorrelations at r = .60 to .72, so a bivariate test cannot separate a need that
+reaches a dimension from five that ride along with it.
+
+`need_outcome_links` computed `slope(need, ideal)` — the bivariate column. H4 as
+implemented would have "supported" every need on every dimension and separated nothing.
+It could not have failed, which means it was not a test.
+
+### The fix
+
+`stats.partial_betas` fits a prototype composite on all six needs at once and returns
+each need's standardised beta and its delta R2, the same hierarchical regression the
+paper ran. Both are reported next to the bivariate r rather than replacing it: Table 13
+shows the two columns telling different stories, and whether they do so here as well is
+itself worth seeing. Relative weights analysis is not reproduced — delta R2 answers the
+hypothesis and Johnson's weights would be machinery for a number nothing reads.
+
+One thing the fix makes visible, recorded because it will otherwise read as a weak
+result: **delta R2 is unique variance, so collinearity shrinks it.** The paper's own
+headline increments are .02 to .06 against betas of .19 to .32. A gate or a reading that
+treats .03 as small would throw away the paper's result along with ours.
+
+### `affiliation` had an invented entry, and the table says it predicts nothing
+
+Section 19 flagged `affiliation -> sensitivity` as the map's single theoretical entry,
+taken from the paper's prose grouping affiliation with the prestige side rather than
+from a reported increment. Table 13 settles it: affiliation's delta R2 is .00 or .01 on
+every one of the eleven dimensions and significant on none, while its bivariate
+correlations run to .54. It was the exact confound the bivariate estimator could not
+see. The entry is removed; affiliation stays in the regression as a control and its
+cognition row now reads n/a, which is the honest answer.
+
+The other five entries survive contact with the table unchanged — protection ->
+strength; status -> tyranny, well-groomed (our `attractiveness`, the 1994 name),
+masculinity; vision -> sensitivity, dedication, charisma; expertise -> sensitivity,
+charisma, intelligence; fairness -> dedication, intelligence, ethics.
+
+### H6: the paper offers no estimator, but it does underwrite the design
+
+The mediation passage is in Directions for Future Research. It names the gap and says
+the FFNI closes it; there is no method to import, so the clustering caveat in section 18
+remains ours. What it does supply is provenance for three choices already made:
+
+- the outcome. "Future research should also go beyond cognitive and perceptual outcomes
+  to examine behavioral consequences of follower needs, such as **voting in elections**,
+  leader support, resistance, or insubordination."
+- the method. "Future studies should use experimental manipulations (e.g., vignettes or
+  **simulations of threat**, inequality, or uncertainty)."
+- the mediator being a change and not a level (section 18). "It remains unclear whether
+  perceived threats **increase** protection needs or whether certain individuals are
+  **chronically inclined** toward this need." That ambiguity is what a within-persona
+  pre-post difference resolves and a level score preserves.
+
+And one prediction close enough to quote in the write-up: "In **hospitals**, for
+instance, threats from infectious diseases may heighten the need for **protection**."
+The scenario is a hospital under threat and the mediator is protection.
+
+### Also worth having: the paper's own alphas
+
+The eleven ILT scales ran alpha .76 to .92 on humans. Section 20's gate asks for .60,
+which is lenient against that benchmark — reasonable for a first look at whether agents
+can answer the scale at all, but not a claim that the instrument performs as published.

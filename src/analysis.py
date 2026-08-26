@@ -11,7 +11,7 @@ from typing import Any
 
 from instrument import BASELINE, POST, Instrument
 from run_record import RunRecord
-from stats import cronbach_alpha, mean, paired_ttest_onesided, slope, std
+from stats import cronbach_alpha, mean, paired_ttest_onesided, partial_betas, slope, std
 from study import Condition, Study
 
 SILENCE_THRESHOLD = 0.80  # a persona below this stayed quiet at least sometimes
@@ -289,10 +289,15 @@ def need_outcome_links(
     The paper found the first link holds for protection/status and the second does not; the
     point of reporting them side by side is to see whether threat closes that gap.
     """
+    names = list(needs.subscales)
     rows: dict[str, dict[str, list[float]]] = {
-        name: {"need": [], "ideal": [], "effect_a": [], "effect_b": []}
-        for name in needs.subscales
+        name: {"need": [], "ideal": [], "effect_a": [], "effect_b": []} for name in names
     }
+    # One row per respondent, all six needs together — the bivariate columns above drop
+    # a respondent per need independently, which is fine for a correlation and useless
+    # as a design matrix.
+    every_need: list[list[float]] = []
+    composites: dict[str, list[float]] = {name: [] for name in names}
 
     for record in records:
         need_scores = record.needs(POST, needs)
@@ -300,32 +305,49 @@ def need_outcome_links(
         ratings = record.ratings(effectiveness) if effectiveness else {}
 
         for pid, scores in need_scores.items():
+            mine = ideal_scores.get(pid, {})
+
+            def composite(name: str) -> float:
+                # The need's predicted prototype dimensions, averaged. Many-to-many
+                # because that is the shape of the source paper's result: status
+                # reached tyranny, masculinity and well-groomed, not one dimension.
+                predicted = ideals.predicts.get(name, ()) if ideals else ()
+                return mean([mine.get(dim, float("nan")) for dim in predicted]) \
+                    if predicted else float("nan")
+
+            every_need.append([scores.get(name, float("nan")) for name in names])
+            for name in names:
+                composites[name].append(composite(name))
+
             for name, value in scores.items():
                 if math.isnan(value):
                     continue
                 rows[name]["need"].append(value)
-
-                # The need's predicted prototype dimensions, averaged. Many-to-one because
-                # that is the shape of the source paper's result: status reached tyranny,
-                # masculinity and well-groomed, not one matching dimension.
-                predicted = ideals.predicts.get(name, ()) if ideals else ()
-                mine = ideal_scores.get(pid, {})
-                ideal = mean([mine.get(dim, float("nan")) for dim in predicted]) \
-                    if predicted else float("nan")
-                rows[name]["ideal"].append(ideal)
-
+                rows[name]["ideal"].append(composite(name))
                 for slot, key in (("effect_a", 0), ("effect_b", 1)):
                     target_ids = record.members(contrast[key]) if contrast else []
                     given = [ratings.get(pid, {}).get(t, float("nan")) for t in target_ids]
                     rows[name][slot].append(mean(given) if given else float("nan"))
 
     out: dict[str, Any] = {"contrast": list(contrast) if contrast else None, "needs": {}}
-    for name, cols in rows.items():
+    for position, name in enumerate(names):
+        cols = rows[name]
         cognition = slope(cols["need"], cols["ideal"])
         evaluation = slope(cols["need"], cols["effect_a"])
         evaluation_b = slope(cols["need"], cols["effect_b"])
+
+        # H4 is a claim about increment, not association. Reported beside the bivariate
+        # r on purpose: the source paper's Table 13 shows the two columns disagreeing
+        # completely, and that disagreement is itself the finding to look for here.
+        betas, deltas, model_r2, partial_n = partial_betas(every_need, composites[name])
         out["needs"][name] = {
-            "cognition": {"slope": cognition[0], "r": cognition[1], "n": cognition[2]},
+            "cognition": {
+                "slope": cognition[0], "r": cognition[1], "n": cognition[2],
+                "beta": betas[position] if betas else float("nan"),
+                "delta_r2": deltas[position] if deltas else float("nan"),
+                "model_r2": model_r2,
+                "partial_n": partial_n,
+            },
             "evaluation_a": {"slope": evaluation[0], "r": evaluation[1], "n": evaluation[2]},
             "evaluation_b": {"slope": evaluation_b[0], "r": evaluation_b[1], "n": evaluation_b[2]},
             # H7: how far the prototype link outruns the effectiveness link.

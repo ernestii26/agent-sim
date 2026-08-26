@@ -31,7 +31,9 @@ from instrument import (  # noqa: E402
 from persona_store import Participant  # noqa: E402
 from pipeline import BalancedSampler  # noqa: E402
 from run_record import RunRecord  # noqa: E402
-from stats import cronbach_alpha, paired_ttest_onesided  # noqa: E402
+from stats import (  # noqa: E402
+    cronbach_alpha, paired_ttest_onesided, partial_betas, slope,
+)
 from study import list_studies, load_study  # noqa: E402
 
 
@@ -752,6 +754,10 @@ def test_the_gate_covers_every_prototype_dimension_an_analysis_reads() -> None:
     assert ideals.predicts["protection"] == ("strength",), \
         "protection has one outlet; if that changes, the alpha gate's stakes change too"
     assert "femininity" in ideals.subscales and "femininity" not in read
+    # Sheng et al. Table 13 gives affiliation no significant increment on any of the
+    # eleven dimensions — its bivariate correlations are large and its delta R2 is .00
+    # or .01 throughout. An entry here would be a guess dressed as a replication.
+    assert "affiliation" not in ideals.predicts
 
 
 def test_each_candidate_rates_only_the_candidates() -> None:
@@ -775,6 +781,37 @@ def test_each_candidate_rates_only_the_candidates() -> None:
     neutrals = [p for p in room if p.group == "N"]
     assert sum(len(rated_by(room, n, ("D", "P"))) for n in neutrals) == 6
     assert sum(len(rated_by(room, n)) for n in neutrals) == 12
+
+
+def test_partial_betas_separate_a_real_predictor_from_its_correlate() -> None:
+    """Sheng et al.'s six needs intercorrelate .60-.72, so their Table 13's bivariate
+    column makes all six predict every prototype dimension at p < .001 while the
+    increment over the other five picks out one. H4 is the second claim, not the first."""
+    rng = random.Random(7)
+    protection, tagalong, outcome = [], [], []
+    for _ in range(200):
+        p = rng.gauss(0, 1)
+        protection.append(p)
+        tagalong.append(p + rng.gauss(0, 0.5))       # rides on protection, causes nothing
+        outcome.append(2 * p + rng.gauss(0, 1))      # driven by protection alone
+
+    assert slope(tagalong, outcome)[1] > 0.6, "bivariately the tag-along looks real"
+
+    predictors = [[a, b] for a, b in zip(protection, tagalong)]
+    betas, deltas, model_r2, n = partial_betas(predictors, outcome)
+    assert n == 200 and model_r2 > 0.7
+    assert betas[0] > 0.7 and abs(betas[1]) < 0.20, betas
+    # delta R2 is UNIQUE variance, so collinearity shrinks it: the tag-along at r ~ .89
+    # leaves protection only a fraction of what it explains alone. This is why the
+    # paper's headline increments are .02-.06 while the same betas are .19-.32 — a small
+    # delta R2 there is not a weak result, and the gate on it must not read like one.
+    assert deltas[0] > 0.10 and deltas[1] < 0.01, deltas
+
+    # Missing values drop the whole row, not the column.
+    predictors[0][1] = float("nan")
+    assert partial_betas(predictors, outcome)[3] == 199
+    # Too few rows to fit is n/a, never a fabricated coefficient.
+    assert math.isnan(partial_betas(predictors[:2], outcome[:2])[2])
 
 
 if __name__ == "__main__":

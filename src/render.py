@@ -159,13 +159,20 @@ def render_layers(study: Study, links: dict[str, Any]) -> None:
     print("Cognition = matching leader-ideal prototype rating.  Evaluation = effectiveness rating.")
     print("The source paper found protection/status predict the prototype but NOT effectiveness.")
     print()
-    print(f"{'Need':<14}  {'r prototype':>12}  {'r eff ' + label_a:>14}  {'r eff ' + label_b:>14}  {'gap':>8}")
+    print("Bivariate r is reported for contrast only. The needs intercorrelate, so every need")
+    print("tracks every dimension; beta and delta R2 hold the other five constant, which is")
+    print("the increment H4 is actually about (Sheng et al., Table 13).")
+    print()
+    print(f"{'Need':<14}  {'r proto':>8}  {'beta':>7}  {'dR2':>6}  "
+          f"{'r eff ' + label_a:>13}  {'r eff ' + label_b:>13}  {'gap':>7}")
     print("-" * 88)
     for name, s in links["needs"].items():
+        c = s["cognition"]
         print(
-            f"{name:<14}  {_fmt(s['cognition']['r'], 2):>12}  "
-            f"{_fmt(s['evaluation_a']['r'], 2):>14}  {_fmt(s['evaluation_b']['r'], 2):>14}  "
-            f"{_fmt(s['layer_gap'], 2):>8}"
+            f"{name:<14}  {_fmt(c['r'], 2):>8}  {_fmt(c.get('beta', float('nan')), 2):>7}  "
+            f"{_fmt(c.get('delta_r2', float('nan')), 3):>6}  "
+            f"{_fmt(s['evaluation_a']['r'], 2):>13}  {_fmt(s['evaluation_b']['r'], 2):>13}  "
+            f"{_fmt(s['layer_gap'], 2):>7}"
         )
     print("=" * 88)
 
