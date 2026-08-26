@@ -261,7 +261,16 @@ def render_mediation(study: Study, med: dict[str, Any]) -> None:
     for label, value in rows:
         print(f"  {label:<{width}}  :  {value}")
     print()
-    verdict = "CI excludes zero — mediation supported" if med["supported"] else "CI includes zero — no mediation evidence"
+    # "Could not be computed" is not "no evidence". A degenerate path — every respondent
+    # in a condition endorsing the same way, so the outcome has no variance — leaves the
+    # bootstrap with nothing to resample and must say so rather than report a null.
+    if med["supported"]:
+        verdict = "CI excludes zero — mediation supported"
+    elif not med["bootstrap_draws"] or math.isnan(med["indirect"]):
+        verdict = (f"NOT ESTIMABLE — {med['bootstrap_draws']} usable bootstrap draws. "
+                   f"A path is degenerate, not null.")
+    else:
+        verdict = "CI includes zero — no mediation evidence"
     print(f"  Verdict: {verdict}")
     print("  (~20 runs per condition: treat as suggestive, not confirmatory.)")
     print("=" * 88)

@@ -440,6 +440,7 @@ def test_mediation_is_not_fooled_by_a_condition_difference_alone() -> None:
     assert med["path_a"] > 0, med["path_a"]        # the condition really did shift the need
     assert abs(med["path_b"]) < 1e-9, med["path_b"]  # but nothing within condition
     assert med["supported"] is False, med["ci95"]
+    assert med["bootstrap_draws"] > 0, "a usable path b must still produce draws"
     # A mediator doing nothing produces exactly [0, 0] once the bootstrap resamples runs
     # rather than respondents. That interval must read as no evidence, not as two bounds
     # agreeing in sign.
@@ -963,6 +964,28 @@ def test_item_order_is_fixed_per_respondent_and_differs_between_them() -> None:
     assert order(calls[0]) == order(calls[1]), "one respondent must see one order"
     orders = {tuple(order(c)) for c in calls}
     assert len(orders) > 1, "two respondents must not share an order"
+
+
+def test_a_degenerate_path_is_reported_as_unestimable_not_as_a_null() -> None:
+    """Every respondent endorsing the same way leaves the outcome with no variance, so
+    path b cannot be fitted at all. A smoke run on gpt-4o-mini did exactly that — no
+    neutral endorsed D in either condition — and the report called it 'no mediation
+    evidence', which is a claim the data cannot support either way."""
+    study = load_study("ffni_mediation")
+    ffni = next(i for i in study.instruments if i.key == "ffni")
+    by_condition = {
+        "collaborative": [_needs_record(i, protection=3, d_rating=4,
+                                        baseline_protection=3, d_voters=0) for i in (1, 2, 3)],
+        "threat": [_needs_record(i, protection=5, d_rating=4,
+                                 baseline_protection=3, d_voters=0) for i in (1, 2, 3)],
+    }
+    med = summarize_mediation(
+        study, by_condition, ffni, need="protection", outcome_group="D", bootstrap=100,
+    )
+    assert med["path_a"] > 0                      # the condition did shift the need
+    assert math.isnan(med["path_b"])              # but nobody ever endorsed D
+    assert med["supported"] is False
+    assert med["bootstrap_draws"] == 0, "nothing resampleable, and the report must say so"
 
 
 if __name__ == "__main__":
