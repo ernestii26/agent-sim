@@ -163,17 +163,20 @@ def render_layers(study: Study, links: dict[str, Any]) -> None:
     print("tracks every dimension; beta and delta R2 hold the other five constant, which is")
     print("the increment H4 is actually about (Sheng et al., Table 13).")
     print()
-    print(f"{'Need':<14}  {'r proto':>8}  {'beta':>7}  {'dR2':>6}  "
-          f"{'r eff ' + label_a:>13}  {'r eff ' + label_b:>13}  {'gap':>7}")
+    print(f"{'Need':<13}  {'PROTOTYPE':>21}  {'EFF ' + label_a:>15}  {'EFF ' + label_b:>15}  {'gap':>6}")
+    print(f"{'':<13}  {'r':>6} {'beta':>6} {'dR2':>7}  {'r':>6} {'beta':>7}  {'r':>6} {'beta':>7}")
     print("-" * 88)
     for name, s in links["needs"].items():
-        c = s["cognition"]
+        c, ea, eb = s["cognition"], s["evaluation_a"], s["evaluation_b"]
         print(
-            f"{name:<14}  {_fmt(c['r'], 2):>8}  {_fmt(c.get('beta', float('nan')), 2):>7}  "
-            f"{_fmt(c.get('delta_r2', float('nan')), 3):>6}  "
-            f"{_fmt(s['evaluation_a']['r'], 2):>13}  {_fmt(s['evaluation_b']['r'], 2):>13}  "
-            f"{_fmt(s['layer_gap'], 2):>7}"
+            f"{name:<13}  {_fmt(c['r'], 2):>6} {_fmt(c['beta'], 2):>6} {_fmt(c['delta_r2'], 3):>7}  "
+            f"{_fmt(ea['r'], 2):>6} {_fmt(ea['beta'], 2):>7}  "
+            f"{_fmt(eb['r'], 2):>6} {_fmt(eb['beta'], 2):>7}  {_fmt(s['layer_gap'], 2):>6}"
         )
+    print()
+    print("  gap = prototype beta - effectiveness beta, both from a six-need fit. The paper")
+    print("  found protection and status reach the prototype and NOT effectiveness, so a")
+    print("  positive gap there is the result being replicated, not a failure.")
     print("=" * 88)
 
 

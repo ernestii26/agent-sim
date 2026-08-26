@@ -298,6 +298,7 @@ def need_outcome_links(
     # as a design matrix.
     every_need: list[list[float]] = []
     composites: dict[str, list[float]] = {name: [] for name in names}
+    rated: dict[str, list[float]] = {"effect_a": [], "effect_b": []}
 
     for record in records:
         need_scores = record.needs(POST, needs)
@@ -318,16 +319,25 @@ def need_outcome_links(
             every_need.append([scores.get(name, float("nan")) for name in names])
             for name in names:
                 composites[name].append(composite(name))
+            for slot, key in (("effect_a", 0), ("effect_b", 1)):
+                target_ids = record.members(contrast[key]) if contrast else []
+                given = [ratings.get(pid, {}).get(t, float("nan")) for t in target_ids]
+                rated[slot].append(mean(given) if given else float("nan"))
 
             for name, value in scores.items():
                 if math.isnan(value):
                     continue
                 rows[name]["need"].append(value)
                 rows[name]["ideal"].append(composite(name))
-                for slot, key in (("effect_a", 0), ("effect_b", 1)):
-                    target_ids = record.members(contrast[key]) if contrast else []
-                    given = [ratings.get(pid, {}).get(t, float("nan")) for t in target_ids]
-                    rows[name][slot].append(mean(given) if given else float("nan"))
+                for slot in ("effect_a", "effect_b"):
+                    rows[name][slot].append(rated[slot][-1])   # this respondent's, just taken
+
+    # One regression per rated group, not one per need: the outcome is the same column
+    # for every need, which is exactly the shape the paper fitted ("these relationships
+    # remained significant even after controlling for all other FFNs").
+    evaluation_fits = {
+        slot: partial_betas(every_need, rated[slot]) for slot in ("effect_a", "effect_b")
+    }
 
     out: dict[str, Any] = {"contrast": list(contrast) if contrast else None, "needs": {}}
     for position, name in enumerate(names):
@@ -340,18 +350,34 @@ def need_outcome_links(
         # r on purpose: the source paper's Table 13 shows the two columns disagreeing
         # completely, and that disagreement is itself the finding to look for here.
         betas, deltas, model_r2, partial_n = partial_betas(every_need, composites[name])
+
+        def layer(slot: str, bivariate: tuple[float, float, int]) -> dict[str, float]:
+            b, d, r2, fitted_n = evaluation_fits[slot]
+            return {
+                "slope": bivariate[0], "r": bivariate[1], "n": bivariate[2],
+                "beta": b[position] if b else float("nan"),
+                "delta_r2": d[position] if d else float("nan"),
+                "model_r2": r2,
+                "partial_n": fitted_n,
+            }
+
+        cognition_beta = betas[position] if betas else float("nan")
+        evaluation_a = layer("effect_a", evaluation)
         out["needs"][name] = {
             "cognition": {
                 "slope": cognition[0], "r": cognition[1], "n": cognition[2],
-                "beta": betas[position] if betas else float("nan"),
+                "beta": cognition_beta,
                 "delta_r2": deltas[position] if deltas else float("nan"),
                 "model_r2": model_r2,
                 "partial_n": partial_n,
             },
-            "evaluation_a": {"slope": evaluation[0], "r": evaluation[1], "n": evaluation[2]},
-            "evaluation_b": {"slope": evaluation_b[0], "r": evaluation_b[1], "n": evaluation_b[2]},
-            # H7: how far the prototype link outruns the effectiveness link.
-            "layer_gap": cognition[1] - evaluation[1],
+            "evaluation_a": evaluation_a,
+            "evaluation_b": layer("effect_b", evaluation_b),
+            # H7: how far the prototype link outruns the effectiveness link. Both sides
+            # are standardised betas from a six-need fit, so the difference is between
+            # comparable quantities — a bivariate r on either side would make the gap a
+            # comparison of two different questions.
+            "layer_gap": cognition_beta - evaluation_a["beta"],
         }
     return out
 
