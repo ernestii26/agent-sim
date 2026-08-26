@@ -1397,3 +1397,38 @@ scatter around it. `supported` was written as "both bounds share a sign", and `[
 passes that test: neither bound is above zero, so they agree. The verdict is now stated
 as the interval excluding zero, which is what was meant. `[-1, 0]` had the same defect.
 The regression test for the pooled-slope bug is what caught it.
+
+### What 40 runs can actually resolve in the layer hypotheses
+
+`tools/layer_power.py`, 100 reps, 200 bootstrap draws, 3 respondents per run, detection
+defined as the estimator's own interval clearing zero. `beta_eff = 0` throughout, so the
+H5 column is a **false-positive rate**, not power — the paper's null is the expected
+result there.
+
+| lift | beta proto | b vote | runs | H3 | H4 within | H5 false positive | H6 |
+|---|---|---|---|---|---|---|---|
+| 0.5 | 0.5 | 0.10 | 20 | 65% | 100% | **11%** | 30% |
+| 0.5 | 0.5 | 0.10 | 40 | 84% | 100% | **5%** | 67% |
+| 0.5 | 0.5 | 0.25 | 40 | 84% | 100% | 5% | 84% |
+| 0.3 | 0.3 | 0.10 | 40 | 42% | 99% | 5% | 41% |
+
+**The strongest argument for 40 runs is not power, it is H5.** Its false-positive rate is
+11% at 20 runs and nominal at 40, in every cell. H5's dominance side is preregistered as
+an expected null, and a null read off an 11%-false-positive test is not a null. Section
+4's tables sized the vote and would have accepted 20.
+
+**H4 is over-powered**, at or near 100% even where the effect is weak. The baseline
+administration added this session is cheap and decisive, and the within-person reading is
+the one the source paper's data cannot give.
+
+**H3 and H6 are the fragile pair, and both depend on the same unknown.** H3 falls from
+84% to 42% when the induced shift drops from 0.5 to 0.3; H6 sits at 67% at a modest path
+b and reaches 84% only at a strong one. Both are quotients of the induced shift over the
+measurement noise, and `sd_induced = 1.0` here is an assumption.
+
+That assumption is exactly what `measure-check` reports. Section 12 called
+`protection`'s delta SD the noise floor without saying what to do with the number; this
+is what to do with it: re-run `layer_power.py --sd-induced <observed>` and read H3 and H6
+off the table. If they land where cell C does, the choice is more runs or a study that
+cannot speak to its own flagship hypothesis — decided before the money is spent rather
+than after.
