@@ -814,6 +814,39 @@ def test_partial_betas_separate_a_real_predictor_from_its_correlate() -> None:
     assert math.isnan(partial_betas(predictors[:2], outcome[:2])[2])
 
 
+def test_no_two_personas_in_a_study_share_a_name() -> None:
+    """TinyWorld rejects a duplicate name and kills the run mid-study. The sampler can no
+    longer seat one persona twice, so the remaining way in is two personas that were
+    written with the same name — a hand edit, or a generator drawing from a pool with a
+    repeat in it."""
+    for name in list_studies():
+        study = load_study(name)
+        seen: dict[str, str] = {}
+        for group in study.groups.values():
+            for pid in group.ids:
+                path = study.personas_dir / f"{pid}.agent.json"
+                if not path.exists():
+                    continue
+                spec = json.loads(path.read_text(encoding="utf-8"))
+                who = (spec.get("persona") or spec)["name"]
+                assert who not in seen, f"{name}: {pid} and {seen[who]} are both '{who}'"
+                seen[who] = pid
+
+
+def test_the_neutral_pool_is_wide_enough_to_identify_the_need_regressions() -> None:
+    """H4 and H5 regress a respondent's six need scores on their ratings. A need level is
+    largely a property of the persona, so the number of DISTINCT neutrals caps the
+    between-person variance however many runs are collected — eight of them against six
+    predictors is a saturated model wearing a large n."""
+    study = load_study("ffni_mediation")
+    neutrals = study.groups["N"]
+    needs = study.self_report
+    assert len(neutrals.ids) > 3 * len(needs.subscales), \
+        f"{len(neutrals.ids)} neutrals against {len(needs.subscales)} predictors"
+    # The pool must also divide evenly by the draw, or every cycle ends on a short batch.
+    assert len(neutrals.ids) % neutrals.sample == 0
+
+
 if __name__ == "__main__":
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for test in tests:
