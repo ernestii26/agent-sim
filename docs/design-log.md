@@ -1440,3 +1440,84 @@ is what to do with it: re-run `layer_power.py --sd-induced <observed>` and read 
 off the table. If they land where cell C does, the choice is more runs or a study that
 cannot speak to its own flagship hypothesis — decided before the money is spent rather
 than after.
+
+---
+
+## 25. The measure check, run twice: the prototype scale needs temperature 0 (2026-08-26)
+
+144 calls per run (36 personas x 2 instruments x 2 administrations), `gpt-4.1`, about
+eight minutes and a couple of dollars each. Section 12 estimated ~80 calls; that was 20
+personas ago, before section 24 widened the neutral pool.
+
+### The result
+
+| | temperature 0.2 | temperature 0 |
+|---|---|---|
+| FFNI | **USABLE** (mean retest .64) | **USABLE** (.65) |
+| `leader_ideal` | **NOT USABLE** (mean retest **.35**, gate is > .40) | **USABLE** (**.47**) |
+
+The failure was the opposite of the one section 12 was watching for. It was not that the
+agents are too stable for a situation to move them; it is that they could not reproduce
+their own answers at all. Alphas were fine throughout (.73 to .99, `strength` at .80 on
+two items) and nobody straight-lined a 45-item battery. Coherent within a sitting,
+unrepeatable across two.
+
+### Why, and why temperature fixes only half of it
+
+Test-retest tracks the ratio of between-person SD to the noise floor almost exactly:
+
+| | between SD | noise SD | ratio | retest |
+|---|---|---|---|---|
+| affiliation | 1.36 | 0.63 | 2.15 | .90 |
+| sensitivity | 1.06 | 0.70 | 1.52 | .83 |
+| **protection** | 0.79 | 1.01 | **0.78** | **.21** |
+| **strength** | 0.49 | 0.67 | **0.74** | **.23** |
+
+So it is not that the agents share one stereotype of a leader and have no individual
+variation — the between-person SDs are real. The noise is simply as large as the signal.
+Two distinct causes, and they respond differently:
+
+- **Ceiling compression** on `strength` (7.39), `dedication` (8.56), `ethics` (8.80) out
+  of 10. Everyone agrees a leader is strong and dedicated, so little variance survives.
+- **No stable view** on `masculinity`, `femininity`, `attractiveness`: large
+  between-person SD, larger noise.
+
+Dropping temperature to 0 nearly doubles the worst prototype scales — `strength`
+.23 -> .46, `dedication` .27 -> .56, `intelligence` .18 -> .41 — and moves the FFNI
+almost not at all (.64 -> .65). The battery that was reading noise was the 45-item one.
+
+**The residual is not decoding randomness.** `discussion.py:391` re-randomises item order
+for every administration, so at temperature 0 the two sittings are still different
+prompts. What is left is order sensitivity, which is a property of the instrument on
+these agents rather than a setting to turn off — and the FFNI was validated with randomly
+presented items, so removing the shuffle would depart from the published protocol to
+flatter the reliability.
+
+### What did not improve, and it is the one that matters
+
+`protection` went .21 -> .26 and its noise floor stayed at **1.01**. It is H6's mediator
+and the dominance side of H4. `strength`, its only prototype outlet, reached .46.
+The attenuation on that link is sqrt(.26 x .46) = **.35**: a true correlation of .5 would
+be observed at about .18.
+
+The one piece of luck is that 1.01 is almost exactly the `sd_induced = 1.0` section 24
+assumed, so that power table stands as computed rather than needing a re-run: H3 and H6
+at 84% and 67% for 40 runs, 94% and 88% for 60.
+
+### Decisions
+
+- `SURVEY_TEMPERATURE = 0`. Note that this closes the door on the `gpt-5` family as
+  `SURVEY_MODEL` — TinyTroupe strips a non-default temperature for those models
+  (`clients/openai_client.py:425`), and reasoning models reject the parameter outright.
+- The two runs are kept side by side in `results/ffni_mediation/measure_check/`, the
+  second suffixed `_t0`. **`save_summary` records neither model nor temperature**, so a
+  summary cannot say what produced it; the suffix and this section are the only record.
+
+### Open, and it is the same flaw section 23 fixed for alpha
+
+The retest gate is a **mean over subscales**. `masculinity` sits at .01 and
+`attractiveness` at .28 even at temperature 0, and they pass because `sensitivity` (.92)
+and `ethics` (.76) carry the average — exactly how a dead `strength` used to pass the
+alpha gate. It matters because `status`, the other dominance-side need, has its composite
+averaged over `tyranny` (.68), `masculinity` (.01) and `attractiveness` (.28): two of its
+three outlets are noise. Gating retest per read subscale would fail `leader_ideal` again.

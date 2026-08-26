@@ -1,0 +1,87 @@
+{
+  "study": "ffni_mediation",
+  "instrument": "ffni",
+  "runs": 1,
+  "subscales": {
+    "protection": {
+      "baseline_mean": 5.673611111111111,
+      "baseline_sd": 0.7878982993754524,
+      "post_mean": 5.569444444444445,
+      "post_sd": 0.8250781588758536,
+      "delta_mean": -0.10416666666666667,
+      "delta_sd": 1.014845167641702,
+      "delta_n": 36,
+      "alpha": 0.9386070049274204
+    },
+    "affiliation": {
+      "baseline_mean": 5.652777777777778,
+      "baseline_sd": 1.364443604260121,
+      "post_mean": 5.625,
+      "post_sd": 1.4607972383012544,
+      "delta_mean": -0.027777777777777776,
+      "delta_sd": 0.6346477588219923,
+      "delta_n": 36,
+      "alpha": 0.9896621549611
+    },
+    "status": {
+      "baseline_mean": 2.5277777777777777,
+      "baseline_sd": 0.5027701042999453,
+      "post_mean": 2.4652777777777777,
+      "post_sd": 0.544953398327973,
+      "delta_mean": -0.0625,
+      "delta_sd": 0.44870846405465287,
+      "delta_n": 36,
+      "alpha": 0.8587127158555733
+    },
+    "vision": {
+      "baseline_mean": 5.953703703703704,
+      "baseline_sd": 0.5970976245072825,
+      "post_mean": 6.0092592592592595,
+      "post_sd": 0.7452968349148135,
+      "delta_mean": 0.05555555555555553,
+      "delta_sd": 0.6299407883487121,
+      "delta_n": 36,
+      "alpha": 0.9379173880781599
+    },
+    "expertise": {
+      "baseline_mean": 5.7592592592592595,
+      "baseline_sd": 0.8455715118532839,
+      "post_mean": 5.7592592592592595,
+      "post_sd": 0.7872439815074822,
+      "delta_mean": -3.700743415417188e-17,
+      "delta_sd": 0.6570738404061082,
+      "delta_n": 36,
+      "alpha": 0.9461026147015293
+    },
+    "fairness": {
+      "baseline_mean": 6.770833333333333,
+      "baseline_sd": 0.5897184558268946,
+      "post_mean": 6.708333333333333,
+      "post_sd": 0.7849021777084254,
+      "delta_mean": -0.0625,
+      "delta_sd": 0.40255878009126994,
+      "delta_n": 36,
+      "alpha": 0.9573527314220509
+    }
+  },
+  "straight_lining": {
+    "baseline": 0.0,
+    "post": 0.0
+  },
+  "test_retest": {
+    "protection": 0.20891886710101254,
+    "affiliation": 0.901289734629768,
+    "status": 0.6358214402825026,
+    "vision": 0.5788204707707107,
+    "expertise": 0.67826157581677,
+    "fairness": 0.866100051910864
+  },
+  "gated_subscales": [
+    "affiliation",
+    "expertise",
+    "fairness",
+    "protection",
+    "status",
+    "vision"
+  ]
+}
