@@ -1761,3 +1761,74 @@ things to validate, and this design validated the first and assumed the second. 
 future mechanism study on LLM personas should treat a published positive association as a
 gate to be passed before the untested one is interpreted, not as a control to be read
 afterwards.
+
+---
+
+## 29. The control did not fail randomly: protection is a prestige-flavoured need here (2026-08-26)
+
+Section 28 recorded H4's dominance side as a failed positive control and offered three
+explanations, leading with "these are LLM personas, not people". That is right but vague,
+and two of the three were checkable. Both check out clean, and what is left is specific
+enough to state as a finding rather than a caveat.
+
+### Not a scoring bug
+
+The obvious candidate for a significant *reversal* is a reverse-worded item that nothing
+reverses. There are none. All four `protection` items are positively worded ("I wish to
+have a leader who positions themselves between my group and an outside threat"), and
+`leader_ideal` is trait adjectives rated for how characteristic of a leader they are —
+`strong`, `bold`, `domineering`. Neither instrument declares reverse-scored items and
+neither needs to.
+
+### Not isolated noise either
+
+`protection` against each of the ten prototype dimensions separately, baseline, six-need
+fit, 240 respondents:
+
+| dimension | beta | | dimension | beta |
+|---|---|---|---|---|
+| **charisma** | **+0.21** | | **strength** | **-0.16** |
+| **ethics** | **+0.17** | | masculinity | -0.07 |
+| **dedication** | **+0.15** | | femininity | -0.06 |
+| attractiveness | +0.12 | | tyranny | -0.05 |
+| sensitivity | +0.04 | | intelligence | -0.02 |
+
+The positive side is charisma, ethics and dedication; the negative side is strength,
+masculinity and tyranny. Those are the prestige-side and dominance-side dimensions
+respectively, and the split is clean. A broken measure returns noise, not a coherent
+inversion along the theoretical axis.
+
+### What it actually says
+
+**In this simulated population, wanting to be protected is a prestige-flavoured need.**
+An agent that scores high on protection wants a charismatic, ethical, dedicated leader —
+not a strong or domineering one. Sheng et al.'s humans go the other way, which is what
+puts `protection` on the dominance side of their dual-model account in the first place.
+
+This is mechanically why H6 came back null, and it is a better explanation than
+measurement error. The chain does not break in the middle: **it routes somewhere else.**
+A mediator that connects to the prestige side cannot carry a condition effect onto
+dominance endorsement no matter how well it is measured or how many runs are collected.
+
+### Consequences
+
+- H6's null should be reported as **conditional**: conditional on a population whose
+  protection need sits on the prestige side. It is not evidence that human follower needs
+  fail to mediate, and it is no longer merely "weak evidence" — it is evidence about a
+  different nomological network.
+- This is not fixable in code. The instruments are right, the scoring is right, the
+  estimators are right. It is a property of the population.
+- It is worth reporting in its own right. "LLM personas reproduce the behavioural effect
+  but attach the mediating need to the opposite leadership strategy" is a finding about
+  the validity of persona simulations for mechanism work, and it is more useful than the
+  null it explains.
+
+### If it is to be pursued
+
+The neutrals' personas are generated from a Big Five description and an occupation and
+nothing else, so whatever maps a personality profile onto a protection need here is the
+model's own prior. Testing whether that is the cause means generating neutrals some other
+way — richer biographies, explicit threat histories, or personas sampled to vary on
+security concerns directly — and re-measuring the baseline association before running any
+meeting at all. That is a study, not a fix, and it is cheap: the association is measured
+before any discussion happens, so it costs two survey calls per persona.
