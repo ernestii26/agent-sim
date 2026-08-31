@@ -1,0 +1,1020 @@
+# Technical Report — `ffni_mediation` (Step 2)
+
+**日期**：2026-08-26 執行，2026-09-01 撰寫
+**研究**：`studies/ffni_mediation`
+**資料**：`results/ffni_mediation/`，每條件 40 場，共 80 場
+**程式版本**：commit `0067e63`（本報告所有數字可由該版本重現）
+
+本報告記錄 Step 2 的完整技術細節：每個假設的估計式、公式、對應的程式路徑、以及實際結果。
+設計決策的來龍去脈記在 `docs/design-log.md` §13–§29，本報告只在必要時引用。
+
+---
+
+## 1. 研究目標
+
+檢驗一條被廣泛假設但從未被實證檢驗的因果鏈：
+
+```
+情境威脅  →  追隨者的保護需求上升  →  偏好支配型領導者
+```
+
+Sheng, Andrews & van Vugt (2026, *J. Applied Psychology* 111(6), 768–801) 開發並驗證了
+Fundamental Follower Needs Inventory (FFNI)，並在 p.45–46 明確指出：先前顯示群體衝突提高
+支配型領導偏好的研究「假設了追隨者需求的中介角色，卻沒有實證檢驗它——很可能是因為缺乏
+經過驗證的測量工具」。
+
+本研究提供該論文所缺的三個條件：
+
+| | 論文 | 本研究 |
+|---|---|---|
+| 情境 | 觀察（相關研究） | **操弄**（隨機分派到兩個情境） |
+| 需求 | 單次橫斷測量 | **人內前後測** |
+| 結果 | 認知／知覺評分 | **行為**（實際投票） |
+
+---
+
+## 2. 實驗設計
+
+### 2.1 母體
+
+36 個 LLM persona，由 `tools/pair_bank.py` 從 3,645 筆的人格庫（`personas_output.json`）
+決定性地產生，職業限制在 `hospital` 設定（emergency room nurse / pharmacist /
+hospital administrator / social worker）。
+
+| 組 | n | 每場抽樣 | 說明 |
+|---|---|---|---|
+| P (Prestige) | 6 | 1 | 聲望型候選人 |
+| D (Dominance) | 6 | 1 | 支配型候選人，`pair_with: "P"` |
+| N (Neutral) | 24 | 3 | 中立者，唯一的受試者與選民 |
+
+**配對構造**：P_i 與 D_i 由**同一筆人格庫資料**產生，因此 Big Five、職業、年齡層、
+父母身分完全相同，唯一差異是 style block。這消除了人格與職業的混淆
+（design-log §3）。`pair_bank.py:150-158` 有斷言驗證這個配對，任何破壞配對的修改都會
+在產生階段失敗，而不是在 1,600 次 API 呼叫之後。
+
+**操弄的載體**（persona spec 裡實際帶有的差異）：
+
+- `style.influence`：D 是「Claims influence by taking control of the room…」，
+  P 是「Earns influence by being worth listening to…」
+- `personality.traits`：各 6 條行為描述（D 例：「treats a challenge as something to be
+  shut down, not examined」）
+- `speech_examples`：各 4 句（D 例：「We're doing it this way. Next.」）
+
+`leadership_style` 標籤與 `style.register` 已於 §17 移除——前者是 demand
+characteristic（TinyTroupe 把整個 persona dict 逐字放進 system prompt），後者是關於
+規格本身的 meta 語言。
+
+### 2.2 抽樣
+
+`src/pipeline.py:31-49`，`BalancedSampler`：
+
+```
+佇列為空 → 用種子化 RNG 產生 0..size-1 的隨機排列
+take(n)  → 依序取出 n 個；跨越循環邊界時，若抽到已在本場的 index，
+           把它推回新循環的尾端，換下一個
+```
+
+- **平衡性**：每個 id 在下一輪重複之前必定各出場一次。24 個中立者、每場抽 3，
+  40 場後每人恰好出場 5 次。
+- **條件對齊**：sampler 以 `study.sampler_seed` 種子化，因此 run *i* 在兩個條件抽到
+  **同一組 cast**。
+- **配對組**：D 不獨立抽樣，而是取用 P 的 index（`compose_run` 的 `pair_with` 分支），
+  所以 P_i 與 D_i 必定同場出現。
+
+跨循環的重複抽樣曾是一個必然當機的 bug（8 人池抽 3，run 3 必掛），修正記於 §21。
+
+### 2.3 條件
+
+兩個條件共用 persona、cast 抽樣與投票題目，只有情境文字不同。`test_core.py` 釘住
+`ffni_mediation` 與 `pd_matched` 的情境與 friction 文字逐字相同。
+
+- **collaborative**：單位連續兩季未達病安與週轉目標，被授權自行診斷並提出一項變革，
+  48 小時內決定。
+- **threat**：醫院整併，兩個重疊單位只保留一個，48 小時內須提出保留本單位的理由，
+  否則由上級決定且會有人失去職位。
+
+兩條件都有 48 小時期限（早期版本只有威脅條件有，那會把威脅與時間壓力混淆，§13 修正）。
+
+---
+
+## 3. 執行流程
+
+`src/pipeline.py:80-200`，`run_condition`。一場 run 的順序：
+
+```
+1. baseline 量表   在 fork 上施測    ffni (22題) + leader_ideal (45題)，各 3 次呼叫
+2. 討論            3 rounds × 5 人   15 次呼叫，發言順序每輪重洗
+3. post 量表       各自從討論後狀態分支出獨立 fork
+                     ffni            3 次
+                     leader_ideal    3 次
+                     effectiveness   3 人 × 2 候選人 = 6 次
+4. 投票            在原始 agent 上   5 次呼叫
+                                     ────────────
+                                     每場 38 次
+```
+
+**Fork 機制**（`src/discussion.py:99-135`）。量表施測必須不改變之後要投票的 agent，
+否則一份 22 題「你想從領導者身上得到什麼」的量表本身就是強烈的 prime。實作：
+
+```python
+saved = {attr: getattr(person, attr) for attr in _LIVE_WIRING if hasattr(person, attr)}
+for attr in saved: setattr(person, attr, None if attr == "environment" else [])
+try:    cloned = copy.deepcopy(person)
+finally: for attr, value in saved.items(): setattr(person, attr, value)
+```
+
+先拆除 live wiring（`environment`、`_accessible_agents` 等）再複製，因為 TinyWorld
+持有 `_thread.RLock`，帶著它的 agent 無法被 deepcopy。**這是 §21 記錄的資料污染
+bug 的修正**：原本的實作是先 deepcopy 再清欄位，並以 `except Exception: return person`
+吞掉失敗，導致每一份 post 量表都寫進了正要投票的那個 agent。現在複製失敗會直接拋出。
+
+`run_discussion` 結束時拆除 TinyWorld 並從 `TinyWorld.all_environments` 移除，
+避免每場累積一個未回收的 world。
+
+**模型設定**（`config.ini`）：
+
+```
+DISCUSSION_MODEL = gpt-4.1     DISCUSSION_TEMPERATURE = 0.7   MAX_TOKENS = 6000
+VOTE_MODEL       = gpt-4.1     VOTE_TEMPERATURE       = 0.2   MAX_TOKENS = 3000
+SURVEY_MODEL     = gpt-4.1     SURVEY_TEMPERATURE     = 0     MAX_TOKENS = 4500
+RUNS = 40   ROUNDS = 3
+```
+
+`SURVEY_TEMPERATURE = 0` 的依據見 §7.2。`DISCUSSION_MODEL` 必須是 `gpt-4.1`：
+`gpt-4o-mini` 上的支配型 persona 完全不 claim 領導（claim 率 0.00 vs 0.17），
+自變項等於沒有被操弄（§22）。
+
+**成本**：80 場 × 38 次 ≈ 3,040 次呼叫，6.5 小時，約 27 美金。
+
+---
+
+## 4. 測量工具與計分
+
+### 4.1 三份工具
+
+| key | 題數 | about | 量尺 | 施測時機 | 誰作答 |
+|---|---|---|---|---|---|
+| `ffni` | 22（6 分量表） | self | 1–7 | baseline, post | N |
+| `leader_ideal` | 45（10 維度） | prototype | 1–10 | baseline, post | N |
+| `effectiveness` | 1（每個目標） | each_candidate | 1–7 | post | N |
+
+- **`ffni`**：Sheng et al. 原始 22 題逐字重現，CC BY-NC-ND 4.0，不得改寫。
+  六個分量表：protection(4)、affiliation(4)、status(4)、vision(3)、expertise(3)、
+  fairness(4)。
+- **`leader_ideal`**：ILT 的**重建**（§19）。論文用 Offermann & Coats (2018) 的 46 題
+  加 femininity 與 ethics 共 51 題；該工具在此不可得，因此以 Offermann, Kennedy & Wirtz
+  (1994) 的 41 特質八因素版（經 Bhatia et al. 2022 附錄逐字重現）加上論文註 13 引述的
+  femininity 與 ethics 題目重建，涵蓋論文 11 個維度中的 10 個（缺 creativity）。
+  **這是已知的效度限制**，見 §9.2。
+- **`effectiveness`**：單題，「Think about how this person behaved in the meeting you
+  just had. Rate how effective they would be as your own leader.」每位中立者對每位
+  **候選人**評分（§21 起不再評其他中立者——那 6 次呼叫沒有任何分析讀取）。
+
+### 4.2 題目呈現
+
+`src/discussion.py:391-397`。整份電池在**一次 API 呼叫**內施測，題目順序隨機化：
+
+```python
+order = random.Random(f"{instrument.key}:{participant.persona_id}").sample(items, len(items))
+```
+
+**順序以「受試者 × 工具」為單位固定，不是每次施測重抽。** FFNI 的驗證程序要求題目
+隨機呈現，且跨受試者的位置偏誤必須被打散；但同一個人在前後測拿到不同順序，會把
+「換個順序就答不一樣」直接混進前後差異——而前後差異正是 H3 的依變項與 H6 的中介變項。
+此修正使所有雜訊地板約減半（§7.3）。
+
+### 4.3 計分
+
+`src/instrument.py:112-126`：
+
+```
+subscale_score(s) = mean{ r_i : i ∈ items(s), r_i 在量尺範圍內且非 null }
+```
+
+**缺失值永不插補。** 超出量尺或模型漏答的題目記為 `null` 並標記，不以中點取代——
+解析失敗必須讀作缺失資料，而非虛假的中庸作答。整份分量表無可用作答時記為 `NaN`。
+
+`effectiveness` 為 `about=each_candidate`，其 `ratings()` 回傳
+`{評分者: {目標: 該目標各分量表平均}}`（`src/run_record.py:84-92`）。
+
+---
+
+## 5. 統計原語
+
+全部實作於 `src/stats.py`，不依賴 scipy 以外的套件（scipy 僅用於 t 分布尾機率）。
+**所有函數丟棄 NaN 而非插補。**
+
+### 5.1 平均與標準差
+
+```
+mean(x) = Σx_i / n                    （僅計非 NaN）
+std(x)  = sqrt( Σ(x_i − x̄)² / (n−1) )   （樣本標準差，n<2 時回傳 0）
+```
+
+### 5.2 OLS 斜率與相關
+
+`slope(x, y)`，n < 3 或任一邊無變異時回傳 NaN：
+
+```
+S_xy = Σ(x_i − x̄)(y_i − ȳ)
+S_xx = Σ(x_i − x̄)²
+S_yy = Σ(y_i − ȳ)²
+
+斜率 b = S_xy / S_xx
+相關 r = S_xy / sqrt(S_xx · S_yy)
+```
+
+### 5.3 單尾配對 t 檢定
+
+`paired_ttest_onesided(a, b)`，檢定 mean(a) > mean(b)：
+
+```
+d_i = a_i − b_i
+t   = d̄ / sqrt( s²_d / n )      其中 s²_d = Σ(d_i − d̄)² / (n−1)
+p   = P(T_{n−1} > t)             （scipy.stats.t.sf）
+```
+
+配對是因為兩組在同一場 run 內同時被觀察，run 是自然的配對單位。
+
+### 5.4 Welch 單尾檢定（交互作用用）
+
+`tools/interaction_test.py`：
+
+```
+SE = sqrt( s²_a/n_a + s²_b/n_b )
+t  = (ā − b̄) / SE
+df = (s²_a/n_a + s²_b/n_b)² / [ (s²_a/n_a)²/(n_a−1) + (s²_b/n_b)²/(n_b−1) ]
+p  = 1 − Φ(t)                    （常態近似；df 遠大於 30 時足夠）
+```
+
+用 Welch 而非配對，因為兩個條件的 run 之間沒有配對關係（cast 相同但討論獨立）。
+
+### 5.5 Cronbach's α
+
+```
+α = (k / (k−1)) · (1 − Σ_i s²_i / s²_total)
+```
+
+k = 題數，s²_i = 第 i 題的變異數，s²_total = 總分的變異數。整列有任何缺失即剔除
+（listwise），受試者少於 3 或題數少於 2 時回傳 NaN。
+
+### 5.6 偏迴歸係數與 ΔR²
+
+`partial_betas(X, y)`，這是 H4/H5/H7 的核心：
+
+```
+1. listwise 刪除任何含 NaN 的列
+2. 標準化：x*_j = (x_j − mean(x_j)) / sd(x_j)，y* 同理
+   （標準化後不需要截距，係數即為標準化 β）
+3. 全模型：β = argmin ‖y* − X*β‖²   （numpy.linalg.lstsq）
+   R²_full = 1 − (y* − X*β)ᵀ(y* − X*β) / (y*ᵀy*)
+4. 對每個預測變項 j，重新配適不含 j 的模型：
+   ΔR²_j = R²_full − R²_(−j)
+```
+
+**為什麼必須用增量而非雙變量相關。** 論文 Table 8 顯示六個需求彼此相關 r = .60–.72。
+論文 Table 13 對每個原型維度同時報兩欄，以 Strength 為例：
+
+| 預測變項 | 雙變量 r | ΔR² |
+|---|---|---|
+| protection | .38\*\*\* | **.03\*\*** |
+| affiliation | .29\*\*\* | .00 |
+| status | .29\*\*\* | .01 |
+| vision | .32\*\*\* | .00 |
+| expertise | .26\*\*\* | .00 |
+| fairness | .26\*\*\* | .00 |
+
+六個雙變量相關全部 p < .001，只有增量能分離出 protection。H4 是關於 **specificity**
+的主張（protection 應**特別地**連到支配側），若用雙變量算，H4 為真與為假會給出相同的
+結果型態——**該檢定不可能失敗，因而不提供任何資訊**。此缺陷於 §23 修正，H5 與 H7 同時修正。
+
+註：ΔR² 是**唯一變異**，共線性會壓縮它。論文自己的頭條增量是 .02–.06，而同一批 β 是
+.19–.32。把 .03 讀作「效果很小」會連同論文的結果一起否定。
+
+### 5.7 Bootstrap 信賴區間
+
+所有區間皆為 **percentile bootstrap，重抽單位是 run**：
+
+```
+重複 B 次（B = 1000）：
+    對每個條件，從其 40 場中「抽後放回」抽 40 場
+    在重抽樣本上重跑整個估計式
+排序 B 個估計值，取第 2.5 與 97.5 百分位
+```
+
+**為什麼重抽 run 而非受試者**：同一場的 3 個中立者觀看同一段討論，不是獨立觀察。
+把他們當成 3 筆獨立資料會低估不確定性。模擬顯示忽略此聚類使偽陽性率上升約 2 個百分點
+（ICC 由 0 至 .25 時，12% → 14%）。§26 起 `summarize_mediation` 與
+`summarize_layer_moderation` 都改為重抽 run。
+
+---
+
+## 6. 七個假設：估計式與結果
+
+### 6.0 選民限制
+
+`summarize_contrast`（`src/analysis.py:82-143`）只計入**非候選組**的選票：
+
+```python
+voters = tuple(k for k in study.groups if k not in (a, b)) or None
+```
+
+P 與 D 是被比較的候選人，讓他們在自己的競賽中投票等於把對手的選票放進依變項。
+cast 為 5 時那是 5 票中的 2 票。因此選民僅為 3 位中立者，每場票數上限為 3。
+兩位候選人互投的票另外記錄於 `candidate_votes` 但不計入檢定。
+
+### 6.1 H1 / H2 — 投票
+
+**估計式**：每場計算兩組各自獲得的中立者票數，做單尾配對 t 檢定。
+
+```
+per_run_i = ( votes_A(i), votes_B(i) )      i = 1..40
+t, p = paired_ttest_onesided( [votes_A], [votes_B] )
+```
+
+**程式**：`summarize_contrast` → `group_metrics(record, group, voters=('N',))`
+
+**結果**：
+
+| 條件 | contrast | 平均票數 | t | p | 勝場 |
+|---|---|---|---|---|---|
+| collaborative | P > D | P 1.650 (sd 1.167) vs D 0.900 (sd 1.105) | 2.199 | **.0170** | 25/40 |
+| threat | D > P | D 1.575 (sd 1.318) vs P 1.100 (sd 1.128) | 1.277 | .1047 | 23/40 |
+
+**H1 成立，H2 單獨不成立。**
+
+附帶指標（同一檢定套用於其他 DV）：threat 條件的 speech rate D .992 vs P .958
+（p = .052）；words per turn D 33.5 vs P 41.4——**注意此檢定方向固定為
+contrast[0] > contrast[1]，而 P 在兩條件都比 D 話多，因此該行的 p 值無意義，
+應讀原始平均數**（§8 已記錄此為報表假象）。
+
+### 6.2 交互作用 — 主要檢定
+
+**這是唯一真正對應「威脅造成轉變」這個理論宣稱的檢定。** 兩個條件各自顯著並不等於
+兩者之間有差異。
+
+**估計式**：
+
+```
+gap_i = votes_D(i) − votes_P(i)          每場的 D−P 差距
+t, df, p = welch_onesided_greater( gap[threat], gap[collaborative] )
+```
+
+**程式**：`tools/interaction_test.py ffni_mediation`
+
+**結果**：
+
+```
+threat        mean(D−P) = +0.47   sd = 2.35   n = 40
+collaborative mean(D−P) = −0.75   sd = 2.16   n = 40
+Welch t = 2.427, df ≈ 77.4, 單尾 p = .00762      → 成立
+```
+
+**行為效果複製。** 檢定力模擬（§4 舊表）早已顯示交互作用比單一條件更有力，因為協作條件
+往反方向錨定，把待檢定的差距拉開；H2 單獨落在 .105 是預期內的。
+
+### 6.3 H3 — 情境是否推動需求
+
+**估計式**：人內變化的組間差。
+
+```
+induced_p = score_post(p) − score_baseline(p)        每位受試者
+a = mean{ induced_p : p ∈ threat } − mean{ induced_p : p ∈ collaborative }
+CI: bootstrap over runs
+```
+
+**程式**：`summarize_layer_moderation` 的 `induced` 欄位（`src/analysis.py`）
+
+**結果**（1–7 量尺，每條件 120 位受試者）：
+
+| need | 協作 | 威脅 | 差 | 95% CI | |
+|---|---|---|---|---|---|
+| **protection** | −0.748 | −0.438 | **+0.310** | **[0.125, 0.496]** | 排除 0 |
+| affiliation | −0.050 | −0.152 | −0.102 | [−0.229, 0.029] | |
+| status | −0.371 | −0.373 | −0.002 | [−0.102, 0.092] | |
+| vision | +0.233 | +0.125 | −0.108 | [−0.244, 0.019] | |
+| expertise | −0.169 | −0.258 | −0.089 | [−0.203, 0.033] | |
+| fairness | +0.106 | +0.077 | −0.029 | [−0.115, 0.050] | |
+
+**H3 成立，且僅 protection 成立。** 威脅推動的正是論文預測的那一個需求，其餘五個
+（含 status，論文亦預測會上升）的區間皆含 0。
+
+**必須注意的細節**：兩個條件的 protection 都在**下降**，威脅只是讓它跌得較少。
+組間比較成立，但這不是「威脅使需求絕對上升」。六個需求在合併資料上的人內變化
+（240 人）全部顯著非零，最大是 protection −0.59 [−0.69, −0.49]——**討論本身**
+使多數需求下降，而情境只調節了幅度。這也證明量表對討論有反應性：measure-check
+顯示什麼都不發生時 protection 的變化 SD 僅 0.40。
+
+### 6.4 H4 — 認知層（需求 → 領導者原型）
+
+**這是論文的正面結果**（Study 5, Sample B），本研究將其設為**正對照**。
+
+**預測映射**（`leader_ideal.json` 的 `predicts`，取自論文 Table 13 的顯著 ΔR²）：
+
+```
+protection → strength
+status     → tyranny, masculinity, attractiveness      (attractiveness = 1994 年的 well-groomed)
+vision     → sensitivity, dedication, charisma
+expertise  → sensitivity, charisma, intelligence
+fairness   → dedication, intelligence, ethics
+affiliation→ （無條目）
+```
+
+`affiliation` 的條目已於 §23 移除：論文 Table 13 顯示它在全部 11 個維度上 ΔR² 皆為
+.00 或 .01 且無一顯著，而雙變量相關高達 .54——它正是舊估計式看不見的那種混淆。
+它仍留在迴歸中作為控制變項。
+
+**估計式（兩種讀法）**：
+
+*(a) 水準值*（論文的問法）：
+
+```
+outcome_p = mean{ prototype_d(p) : d ∈ predicts[need] }
+X = [protection, affiliation, status, vision, expertise, fairness]   （6 欄，240 列）
+β, ΔR² = partial_betas(X, outcome)
+讀 need 自己那一欄的 β
+```
+
+*(b) 人內變化*（論文的資料問不出來的）：
+
+```
+Δneed_p      = need_post(p) − need_baseline(p)
+Δprototype_p = mean{ proto_d,post(p) − proto_d,baseline(p) : d ∈ predicts[need] }
+β = partial_betas(ΔX, Δoutcome) 的對應欄
+```
+
+(b) 之所以可能，是因為 §24 為 `leader_ideal` 加了 baseline 施測——baseline fork 不帶
+逐字稿，是整個設計中最便宜的呼叫。
+
+**程式**：`summarize_layer_moderation` 的 `cognition` 與 `cognition_induced`
+
+**結果**（討論後資料，pooled，條件內各自置中）：
+
+| need | 水準值 β | 95% CI | ΔR² | 變化量 β | 95% CI |
+|---|---|---|---|---|---|
+| protection | −0.072 | [−0.195, +0.046] | .0050 | +0.048 | [−0.089, +0.193] |
+| status | −0.160 | [−0.277, −0.051] | .0222 | +0.048 | [−0.083, +0.175] |
+| vision | +0.068 | [−0.042, +0.170] | .0041 | +0.015 | [−0.099, +0.135] |
+| expertise | +0.123 | [−0.020, +0.243] | .0131 | +0.093 | [−0.037, +0.221] |
+| fairness | +0.031 | [−0.042, +0.105] | .0008 | +0.025 | [−0.073, +0.110] |
+
+**H4 不成立**：protection 兩種讀法的區間皆含 0。status 顯著但**方向相反**。
+
+**與論文條件對齊的補充分析**（§28）。論文是在冷測條件下以水準值測量，而上表用的是
+討論後分數。既然 `leader_ideal` 已有 baseline，最接近論文的分析是「前測需求 → 前測原型」：
+
+| need | β | 95% CI | 論文方向 | |
+|---|---|---|---|---|
+| expertise | **+0.23** | [0.12, 0.34] | + | **複製** |
+| vision | **+0.13** | [0.03, 0.23] | + | **複製** |
+| status | −0.03 | [−0.14, 0.10] | + | null |
+| **protection** | **−0.16** | **[−0.29, −0.02]** | + | **顯著反向** |
+| fairness | −0.20 | [−0.31, −0.11] | + | 顯著反向 |
+
+反向的穩健性經 8 個不同 bootstrap 種子（各 2000 次抽樣）驗證，8/8 皆排除 0，
+上界穩定在 −0.02 至 −0.03。
+
+**五條中三條排除 0，因此這不是量表在吐雜訊，而是有結構的失敗：聲望側複製、支配側反向。**
+診斷見 §9。
+
+### 6.5 H5 — 評價層（需求 → 對具體某人的有效性評分）
+
+論文的 Study 5 (Sample E) 以階層迴歸檢定，並明言「These relationships remained
+significant even after controlling for all other FFNs」。其支配側是 **null**：
+「the FFNs for protection and status failed to predict perceived effectiveness of
+dominance-based leadership styles」。**因此本研究的支配側預期也是 null，那是複製成功。**
+
+**估計式**：與 H4(a) 同一個設計矩陣，只換結果變項。
+
+```
+eff_A(p) = mean{ rating(p → t) : t ∈ members(contrast[0]) }     對支配型的評分
+eff_B(p) = mean{ rating(p → t) : t ∈ members(contrast[1]) }     對聲望型的評分
+β = partial_betas(X, eff_A) 的對應欄
+```
+
+**注意**：每個評分組各配適**一次**迴歸（結果變項對所有需求是同一欄），
+而非每個需求各配適一次——這才是論文的模型形狀。
+
+**程式**：`summarize_layer_moderation` 的 `evaluation_a` / `evaluation_b`
+
+**結果**：
+
+| need | → 支配型 β | 95% CI | → 聲望型 β | 95% CI |
+|---|---|---|---|---|
+| protection | −0.002 | [−0.139, +0.132] | +0.053 | [−0.068, +0.171] |
+| affiliation | **−0.190** | **[−0.318, −0.070]** | **+0.151** | **[+0.013, +0.303]** |
+| status | +0.120 | [−0.011, +0.248] | +0.010 | [−0.129, +0.121] |
+| vision | +0.033 | [−0.102, +0.168] | +0.068 | [−0.042, +0.169] |
+| expertise | +0.005 | [−0.120, +0.146] | +0.113 | [−0.024, +0.275] |
+| fairness | +0.105 | [−0.041, +0.206] | −0.088 | [−0.175, +0.017] |
+
+- **支配側 null → 複製成功**（protection −0.002，status 區間含 0）
+- **聲望側**：論文的 vision / expertise / fairness 三條**皆未複製**（區間全含 0）。
+  唯一顯著的是 affiliation（→聲望型 +0.151、→支配型 −0.190），方向與論文報告的
+  benevolence / team-building 大致相符。
+
+### 6.6 H6 — 中介
+
+**這是論文明言從未被檢驗的那一條，也是本研究的主軸。**
+
+**估計式**（`summarize_mediation`，`src/analysis.py:337-495`）：
+
+```
+單位：每場的每位中立者。40 場 × 3 人 = 120 列／條件
+
+M_p = need_post(p) − need_baseline(p)                    誘發的保護需求（變化量）
+Y_p = 1 if vote_of(p) == "D" else 0                      該受試者自己那一票
+
+path a = mean{ M_p : threat } − mean{ M_p : collaborative }
+
+path b：條件內各自置中後合併，取 OLS 斜率
+    for each condition c:
+        M̄_c = mean{ M_p : p ∈ c }
+        pooled += [ (M_p − M̄_c, Y_p) for p ∈ c ]
+    b = slope(pooled_x, pooled_y)
+
+indirect = a × b
+CI: percentile bootstrap，重抽 run，B = 1000
+supported = CI 排除 0
+```
+
+**三個刻意的設計選擇**：
+
+1. **中介變項是變化量而非水準值**（§18）。論文的 null 是關於慢性的、特質式的需求；
+   本研究主張的是情境誘發的狀態，水準值會把兩者混在一起。論文自己也把這個歧義
+   列為限制：「it remains unclear whether perceived threats **increase** protection
+   needs or whether certain individuals are **chronically inclined** toward this need」。
+2. **結果變項是受試者自己的那一票**，不是全組票數。這是論文點名「從未測過」的行為
+   後果；同時使 H6 與 H5 不會壓在同一個係數上卻做相反預測。
+3. **path b 在條件內置中**。不置中的話，威脅同時抬高誘發需求**與**直接抬高背書
+   （後者即 H2），使合併斜率在需求毫無作用時仍為正。模擬顯示不置中的偽陽性率為
+   13%（5 人 30 場）至 20%（10 人 20 場），且不隨 n 縮小——只有 CI 縮小，所以場次
+   越多越糟。置中後回到約 7%。
+
+**結果**：
+
+```
+path a    = +0.3104        威脅確實推高了誘發的保護需求
+path b    = −0.0055        但誘發需求完全預測不到那一票
+indirect  = −0.00171       95% CI [−0.02702, +0.02413]
+bootstrap draws = 1000     n = 120／條件，40 場／條件
+supported = False
+```
+
+**H6 不成立。**
+
+**此 null 的資訊量**：區間在絕對值上很窄。以 path a = 0.31 反除，path b 的隱含區間
+約為 [−0.09, +0.08]，**排除了檢定力模擬中「小效果」所用的 b_vote = 0.10**，
+而同一模擬在此 n 下對中效果的偵測率為 95%。因此這不是「沒看到」，而是
+「看了，且能排除除極小效果之外的一切」。
+
+**退化情況的處理**（§27）：若某條路徑無變異（例如所有受試者投票一致），path b 無法
+配適、bootstrap 無樣本可抽。此時報表印「NOT ESTIMABLE — 0 usable bootstrap draws.
+A path is degenerate, not null.」而非「no mediation evidence」。判準亦由
+「兩端同號」改為「區間排除 0」——前者會讓退化區間 [0, 0] 通過。
+
+### 6.7 H7 — 威脅的調節作用
+
+H7 有兩個部分。
+
+**(a) 威脅是否強化「誘發保護需求 → 支配型背書」**：
+
+```
+對每個條件各自：
+    xs = 條件內置中的 M_p
+    ys = 1 if vote == "D" else 0
+    slope_c = slope(xs, ys)
+difference = slope_threat − slope_collaborative
+```
+
+結果：協作 −0.005、威脅 −0.006、**差 −0.002，CI [−0.127, +0.155]** → 乾淨的 null。
+
+**(b) 威脅是否縮小認知層與評價層的落差**：
+
+```
+gap_c = β_cognition(c) − β_evaluation_a(c)        每個條件各自配適
+difference = gap_threat − gap_collaborative
+```
+
+| need | 協作 gap | 威脅 gap | 差 | 95% CI | |
+|---|---|---|---|---|---|
+| **protection** | +0.130 | −0.337 | **−0.467** | **[−0.822, −0.159]** | 排除 0 |
+| status | −0.107 | −0.442 | −0.335 | [−0.705, +0.028] | |
+| vision | +0.071 | −0.008 | −0.079 | [−0.459, +0.250] | |
+| expertise | −0.002 | +0.134 | +0.136 | [−0.235, +0.511] | |
+| fairness | +0.094 | −0.168 | −0.261 | [−0.522, +0.160] | |
+
+**protection 的區間排除 0，但方向與假設相反。** H7 預測威脅使兩層**收斂**（落差趨近 0）；
+實際上落差由 +0.13 變為 −0.34，絕對值變大且穿過零點。
+
+拆解此差異的來源：
+
+| | 威脅 − 協作 | 95% CI |
+|---|---|---|
+| **認知層** | **−0.305** | **[−0.520, −0.085]** 排除 0 |
+| 評價層 | +0.178 | [−0.083, +0.442] |
+
+驅動落差的是認知層：威脅使 protection → 原型的關聯**更負**。
+
+**本研究不將此列為結論**，理由：(i) 五個需求做了五次檢定，α = .05 下期望 0.25 個
+假陽性；(ii) 合併後兩層皆為 null，此為「差的差」，容易是雜訊；(iii) 每條件僅 120 人
+40 場，per-condition 估計本身不穩；(iv) 方向與假設相反，故 H7 無論如何不成立。
+
+**H7 兩部分皆不成立。**
+
+---
+
+## 7. 測量效度驗證
+
+`run.py measure-check ffni_mediation`。在支付正式研究之前，對每個可在無會議情況下作答的
+工具（`about` 為 self 或 prototype）施測**兩次**，中間不發生任何事。36 個 persona ×
+2 個工具 × 2 次 = 144 次呼叫，約 8 分鐘、2 美金。
+
+`effectiveness` 無法以此方式檢驗——它詢問「你剛開完的那場會」，而此處沒有會議。
+這仍是未解的限制。
+
+### 7.1 四個閘門
+
+`src/render.py:199-236`：
+
+| 閘門 | 判準 | 意義 |
+|---|---|---|
+| 分量表區辨 | SD(各分量表平均) > 0.30 | 工具是否區分不同構念 |
+| 直線作答 | 整份給同一數字的比例 < 0.30 | agent 是否放棄作答 |
+| 內部一致性 | **每個被分析讀取的分量表** α > 0.60 | 同一分量表的題目是否測同一件事 |
+| 重測穩定 | 平均 test-retest r > 0.40 | 相同條件下能否重現自己的答案 |
+
+**內部一致性閘門為 per-subscale**（§23）。原本是十個分量表取平均，而 `protection`
+只對應一個原型維度 `strength`（2 題）——平均會讓 tyranny（10 題）把死掉的 strength
+撐過關，使 H4 與 H6 的主線建立在雜訊上。被把關的集合是 `predicts` 值的聯集，
+因此無人讀取的維度（femininity）不會擋下研究，而新加入映射的維度會自動被納入。
+
+**重測閘門的上限已移除**（§26）。原本是 `0.40 < r < 0.85`，上限用於捕捉「agent 太穩定，
+情境推不動」。但在題序固定且 temperature 為 0 之後，兩次施測是幾乎相同的 prompt，
+test-retest 量到的是「相同 prompt 是否給相同答案」——那是量測應有的性質。
+FFNI 隨即以 0.89「不合格」，那不是關於 FFNI 的發現。情境能否推動分數，是由 H3 的
+path a 在真的發生了事情的資料上回答，不是由「什麼都不發生地問兩次」回答。
+
+### 7.2 三次執行的結果
+
+| | 平均 test-retest | | |
+|---|---|---|---|
+| | FFNI | leader_ideal | 判決 |
+| temperature 0.2，題序每次重洗 | .645 | **.346** | ILT **不合格** |
+| temperature 0，題序每次重洗 | .650 | .467 | 合格 |
+| temperature 0，**題序依人固定** | **.894** | **.758** | 合格 |
+
+失敗的方向與 §12 的預期相反：不是 agent 太穩定，而是**重現不了自己的答案**。
+α 全程良好（.73–.99），45 題也無人直線作答——單次作答內部連貫，兩次之間對不上。
+
+### 7.3 雜訊來源的分解
+
+test-retest 幾乎完全由「人間 SD ÷ 雜訊 SD」決定（temperature 0.2 時）：
+
+| | 人間 SD | 雜訊 SD | 比值 | retest |
+|---|---|---|---|---|
+| affiliation | 1.36 | 0.63 | 2.15 | .90 |
+| sensitivity | 1.06 | 0.70 | 1.52 | .83 |
+| **protection** | 0.79 | 1.01 | **0.78** | **.21** |
+| **strength** | 0.49 | 0.67 | **0.74** | **.23** |
+
+因此並非「agent 對領導者的看法完全一致而無個體變異」——人間 SD 是實在的。
+問題是雜訊與訊號等大。
+
+**temperature 只解決約三分之一**：最差的原型量表接近翻倍（strength .23→.46，
+dedication .27→.56，intelligence .18→.41），FFNI 幾乎不動（.645→.650）。
+
+**題序是主因**。固定題序後（第三列），所有雜訊地板約減半：
+
+| | 修正前 | 修正後 |
+|---|---|---|
+| protection 雜訊 SD | 1.01 | **0.40** |
+| protection retest | .26 | **.83** |
+| strength retest | .46 | **.81** |
+| masculinity retest | .01 | **.63** |
+
+**這是本次工作對統計效力影響最大的單一改動。**
+
+### 7.4 正式研究所用設定下的完整測量指標
+
+`SURVEY_TEMPERATURE = 0`，題序依人固定，36 個 persona：
+
+**FFNI**（1–7）
+
+| 分量表 | 前測平均 | 人間 SD | Δ平均 | Δ SD | α | retest |
+|---|---|---|---|---|---|---|
+| protection | 5.58 | 0.64 | +0.08 | 0.40 | .93 | .83 |
+| affiliation | 5.58 | 1.33 | +0.02 | 0.38 | .99 | .96 |
+| status | 2.44 | 0.72 | +0.02 | 0.25 | .93 | .95 |
+| vision | 5.78 | 0.77 | +0.06 | 0.30 | .97 | .92 |
+| expertise | 5.62 | 0.96 | +0.17 | 0.39 | .97 | .91 |
+| fairness | 6.66 | 0.81 | +0.10 | 0.50 | .99 | .79 |
+
+**leader_ideal**（1–10）
+
+| 維度 | 題數 | 前測平均 | 人間 SD | Δ SD | α | retest |
+|---|---|---|---|---|---|---|
+| strength | 2 | 7.31 | 0.56 | 0.36 | .87 | .81 |
+| tyranny | 10 | 2.72 | 0.96 | 0.39 | .92 | .91 |
+| masculinity | 2 | 2.53 | 0.88 | 0.70 | .94 | .63 |
+| attractiveness | 4 | 4.10 | 0.62 | 0.64 | .92 | .58 |
+| sensitivity | 8 | 6.92 | 1.11 | 0.46 | .99 | .91 |
+| dedication | 4 | 8.69 | 0.48 | 0.27 | .87 | .84 |
+| charisma | 5 | 7.68 | 0.50 | 0.34 | .89 | .76 |
+| intelligence | 5 | 8.09 | 0.39 | 0.31 | .82 | .70 |
+| femininity | 2 | 2.35 | 0.82 | 0.63 | .97 | .64 |
+| ethics | 3 | 8.86 | 0.92 | 0.55 | .99 | .80 |
+
+**仍未解決的問題**：重測閘門仍是取平均。`masculinity`(.63) 與 `attractiveness`(.58)
+即使修正後仍偏低，而 `status` 的複合分數正是對這兩者加上 `tyranny` 取平均——
+三個出口有兩個信度偏低。若把重測也改為 per-subscale 把關，需先決定門檻。
+
+---
+
+## 8. 檢定力模擬
+
+`tools/layer_power.py`。此前只有投票的檢定力被計算過（`tools/power_sim.py`），
+H3–H7 是不同的估計量、不同的資料結構，從未被評估。
+
+**方法**：造合成資料，其中效果量已知，用**真正的**分析函數
+（`summarize_layer_moderation`、`summarize_mediation`）去跑，計算「該估計式自己的
+bootstrap 區間排除 0」的比例。不用公式，因為分析包含公式處理不了的東西：分層資料、
+兩個估計相乘、bootstrap 區間。
+
+**資料產生模型**（每場、每位受試者）：
+
+```
+room     ~ N(0, 0.3)                    這場討論對所有人的共同影響
+level    ~ U(2, 6)                      該人的基準需求水準
+induced  = lift + room + N(0, sd_true)  情境真正造成的位移
+observed = induced + N(0, sd_noise)     量表報告的位移
+prototype 變化 = beta_proto × induced + N(0, 1)
+effectiveness  = 4 + beta_eff × induced + N(0, 1)
+投票 D 的機率  = clip(0.5 + b_vote × induced, 0, 1)
+```
+
+**參數分離**（§26 修正）：`sd_true` 是情境真正推動各人的差異，`sd_noise` 是量表加上的
+雜訊，即 measure-check 的 Δ SD。兩者方向相反——原型與投票追隨**真實**變化，而所有
+估計式只看得到**觀測**變化，因此雜訊衰減斜率、真實變異支撐檢定力。原本用單一參數
+`sd_induced` 同時代表兩者，會使「雜訊地板降低」看起來像「檢定力下降」。
+
+**結果**（`sd_noise = 0.40` 為實測值，`sd_true = 0.5`、`beta_proto = 0.5`、
+`beta_eff = 0`、100 reps、200 draws）：
+
+| runs／條件 | H3 | H4 人內 | H5 偽陽性 | H6 (b=.10) | H6 (b=.25) |
+|---|---|---|---|---|---|
+| 20 | 92% | 65% | **13%** | 20% | — |
+| **40** | **100%** | **94%** | **2%** | 31% | **95%** |
+| 60 | 100% | 97% | 4% | 44% | 100% |
+
+`beta_eff = 0` 時 H5 那欄是**偽陽性率**而非檢定力——論文的 null 是預期結果，
+重要的是它維持在名目 5% 附近。
+
+**樣本數決定：每條件 40 場。**
+
+- H3 已飽和。雜訊地板減半使其由 84%（舊參數）升至 100%。
+- **H5 的偽陽性率在 20 場是 13%，40 場才回到名目。這是「40 場是下限」的真正理由，
+  而該理由與檢定力無關。** H5 的支配側是預註的預期 null，而由偽陽性率 13% 的檢定
+  得出的 null 不可解讀。
+- H4 人內為 94%。
+- **H6 是懸崖而非斜坡**：小效果時 40 場 31%、60 場 44%（皆不足）；中效果時 40 場已
+  95%（無需增加）。多花 50% 預算在兩端都無回報。
+
+H6 的命運因此取決於誘發需求對投票的真實效果量，而非預算。
+
+---
+
+## 9. H4 失敗的診斷
+
+正對照失敗會限制其他結果能推論多遠，因此需要具體診斷而非籠統歸因。
+
+### 9.1 排除計分錯誤
+
+顯著**反向**最明顯的候選原因是反向題未被反轉計分。**兩份工具都沒有反向題**：
+FFNI 的四個 protection 題目全為正向敘述（「I wish to have a leader who positions
+themselves between my group and an outside threat」），`leader_ideal` 全為特質形容詞
+（strong、bold、domineering），評「多符合領導者」。
+
+### 9.2 反向有結構，不是雜訊
+
+protection 對**十個**原型維度分別的偏迴歸係數（前測，六需求模型，240 列）：
+
+| 維度 | β | | 維度 | β |
+|---|---|---|---|---|
+| charisma | **+0.21** | | strength | **−0.16** |
+| ethics | **+0.17** | | masculinity | −0.07 |
+| dedication | **+0.15** | | femininity | −0.06 |
+| attractiveness | +0.12 | | tyranny | −0.05 |
+| sensitivity | +0.04 | | intelligence | −0.02 |
+
+正向側是 charisma、ethics、dedication；負向側是 strength、masculinity、tyranny。
+這正是聲望側與支配側的分界，且分割乾淨。**壞掉的量表回傳雜訊，不會回傳一個沿著
+理論軸線的連貫反轉。**
+
+### 9.3 「bold」這個詞扛了整個反向
+
+`strength` 只有兩題。分開檢視（24 位中立者的跨場平均分數）：
+
+| | strong | bold |
+|---|---|---|
+| protection → | **−0.02** | **−0.29** |
+| openness → | +0.39 | +0.24 |
+| 平均分數 | 7.25 | 7.11 |
+| 人間 SD | 0.45 | 0.37 |
+
+**protection 對 "strong" 幾乎無關聯（−0.02），整個反向來自 "bold"（−0.29）。**
+
+一個高保護需求的 persona 是安全取向的，而 "bold（大膽）" 在語義上是**冒險**。
+它給 bold 低分不是因為不想要強壯的領導者，而是因為「大膽」讀起來像會冒險。
+
+論文的量表在 Strength 維度上有更多題目來稀釋單一詞的語義；本研究的重建只有 2 題，
+其中 1 題的語義恰好與保護需求對衝。**這是量表重建的缺陷（§19 已記錄此風險），
+不是心理學發現。**
+
+### 9.4 變異範圍嚴重受限
+
+```
+strength   平均 7.18/10   人間 SD 0.39   範圍 6.2 – 8.0
+charisma   平均 7.61/10   人間 SD 0.37   範圍 7.0 – 8.2
+```
+
+24 個 persona 全部落在 1.8 分的區間內（滿分 10）。所有 agent 都同意領導者該強壯、
+該有魅力，剩餘變異極小，一個語義偏誤即足以蓋過真實訊號。
+
+### 9.5 Big Five 在兩端留下相反印記
+
+persona 的需求與原型**皆由同一份 Big Five 描述生成**：
+
+| Big Five | → protection | → strength | → charisma |
+|---|---|---|---|
+| **openness** | **−0.33** | **+0.34** | +0.10 |
+| conscientiousness | +0.23 | +0.17 | −0.19 |
+| extraversion | +0.16 | −0.03 | +0.58 |
+| agreeableness | +0.28 | +0.15 | +0.22 |
+| neuroticism | +0.10 | −0.09 | −0.29 |
+
+openness 把兩者往相反方向拉：低開放性 → 想要保護、但覺得領導者不需要 bold。
+
+人層次的 protection ↔ strength 相關為 **−0.15**（n = 24），與 240 列的偏迴歸係數
+−0.16 幾乎相同——**確認此反向完全來自 24 個 persona 之間的既有差異，與討論或情境無關。**
+
+### 9.6 診斷結論與解釋排序
+
+按證據強度：
+
+1. **量表重建的語義缺陷**（§9.3）。直接證據，且可修：Strength 維度僅 2 題，其中
+   "bold" 與保護需求語義對衝。
+2. **變異範圍受限**（§9.4）。所有原型維度都擠在高分區間，訊號空間小。
+3. **persona 生成方式**（§9.5）。需求與原型出自同一份人格描述，其間的關聯是模型
+   自身的一致性邏輯，無理由重現人類的個體差異結構。
+
+**此排序修正了 §28 的初始判斷**，該節將「這些是 LLM persona 而非人」列為首要解釋。
+證據顯示應反過來：反向的直接來源是可修的量表缺陷。至於「LLM persona 的需求–原型
+結構天生不同於人類」這個更大的主張，目前僅 `fairness`（−0.20）尚無此類簡單解釋，
+證據強度弱於 §28 所述。
+
+---
+
+## 10. 結果總表
+
+| 假設 | 內容 | 論文做過？ | 結果 | 關鍵數字 |
+|---|---|---|---|---|
+| H1 | 協作：P > D | ✗（雙路徑文獻） | **成立** | p = .017 |
+| H2 | 威脅：D > P | ✗（同上） | 單獨不成立 | p = .105 |
+| — | **交互作用** | ✗ | **成立** | Welch p = **.0076** |
+| H3 | 威脅提高保護需求 | ✗（論文從未操弄情境） | **成立，且僅此一個需求** | +0.310 [0.125, 0.496] |
+| H4 | 需求 → 原型 | **✓ 正面結果** | **不成立；前測顯著反向** | −0.16 [−0.29, −0.02] |
+| H5 | 需求 → 有效性（支配側） | **✓ null** | **null，複製成功** | −0.002 [−0.139, +0.132] |
+| H5 | 需求 → 有效性（聲望側） | ✓ 正面結果 | 三條皆未複製 | 區間全含 0 |
+| H6 | 中介 | ✗（論文明言未檢驗） | **不成立** | a×b = −0.0017 [−0.027, +0.024] |
+| H7a | 威脅強化 need→票 | ✗ | 不成立（null） | −0.002 [−0.127, +0.155] |
+| H7b | 威脅縮小兩層落差 | ✗ | 不成立（方向相反） | −0.467 [−0.822, −0.159] |
+
+**七個假設中，論文做過的只有 H4 與 H5 兩個**，而它們正是本研究的兩個對照：
+H4 為陽性對照、H5 支配側為陰性對照。
+
+---
+
+## 11. 效度威脅
+
+### 11.1 正對照失敗（最嚴重）
+
+H4 是論文的正面結果，本研究做成不成立且前測顯著反向。此外 H5 的聲望側三條也未複製。
+**論文做過的所有「預期有效果」的部分皆未複製；唯一複製成功的是「預期為 null」的部分。**
+
+這使 H6 的 null 必須分兩個範圍陳述：
+
+- **關於本模擬**：誘發的保護需求不預測這些 agent 的背書。區間窄，能排除小效果以外的
+  一切。**此宣稱成立。**
+- **關於人類**：證據力有限。一群重現不出已知關聯（甚至做成反向）的受試者，在一個
+  從未被檢驗的關聯上回報 null，對真實人類母體的推論力薄弱。
+
+行為層結果（交互作用 p = .0076）不受影響——它不依賴原型層。
+
+### 11.2 中介變項的測量
+
+protection 的 retest 為 .83（題序修正後的最佳值），Δ SD 為 0.40。這是整條鏈上
+最弱的一環。若真實 path b 存在但被衰減，本研究可能低估它。衰減係數的粗估：
+以 `sd_true = 0.5`、`sd_noise = 0.40` 計，信度 = 0.25/(0.25+0.16) = 0.61。
+
+### 11.3 中介變項的測量時點
+
+中介變項在討論**之後**測量，而投票隨後發生。**一個在討論期間升起、於結束前回落的
+需求，在本設計中不可見。**
+
+### 11.4 房間層次的共同原因
+
+path b 在條件內以 40 場中的 120 位受試者估計。bootstrap 重抽 run，因此區間誠實；
+但房間層次的共同原因（例如某場的 D 特別強勢，使該場的中立者同時需求上升且投給 D）
+不會以中介的形式現形，也不會被此設計排除。
+
+### 11.5 ILT 為重建工具
+
+`leader_ideal` 是 1994 年八因素版加補充題目的重建，非論文所用的 2018 年修訂版
+（§19）。已知兩個缺陷：來源附錄列出 40 個特質而其正文稱 41，可能遺漏一個；
+所有措辭未經 1994 或 2018 原文核對。`strength` 僅 2 題，而 §9.3 顯示這正是問題所在。
+
+### 11.6 投票理由與機制的關係
+
+`tools/vote_reason_scan.py` 對 Step 1 的分析顯示：恐懼／強制語言在投票理由中
+**完全不存在**（0%），而果斷／負責的措辭占 84%（D 票）。但該比率在協作條件是 82%，
+**兩條件幾乎相同**，因此它解釋不了「為什麼威脅造成轉變」。
+
+兩種無法由現有資料區分的解釋：(i) 支配型的行為在威脅情境下**功能上**就是果斷，
+而被獎勵的是果斷本身；(ii) LLM 投票者系統性地把支配行為的投票重寫成社會上較體面的
+能力語言——若為真，則投票理由與自陳量表皆非通往機制的可靠窗口，而那是本研究
+唯一擁有的機制資料。
+
+### 11.7 未預註的探索性發現
+
+以下**不是**預註假設，是在「還有什麼可能」的探索中得出，且在找到它之前檢視了
+4 個行為指標，區間未針對此搜尋做校正。**應視為下一個研究的假設，不是本研究的結論。**
+
+以 D 在該場討論的**發言字數佔比**為中介變項，重跑同一個中介估計式：
+
+```
+path a    = +0.0182       威脅使 D 多佔約 1.8 個百分點的發言空間   CI [0.001, 0.037]
+path b    = +4.464        發言佔比強烈預測該場投 D 的比例          CI [2.965, 6.109]
+indirect  = +0.0814       95% CI [+0.0064, +0.1663]
+總效果    = +0.2250       被中介的比例 36%，CI [6%, 104%]
+```
+
+（對照：protection 的間接效果為 −0.002，CI [−0.027, +0.024]。）
+
+四項限制：(i) 事後分析；(ii) path a 很弱，下界 0.001；(iii) 被中介比例的區間寬至 104%；
+(iv) 房間內的因果方向未確立。
+
+此發現與其他所有觀察一致：投票理由 0% 恐懼／84% 果斷、果斷措辭在兩條件幾乎相同
+（改變的不是理由而是 D 佔了多少地板）、六個需求與十個原型維度全部不承載效果。
+
+---
+
+## 12. 重現方式
+
+```bash
+cd /tmp2/b12902056/agent-sim
+python3 test_core.py                                          # 42 項離線檢查
+
+# 不呼叫 API，從既有 checkpoint 重算
+python3 run.py report  ffni_mediation threat
+python3 run.py report  ffni_mediation collaborative
+python3 run.py layers  ffni_mediation                          # H3, H4, H5, H7
+python3 run.py mediate ffni_mediation --need protection --group D   # H6
+python3 tools/interaction_test.py ffni_mediation               # 交互作用
+
+# 需呼叫 API
+python3 run.py measure-check ffni_mediation                    # 144 次，約 2 美金
+python3 run.py run ffni_mediation threat                       # 40 場，約 3 小時
+
+# 純 CPU
+python3 tools/layer_power.py --reps 100 --runs 20 40 60 --sd-noise 0.4 --sd-true 0.5
+python3 tools/power_sim.py                                     # 投票的檢定力
+```
+
+`results/**/checkpoints/` 與 `logs/` 不進版控（`.gitignore`），摘要 JSON 與圖表進版控。
+重跑同一道 `run` 指令會跳過已完成的場次，只補缺的——中斷、配額用盡或機器重開皆可續跑。
+
+**已知的記錄缺口**：`save_summary` 不記錄產生該摘要的模型與 temperature，因此
+`results/` 下的摘要 JSON 無法自證其產生條件。三次 measure-check 的區分目前依賴
+檔名後綴（`_t0`、`_fixorder`）與本報告。
+
+---
+
+## 13. 主要程式路徑索引
+
+| 功能 | 位置 |
+|---|---|
+| CLI | `run.py`（`list` / `validate` / `measure-check` / `run` / `report` / `mediate` / `layers`） |
+| 設計載入與驗證 | `src/study.py` |
+| 量表載入、`predicts` 驗證、分量表計分 | `src/instrument.py` |
+| 抽樣、組場、執行、checkpoint | `src/pipeline.py` |
+| 討論、投票、量表施測、fork、題序 | `src/discussion.py` |
+| checkpoint 的唯一格式知識 | `src/run_record.py` |
+| 統計原語 | `src/stats.py` |
+| H1–H7 的估計式 | `src/analysis.py` |
+| 報表輸出與閘門判定 | `src/render.py` |
+| 交互作用檢定 | `tools/interaction_test.py` |
+| 投票檢定力 | `tools/power_sim.py` |
+| 層次假設檢定力 | `tools/layer_power.py` |
+| persona 產生 | `tools/pair_bank.py` |
+| 投票理由掃描 | `tools/vote_reason_scan.py` |
