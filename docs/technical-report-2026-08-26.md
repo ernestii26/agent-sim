@@ -206,33 +206,47 @@ subscale_score(s) = mean{ r_i : i ∈ items(s), r_i 在量尺範圍內且非 nul
 
 ### 5.1 平均與標準差
 
-```
-mean(x) = Σx_i / n                    （僅計非 NaN）
-std(x)  = sqrt( Σ(x_i − x̄)² / (n−1) )   （樣本標準差，n<2 時回傳 0）
-```
+$$
+\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i
+\qquad\qquad
+s = \sqrt{\frac{\sum_{i=1}^{n}(x_i-\bar{x})^2}{n-1}}
+$$
+
+僅計非 NaN 的觀察值；樣本標準差在 $n<2$ 時回傳 0。
 
 ### 5.2 OLS 斜率與相關
 
 `slope(x, y)`，n < 3 或任一邊無變異時回傳 NaN：
 
-```
-S_xy = Σ(x_i − x̄)(y_i − ȳ)
-S_xx = Σ(x_i − x̄)²
-S_yy = Σ(y_i − ȳ)²
+$$
+S_{xy}=\sum_i (x_i-\bar{x})(y_i-\bar{y}),\qquad
+S_{xx}=\sum_i (x_i-\bar{x})^2,\qquad
+S_{yy}=\sum_i (y_i-\bar{y})^2
+$$
 
-斜率 b = S_xy / S_xx
-相關 r = S_xy / sqrt(S_xx · S_yy)
-```
+$$
+b = \frac{S_{xy}}{S_{xx}}
+\qquad\qquad
+r = \frac{S_{xy}}{\sqrt{S_{xx}\,S_{yy}}}
+$$
 
 ### 5.3 單尾配對 t 檢定
 
 `paired_ttest_onesided(a, b)`，檢定 mean(a) > mean(b)：
 
-```
-d_i = a_i − b_i
-t   = d̄ / sqrt( s²_d / n )      其中 s²_d = Σ(d_i − d̄)² / (n−1)
-p   = P(T_{n−1} > t)             （scipy.stats.t.sf）
-```
+$$
+d_i = a_i - b_i,
+\qquad
+t = \frac{\bar{d}}{\sqrt{s_d^{2}/n}},
+\qquad
+s_d^{2} = \frac{\sum_i (d_i-\bar{d})^2}{n-1}
+$$
+
+$$
+p = P\left(T_{n-1} > t\right)
+$$
+
+尾機率由 `scipy.stats.t.sf` 計算。
 
 配對是因為兩組在同一場 run 內同時被觀察，run 是自然的配對單位。
 
@@ -240,20 +254,28 @@ p   = P(T_{n−1} > t)             （scipy.stats.t.sf）
 
 `tools/interaction_test.py`：
 
-```
-SE = sqrt( s²_a/n_a + s²_b/n_b )
-t  = (ā − b̄) / SE
-df = (s²_a/n_a + s²_b/n_b)² / [ (s²_a/n_a)²/(n_a−1) + (s²_b/n_b)²/(n_b−1) ]
-p  = 1 − Φ(t)                    （常態近似；df 遠大於 30 時足夠）
-```
+$$
+\mathrm{SE} = \sqrt{\frac{s_a^{2}}{n_a} + \frac{s_b^{2}}{n_b}}
+\qquad\qquad
+t = \frac{\bar{a}-\bar{b}}{\mathrm{SE}}
+$$
+
+$$
+\nu = \frac{\left(\dfrac{s_a^{2}}{n_a}+\dfrac{s_b^{2}}{n_b}\right)^{2}}
+           {\dfrac{(s_a^{2}/n_a)^{2}}{n_a-1}+\dfrac{(s_b^{2}/n_b)^{2}}{n_b-1}}
+\qquad\qquad
+p = 1-\Phi(t)
+$$
+
+$p$ 以常態近似 $t$ 分布的尾機率；$\nu$ 遠大於 30 時足夠。
 
 用 Welch 而非配對，因為兩個條件的 run 之間沒有配對關係（cast 相同但討論獨立）。
 
 ### 5.5 Cronbach's α
 
-```
-α = (k / (k−1)) · (1 − Σ_i s²_i / s²_total)
-```
+$$
+\alpha = \frac{k}{k-1}\left(1 - \frac{\sum_{i=1}^{k} s_i^{2}}{s_{\text{total}}^{2}}\right)
+$$
 
 k = 題數，s²_i = 第 i 題的變異數，s²_total = 總分的變異數。整列有任何缺失即剔除
 （listwise），受試者少於 3 或題數少於 2 時回傳 NaN。
@@ -262,15 +284,29 @@ k = 題數，s²_i = 第 i 題的變異數，s²_total = 總分的變異數。�
 
 `partial_betas(X, y)`，這是 H4/H5/H7 的核心：
 
-```
-1. listwise 刪除任何含 NaN 的列
-2. 標準化：x*_j = (x_j − mean(x_j)) / sd(x_j)，y* 同理
-   （標準化後不需要截距，係數即為標準化 β）
-3. 全模型：β = argmin ‖y* − X*β‖²   （numpy.linalg.lstsq）
-   R²_full = 1 − (y* − X*β)ᵀ(y* − X*β) / (y*ᵀy*)
-4. 對每個預測變項 j，重新配適不含 j 的模型：
-   ΔR²_j = R²_full − R²_(−j)
-```
+**步驟 1**：listwise 刪除任何含 NaN 的列。
+
+**步驟 2**：標準化每一欄，標準化後不需要截距，係數即為標準化 $\beta$：
+
+$$
+x^{*}_{ij} = \frac{x_{ij}-\bar{x}_j}{s_{x_j}}
+\qquad\qquad
+y^{*}_{i} = \frac{y_i-\bar{y}}{s_y}
+$$
+
+**步驟 3**：最小平方配適全模型（`numpy.linalg.lstsq`），並計算模型 $R^2$：
+
+$$
+\hat{\boldsymbol\beta} = \arg\min_{\boldsymbol\beta}\;\lVert \mathbf{y}^{*}-\mathbf{X}^{*}\boldsymbol\beta \rVert^{2}
+\qquad\qquad
+R^{2}_{\text{full}} = 1-\frac{(\mathbf{y}^{*}-\mathbf{X}^{*}\hat{\boldsymbol\beta})^{\!\top}(\mathbf{y}^{*}-\mathbf{X}^{*}\hat{\boldsymbol\beta})}{\mathbf{y}^{*\top}\mathbf{y}^{*}}
+$$
+
+**步驟 4**：對每個預測變項 $j$，重新配適不含 $j$ 的模型，取 $R^2$ 的落差：
+
+$$
+\Delta R^{2}_{j} = R^{2}_{\text{full}} - R^{2}_{(-j)}
+$$
 
 **為什麼必須用增量而非雙變量相關。** 論文 Table 8 顯示六個需求彼此相關 r = .60–.72。
 論文 Table 13 對每個原型維度同時報兩欄，以 Strength 為例：
@@ -295,12 +331,15 @@ k = 題數，s²_i = 第 i 題的變異數，s²_total = 總分的變異數。�
 
 所有區間皆為 **percentile bootstrap，重抽單位是 run**：
 
-```
-重複 B 次（B = 1000）：
-    對每個條件，從其 40 場中「抽後放回」抽 40 場
-    在重抽樣本上重跑整個估計式
-排序 B 個估計值，取第 2.5 與 97.5 百分位
-```
+對 $k = 1,\dots,B$（$B = 1000$）：對每個條件，從其 40 場中抽後放回抽出 40 場，
+在重抽樣本上重跑**整個**估計式得到 $\hat{\theta}^{(k)}$。區間為
+
+$$
+\text{CI}_{95} = \left[\hat{\theta}^{(\lfloor 0.025B \rfloor)},\;
+                        \hat{\theta}^{(\lceil 0.975B \rceil)}\right]
+$$
+
+其中 $\hat{\theta}^{(1)} \le \cdots \le \hat{\theta}^{(B)}$ 為排序後的重抽估計值。
 
 **為什麼重抽 run 而非受試者**：同一場的 3 個中立者觀看同一段討論，不是獨立觀察。
 把他們當成 3 筆獨立資料會低估不確定性。模擬顯示忽略此聚類使偽陽性率上升約 2 個百分點
@@ -327,10 +366,13 @@ cast 為 5 時那是 5 票中的 2 票。因此選民僅為 3 位中立者，每
 
 **估計式**：每場計算兩組各自獲得的中立者票數，做單尾配對 t 檢定。
 
-```
-per_run_i = ( votes_A(i), votes_B(i) )      i = 1..40
-t, p = paired_ttest_onesided( [votes_A], [votes_B] )
-```
+$$
+\text{per-run}_i = \bigl(v_A(i),\, v_B(i)\bigr),\quad i = 1,\dots,40
+\qquad\qquad
+H_0:\; \mathbb{E}[v_A - v_B] \le 0
+$$
+
+其中 $v_G(i)$ 是第 $i$ 場中立者投給組 $G$ 的票數，以 §5.3 的單尾配對 $t$ 檢定。
 
 **程式**：`summarize_contrast` → `group_metrics(record, group, voters=('N',))`
 
@@ -355,10 +397,13 @@ contrast[0] > contrast[1]，而 P 在兩條件都比 D 話多，因此該行的 
 
 **估計式**：
 
-```
-gap_i = votes_D(i) − votes_P(i)          每場的 D−P 差距
-t, df, p = welch_onesided_greater( gap[threat], gap[collaborative] )
-```
+$$
+g_i = v_D(i) - v_P(i)
+\qquad\qquad
+H_0:\; \mathbb{E}\bigl[g \mid \text{threat}\bigr] \le \mathbb{E}\bigl[g \mid \text{collab}\bigr]
+$$
+
+以 §5.4 的 Welch 單尾檢定比較兩個條件的 $g$。
 
 **程式**：`tools/interaction_test.py ffni_mediation`
 
@@ -377,11 +422,15 @@ Welch t = 2.427, df ≈ 77.4, 單尾 p = .00762      → 成立
 
 **估計式**：人內變化的組間差。
 
-```
-induced_p = score_post(p) − score_baseline(p)        每位受試者
-a = mean{ induced_p : p ∈ threat } − mean{ induced_p : p ∈ collaborative }
-CI: bootstrap over runs
-```
+$$
+M_p = \text{score}_{\text{post}}(p) - \text{score}_{\text{baseline}}(p)
+$$
+
+$$
+a = \frac{1}{|T|}\sum_{p \in T} M_p \;-\; \frac{1}{|C|}\sum_{p \in C} M_p
+$$
+
+$T$ 與 $C$ 分別為威脅與協作條件的受試者集合；信賴區間以重抽 run 的 bootstrap 求得。
 
 **程式**：`summarize_layer_moderation` 的 `induced` 欄位（`src/analysis.py`）
 
@@ -399,7 +448,7 @@ CI: bootstrap over runs
 **H3 成立，且僅 protection 成立。** 威脅推動的正是論文預測的那一個需求，其餘五個
 （含 status，論文亦預測會上升）的區間皆含 0。
 
-**必須注意的細節**：兩個條件的 protection 都在**下降**，威脅只是讓它跌得較少。
+**必須注意的細節**：$M_p < 0$ 在兩個條件皆成立——protection 都在**下降**，威脅只是讓它跌得較少。
 組間比較成立，但這不是「威脅使需求絕對上升」。六個需求在合併資料上的人內變化
 （240 人）全部顯著非零，最大是 protection −0.59 [−0.69, −0.49]——**討論本身**
 使多數需求下降，而情境只調節了幅度。這也證明量表對討論有反應性：measure-check
@@ -428,20 +477,30 @@ affiliation→ （無條目）
 
 *(a) 水準值*（論文的問法）：
 
-```
-outcome_p = mean{ prototype_d(p) : d ∈ predicts[need] }
-X = [protection, affiliation, status, vision, expertise, fairness]   （6 欄，240 列）
-β, ΔR² = partial_betas(X, outcome)
-讀 need 自己那一欄的 β
-```
+$$
+y_p = \frac{1}{|D_m|}\sum_{d \in D_m} \text{prototype}_d(p)
+$$
+
+$$
+\mathbf{X} = \bigl[\,m_1\;m_2\;\cdots\;m_6\,\bigr]
+\quad (240 \times 6),
+\qquad
+\hat{\beta}_m,\; \Delta R^2_m \;\text{ 由 }\; \mathbf{X},\, \mathbf{y} \;\text{ 依 §5.6 求得}
+$$
+
+六個需求 $m_1 \dots m_6$ 全部進入模型，讀該需求自己那一欄的 $\hat{\beta}$。
 
 *(b) 人內變化*（論文的資料問不出來的）：
 
-```
-Δneed_p      = need_post(p) − need_baseline(p)
-Δprototype_p = mean{ proto_d,post(p) − proto_d,baseline(p) : d ∈ predicts[need] }
-β = partial_betas(ΔX, Δoutcome) 的對應欄
-```
+$$
+\Delta m_p = m_{\text{post}}(p) - m_{\text{base}}(p)
+\qquad
+\Delta y_p = \frac{1}{|D_m|}\sum_{d \in D_m}\bigl[\text{proto}_{d,\text{post}}(p) - \text{proto}_{d,\text{base}}(p)\bigr]
+$$
+
+$$
+\hat{\beta}_m \;\text{ 由 }\; \Delta\mathbf{X},\, \Delta\mathbf{y} \;\text{ 依 §5.6 求得}
+$$
 
 (b) 之所以可能，是因為 §24 為 `leader_ideal` 加了 baseline 施測——baseline fork 不帶
 逐字稿，是整個設計中最便宜的呼叫。
@@ -486,11 +545,18 @@ dominance-based leadership styles」。**因此本研究的支配側預期也是
 
 **估計式**：與 H4(a) 同一個設計矩陣，只換結果變項。
 
-```
-eff_A(p) = mean{ rating(p → t) : t ∈ members(contrast[0]) }     對支配型的評分
-eff_B(p) = mean{ rating(p → t) : t ∈ members(contrast[1]) }     對聲望型的評分
-β = partial_betas(X, eff_A) 的對應欄
-```
+$$
+\text{eff}_A(p) = \frac{1}{|A_p|}\sum_{t \in A_p} r(p \to t)
+\qquad\qquad
+\text{eff}_B(p) = \frac{1}{|B_p|}\sum_{t \in B_p} r(p \to t)
+$$
+
+$A_p$、$B_p$ 分別是該場的支配型與聲望型候選人，$r(p \to t)$ 是 $p$ 給 $t$ 的有效性評分。
+以與 H4(a) **同一個** $\mathbf{X}$ 配適：
+
+$$
+\hat{\beta}^{(A)}_m \;\text{ 由 }\; \mathbf{X},\, \text{eff}_A \;\text{ 依 §5.6 求得}
+$$
 
 **注意**：每個評分組各配適**一次**迴歸（結果變項對所有需求是同一欄），
 而非每個需求各配適一次——這才是論文的模型形狀。
@@ -519,24 +585,43 @@ eff_B(p) = mean{ rating(p → t) : t ∈ members(contrast[1]) }     對聲望型
 
 **估計式**（`summarize_mediation`，`src/analysis.py:337-495`）：
 
-```
-單位：每場的每位中立者。40 場 × 3 人 = 120 列／條件
+單位為每場的每位中立者，$40 \times 3 = 120$ 列／條件。
 
-M_p = need_post(p) − need_baseline(p)                    誘發的保護需求（變化量）
-Y_p = 1 if vote_of(p) == "D" else 0                      該受試者自己那一票
+$$
+M_p = m_{\text{post}}(p) - m_{\text{base}}(p)
+\qquad\qquad
+Y_p = \mathbb{1}\bigl[\text{vote}(p) = D\bigr]
+$$
 
-path a = mean{ M_p : threat } − mean{ M_p : collaborative }
+**path $a$** — 誘發需求的組間差：
 
-path b：條件內各自置中後合併，取 OLS 斜率
-    for each condition c:
-        M̄_c = mean{ M_p : p ∈ c }
-        pooled += [ (M_p − M̄_c, Y_p) for p ∈ c ]
-    b = slope(pooled_x, pooled_y)
+$$
+a = \frac{1}{|T|}\sum_{p \in T} M_p \;-\; \frac{1}{|C|}\sum_{p \in C} M_p
+$$
 
-indirect = a × b
-CI: percentile bootstrap，重抽 run，B = 1000
-supported = CI 排除 0
-```
+**path $b$** — 條件內各自置中後合併，取 OLS 斜率：
+
+$$
+\tilde{M}_p = M_p - \bar{M}_{c(p)},
+\qquad
+b = \frac{\sum_p \bigl(\tilde{M}_p - \bar{\tilde{M}}\bigr)\bigl(Y_p - \bar{Y}\bigr)}
+         {\sum_p \bigl(\tilde{M}_p - \bar{\tilde{M}}\bigr)^{2}}
+$$
+
+其中 $c(p)$ 是 $p$ 所屬的條件，$\bar{M}_{c}$ 是該條件的組內平均。
+
+**間接效果**：
+
+$$
+\widehat{ab} = a \times b
+$$
+
+$$
+\text{CI}_{95} = \left[ Q_{0.025}, \; Q_{0.975} \right]
+\text{ of } \left\{ \widehat{ab}^{(1)}, \dots, \widehat{ab}^{(B)} \right\}, \quad B = 1000
+$$
+
+$\widehat{ab}^{(k)}$ 為第 $k$ 次重抽 run 後重算的間接效果；判準為 $\text{CI}_{95}$ 排除 0。
 
 **三個刻意的設計選擇**：
 
@@ -563,9 +648,15 @@ supported = False
 
 **H6 不成立。**
 
-**此 null 的資訊量**：區間在絕對值上很窄。以 path a = 0.31 反除，path b 的隱含區間
-約為 [−0.09, +0.08]，**排除了檢定力模擬中「小效果」所用的 b_vote = 0.10**，
-而同一模擬在此 n 下對中效果的偵測率為 95%。因此這不是「沒看到」，而是
+**此 null 的資訊量**：區間在絕對值上很窄。由 $\widehat{ab} = a \times b$ 且 $a = 0.31$
+反推 path b 的隱含區間：
+
+$$
+b \in \left[\frac{-0.02702}{0.3104},\; \frac{+0.02413}{0.3104}\right] \approx [-0.087,\; +0.078]
+$$
+
+這**排除了檢定力模擬中「小效果」所用的 $b_{\text{vote}} = 0.10$**，而同一模擬在此 $n$
+下對中效果（$b_{\text{vote}} = 0.25$）的偵測率為 95%。因此這不是「沒看到」，而是
 「看了，且能排除除極小效果之外的一切」。
 
 **退化情況的處理**（§27）：若某條路徑無變異（例如所有受試者投票一致），path b 無法
@@ -579,22 +670,23 @@ H7 有兩個部分。
 
 **(a) 威脅是否強化「誘發保護需求 → 支配型背書」**：
 
-```
-對每個條件各自：
-    xs = 條件內置中的 M_p
-    ys = 1 if vote == "D" else 0
-    slope_c = slope(xs, ys)
-difference = slope_threat − slope_collaborative
-```
+$$
+b_c = \text{slope}\bigl(\{\tilde{M}_p\}_{p \in c},\; \{Y_p\}_{p \in c}\bigr)
+\qquad\qquad
+\Delta b = b_{\text{threat}} - b_{\text{collab}}
+$$
 
 結果：協作 −0.005、威脅 −0.006、**差 −0.002，CI [−0.127, +0.155]** → 乾淨的 null。
 
 **(b) 威脅是否縮小認知層與評價層的落差**：
 
-```
-gap_c = β_cognition(c) − β_evaluation_a(c)        每個條件各自配適
-difference = gap_threat − gap_collaborative
-```
+$$
+\text{gap}_c = \hat{\beta}^{\text{cog}}_{m}(c) - \hat{\beta}^{(A)}_{m}(c)
+\qquad\qquad
+\Delta\text{gap} = \text{gap}_{\text{threat}} - \text{gap}_{\text{collab}}
+$$
+
+兩個 $\hat{\beta}$ 都在該條件內單獨配適，且皆為標準化係數，因此可直接相減。
 
 | need | 協作 gap | 威脅 gap | 差 | 95% CI | |
 |---|---|---|---|---|---|
@@ -743,15 +835,21 @@ bootstrap 區間排除 0」的比例。不用公式，因為分析包含公式�
 
 **資料產生模型**（每場、每位受試者）：
 
-```
-room     ~ N(0, 0.3)                    這場討論對所有人的共同影響
-level    ~ U(2, 6)                      該人的基準需求水準
-induced  = lift + room + N(0, sd_true)  情境真正造成的位移
-observed = induced + N(0, sd_noise)     量表報告的位移
-prototype 變化 = beta_proto × induced + N(0, 1)
-effectiveness  = 4 + beta_eff × induced + N(0, 1)
-投票 D 的機率  = clip(0.5 + b_vote × induced, 0, 1)
-```
+$$
+\begin{aligned}
+u_{\text{room}} &\sim \mathcal{N}(0,\, 0.3^2) && \text{該場討論對所有人的共同影響}\\
+\ell_p &\sim \mathcal{U}(2,\, 6) && \text{該人的基準需求水準}\\
+M^{\text{true}}_p &= \text{lift} + u_{\text{room}} + \varepsilon_p,
+  \quad \varepsilon_p \sim \mathcal{N}(0,\, \sigma_{\text{true}}^2)
+  && \text{情境真正造成的位移}\\
+M^{\text{obs}}_p &= M^{\text{true}}_p + \eta_p,
+  \quad \eta_p \sim \mathcal{N}(0,\, \sigma_{\text{noise}}^2)
+  && \text{量表報告的位移}\\
+\Delta\text{proto}_p &= \beta_{\text{proto}} M^{\text{true}}_p + \mathcal{N}(0,1) &&\\
+\text{eff}_p &= 4 + \beta_{\text{eff}} M^{\text{true}}_p + \mathcal{N}(0,1) &&\\
+P(\text{vote}_p = D) &= \operatorname{clip}\bigl(0.5 + b_{\text{vote}} M^{\text{true}}_p,\; 0,\; 1\bigr) &&
+\end{aligned}
+$$
 
 **參數分離**（§26 修正）：`sd_true` 是情境真正推動各人的差異，`sd_noise` 是量表加上的
 雜訊，即 measure-check 的 Δ SD。兩者方向相反——原型與投票追隨**真實**變化，而所有
@@ -879,16 +977,16 @@ openness 把兩者往相反方向拉：低開放性 → 想要保護、但覺得
 
 | 假設 | 內容 | 論文做過？ | 結果 | 關鍵數字 |
 |---|---|---|---|---|
-| H1 | 協作：P > D | ✗（雙路徑文獻） | **成立** | p = .017 |
-| H2 | 威脅：D > P | ✗（同上） | 單獨不成立 | p = .105 |
-| — | **交互作用** | ✗ | **成立** | Welch p = **.0076** |
-| H3 | 威脅提高保護需求 | ✗（論文從未操弄情境） | **成立，且僅此一個需求** | +0.310 [0.125, 0.496] |
-| H4 | 需求 → 原型 | **✓ 正面結果** | **不成立；前測顯著反向** | −0.16 [−0.29, −0.02] |
-| H5 | 需求 → 有效性（支配側） | **✓ null** | **null，複製成功** | −0.002 [−0.139, +0.132] |
-| H5 | 需求 → 有效性（聲望側） | ✓ 正面結果 | 三條皆未複製 | 區間全含 0 |
-| H6 | 中介 | ✗（論文明言未檢驗） | **不成立** | a×b = −0.0017 [−0.027, +0.024] |
-| H7a | 威脅強化 need→票 | ✗ | 不成立（null） | −0.002 [−0.127, +0.155] |
-| H7b | 威脅縮小兩層落差 | ✗ | 不成立（方向相反） | −0.467 [−0.822, −0.159] |
+| H1 | 協作：P > D | 無（雙路徑文獻） | **成立** | p = .017 |
+| H2 | 威脅：D > P | 無（同上） | 單獨不成立 | p = .105 |
+| — | **交互作用** | 無 | **成立** | Welch p = **.0076** |
+| H3 | 威脅提高保護需求 | 無（論文從未操弄情境） | **成立，且僅此一個需求** | +0.310 [0.125, 0.496] |
+| H4 | 需求 → 原型 | **有（正面結果）** | **不成立；前測顯著反向** | −0.16 [−0.29, −0.02] |
+| H5 | 需求 → 有效性（支配側） | **有（null）** | **null，複製成功** | −0.002 [−0.139, +0.132] |
+| H5 | 需求 → 有效性（聲望側） | 有（正面結果） | 三條皆未複製 | 區間全含 0 |
+| H6 | 中介 | 無（論文明言未檢驗） | **不成立** | a×b = −0.0017 [−0.027, +0.024] |
+| H7a | 威脅強化 need→票 | 無 | 不成立（null） | −0.002 [−0.127, +0.155] |
+| H7b | 威脅縮小兩層落差 | 無 | 不成立（方向相反） | −0.467 [−0.822, −0.159] |
 
 **七個假設中，論文做過的只有 H4 與 H5 兩個**，而它們正是本研究的兩個對照：
 H4 為陽性對照、H5 支配側為陰性對照。
@@ -914,8 +1012,15 @@ H4 是論文的正面結果，本研究做成不成立且前測顯著反向。�
 ### 11.2 中介變項的測量
 
 protection 的 retest 為 .83（題序修正後的最佳值），Δ SD 為 0.40。這是整條鏈上
-最弱的一環。若真實 path b 存在但被衰減，本研究可能低估它。衰減係數的粗估：
-以 `sd_true = 0.5`、`sd_noise = 0.40` 計，信度 = 0.25/(0.25+0.16) = 0.61。
+最弱的一環。若真實 path b 存在但被衰減，本研究可能低估它。以 $\sigma_{\text{true}} = 0.5$、
+$\sigma_{\text{noise}} = 0.40$ 估計中介變項的信度：
+
+$$
+\rho_{MM} = \frac{\sigma_{\text{true}}^{2}}{\sigma_{\text{true}}^{2}+\sigma_{\text{noise}}^{2}}
+= \frac{0.25}{0.25+0.16} \approx 0.61
+$$
+
+古典衰減公式下，觀測斜率約為真值的 $\rho_{MM}$ 倍。
 
 ### 11.3 中介變項的測量時點
 
