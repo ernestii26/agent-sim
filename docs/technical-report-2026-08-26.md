@@ -350,6 +350,99 @@ $$
 
 ## 6. 七個假設：估計式與結果
 
+### 對應總表：七個假設出自何處，公式是否相同
+
+論文頁碼為期刊頁碼（`docs/2027-27008-001.pdf` 的 PDF 頁碼 = 期刊頁碼 − 768 + 3）。
+
+| | 出處 | 論文的估計式 | 本研究的估計式 | 相同？ |
+|---|---|---|---|---|
+| H1 / H2 | **非本論文**，出自雙路徑文獻 | **無**。論文完全沒有行為結果變項 | 每場票數的單尾配對 $t$ 檢定 | **不適用** |
+| 交互作用 | **非本論文** | **無** | Welch 單尾檢定比較兩條件的 $D-P$ 差距 | **不適用** |
+| H3 | **論文未做**，p.795 列為未來方向 | **無**。五個研究皆為自陳與相關設計，從未操弄情境 | 人內變化量的組間差，bootstrap 區間 | **不適用** |
+| **H4** | **論文的正面結果**：Study 5, Sample B, **Table 13**, p.789–791, $N = 261$ | 階層多元迴歸 + relative weights analysis（Tonidandel & LeBreton 2011, 2015）。報告 $r$、$b$、$SE$、$\beta$、$\Delta R^2$、$RW$、$RW$ CI、$RW\%$ | 標準化偏迴歸 $\beta$ 與 $\Delta R^2$（§5.6） | **$\Delta R^2$ 相同**；未做 relative weights；**結果變項的聚合方式不同**，見下 |
+| **H5** | **論文的結果（支配側 null）**：Study 5, Sample E, **Table 3**, p.773, $N = 367$ | 線性迴歸 Model 1（僅該需求）與 **Model 2（控制其餘五個需求）**，另附 SEM | 標準化偏迴歸 $\beta$（§5.6） | **與 Model 2 相同**；**效標本身差異很大**，見下 |
+| H6 | **論文明言未檢驗**，p.795 | **無** | 路徑乘積 $a \times b$ + percentile bootstrap（重抽 run） | **不適用**（無可對照者） |
+| H7 | **論文列為待答問題**，p.789 | **無** | 兩條件各自估計後相減，bootstrap 區間 | **不適用** |
+
+四處出處的原文：
+
+- **H1 / H2** — 雙路徑模型（Cheng et al. 2013；Henrich & Gil-White 2001）與威脅效果
+  （Kakkar & Sivanathan 2017；Laustsen & Petersen 2017；Spisak et al. 2012）。本論文
+  p.795 僅引述為背景。
+- **H3** — p.795：「Experimental vignette studies offer a useful method for manipulating
+  contextual cues…intergroup conflict may heighten the FFN for protection」。
+- **H6** — p.795：「these studies often assume yet do not empirically test the mediating
+  role of follower needs—likely due to a lack of validated measures」。
+- **H7** — p.789：「would intergroup conflict situations (e.g., trade wars,
+  organizational crises) strengthen the FFN protection–authoritarianism link?」
+
+**七個假設中只有 H4 與 H5 在論文裡有對應的實證結果**，而它們正是本研究的兩個對照：
+H4 為陽性對照（論文有效果），H5 支配側為陰性對照（論文為 null）。其餘五個假設論文
+或未做（H3、H6）、或不屬於本論文（H1、H2、交互作用）、或僅列為待答問題（H7）。
+
+#### H4 的公式異同（細節）
+
+**相同的部分**：兩者都是「六個需求同時進入模型，讀該需求相對於其餘五個的增量」。
+論文的 $\Delta R^2$ 就是本研究 §5.6 的 $\Delta R^2_j = R^2_{\text{full}} - R^2_{(-j)}$。
+
+論文採用增量而非雙變量的理由，其正文自己說明了：需求之間高度相關，Study 5 的討論寫
+「Despite strong correlations among these needs ($r$ ranged from .60 to .72; see Table 8),
+hierarchical regression confirmed their incremental contributions」。Table 8（p.783）的
+完整相關矩陣範圍更寬（最低 .21，最高 .87）。
+
+**三個不同的部分**：
+
+1. **結果變項的聚合方式**。論文對 **11 個 ILT 維度各自**配適一個迴歸（Table 13 有 11 個
+   criterion 區塊）。本研究把 `predicts` 映射到的維度**先平均成一個複合分數**再配適，
+   每個需求一個迴歸。因此本研究的 `status` 是 tyranny、masculinity、attractiveness 的
+   平均，而論文是三個分開報告。這使本研究無法看出某個需求只在其中一個維度上有效果，
+   §9.2 的逐維度分解即是為了補回這一點。
+2. **未做 relative weights analysis**。論文同時報 Johnson 相對權重及其 bootstrap 區間；
+   本研究只用 $\Delta R^2$，因為它已足以回答假設，而相對權重是為一個沒有分析會讀取的
+   數字增加機制。
+3. **不確定性的來源**。論文以迴歸的解析標準誤與 relative weights 的 bootstrap
+   （10,000 次，重抽受試者）報告；本研究以重抽 **run** 的 percentile bootstrap（§5.7），
+   因為同一場的三位受試者不獨立。
+
+**工具亦不同**：論文用 Offermann & Coats (2018) 的 51 題（46 題正式量表 + femininity 2 題
++ ethics 3 題），10 點量尺，$\alpha$ 為 .76–.92；本研究用 45 題的重建版（§4.1、§11.5），
+同為 10 點量尺。
+
+#### H5 的公式異同（細節）
+
+**相同的部分**：論文 Table 3 的 **Model 2** 明確定義為「linear regression models control
+for the other five follower needs」，這與本研究 §5.6 的偏迴歸 $\beta$ 是同一個估計式。
+論文正文亦強調「These relationships remained significant even after controlling for all
+other FFNs」。本研究的支配側 null 因此是與 Model 2 對照，而非與 Model 1。
+
+**兩個不同的部分**：
+
+1. **效標的性質完全不同**。論文的效標是 **13 個具體領導風格的描述**，受試者評「若這些人
+   是我的領導者會多有效」（1–7）。支配側是 Authoritarianism、Narcissism、Dominance
+   三個分開的風格；聲望側是 Benevolence、Team-building、Vision communication、
+   High-expectation、Competence、Intellectual stimulation、Moral character、Virtue。
+   **沒有任何受試者觀察過任何人。**
+   本研究的效標是**單一題目**，評「剛剛一起開完三輪會的這個具體的人」。
+   因此本研究的「對支配型的有效性」對應論文的三個支配側風格之聚合，而非任何單一欄位。
+2. **時間間隔**。論文 Sample E 在 Time 1 施測 FFNI，**一週後**的 Time 2 施測有效性；
+   本研究兩者在同一場會議後相隔數分鐘。
+
+**論文支配側 null 的原始數字**（Table 3，Model 1 / Model 2）：
+
+| 需求 → 風格 | Model 1 $\beta$ | Model 2 $\beta$ | |
+|---|---|---|---|
+| Protection → Authoritarianism | −.02 | −.01 | ns |
+| Status → Narcissism | .04 | .03 | ns |
+| Status → Authoritarianism | −.05 | −.02 | ns |
+| Status → Dominance | −.12 | −.05 | ns |
+
+對照本研究：protection → 支配型有效性 $\hat\beta = -0.002$，CI $[-0.139, +0.132]$。
+
+**注意 Protection → Safety 在論文是 .43\*\*\* / .20\*\*\***（強烈成立）。論文的支配側 null
+專指 Authoritarianism；「想要被保護」與「認為以安全為導向的領導有效」是成立的，
+與「認為威權領導有效」才是不成立的。本研究的單題效標無法區分這兩者，這是 §11 未列出
+的一個效度限制，於此補記。
+
 ### 6.0 選民限制
 
 `summarize_contrast`（`src/analysis.py:82-143`）只計入**非候選組**的選票：
@@ -456,7 +549,7 @@ $T$ 與 $C$ 分別為威脅與協作條件的受試者集合；信賴區間以�
 
 ### 6.4 H4 — 認知層（需求 → 領導者原型）
 
-**這是論文的正面結果**（Study 5, Sample B），本研究將其設為**正對照**。
+**這是論文的正面結果**（Study 5, Sample B, Table 13, p.789–791, $N = 261$），本研究將其設為**正對照**。估計式與論文的異同見本節開頭的對應總表。
 
 **預測映射**（`leader_ideal.json` 的 `predicts`，取自論文 Table 13 的顯著 ΔR²）：
 
@@ -538,10 +631,12 @@ $$
 
 ### 6.5 H5 — 評價層（需求 → 對具體某人的有效性評分）
 
-論文的 Study 5 (Sample E) 以階層迴歸檢定，並明言「These relationships remained
-significant even after controlling for all other FFNs」。其支配側是 **null**：
-「the FFNs for protection and status failed to predict perceived effectiveness of
-dominance-based leadership styles」。**因此本研究的支配側預期也是 null，那是複製成功。**
+論文的 Study 5 (Sample E, Table 3, p.773, $N = 367$) 以線性迴歸檢定，其 Model 2
+控制其餘五個需求，並明言「These relationships remained significant even after
+controlling for all other FFNs」。其支配側是 **null**：「the FFNs for protection and
+status failed to predict perceived effectiveness of dominance-based leadership styles」。
+**因此本研究的支配側預期也是 null，那是複製成功。** 效標性質的重大差異見本節開頭的
+對應總表。
 
 **估計式**：與 H4(a) 同一個設計矩陣，只換結果變項。
 
@@ -581,7 +676,8 @@ $$
 
 ### 6.6 H6 — 中介
 
-**這是論文明言從未被檢驗的那一條，也是本研究的主軸。**
+**這是論文明言從未被檢驗的那一條（p.795），也是本研究的主軸。** 論文沒有可對照的
+估計式，因此下列設計選擇皆為本研究自訂。
 
 **估計式**（`summarize_mediation`，`src/analysis.py:337-495`）：
 
@@ -980,12 +1076,12 @@ openness 把兩者往相反方向拉：低開放性 → 想要保護、但覺得
 | H1 | 協作：P > D | 無（雙路徑文獻） | **成立** | p = .017 |
 | H2 | 威脅：D > P | 無（同上） | 單獨不成立 | p = .105 |
 | — | **交互作用** | 無 | **成立** | Welch p = **.0076** |
-| H3 | 威脅提高保護需求 | 無（論文從未操弄情境） | **成立，且僅此一個需求** | +0.310 [0.125, 0.496] |
-| H4 | 需求 → 原型 | **有（正面結果）** | **不成立；前測顯著反向** | −0.16 [−0.29, −0.02] |
-| H5 | 需求 → 有效性（支配側） | **有（null）** | **null，複製成功** | −0.002 [−0.139, +0.132] |
-| H5 | 需求 → 有效性（聲望側） | 有（正面結果） | 三條皆未複製 | 區間全含 0 |
-| H6 | 中介 | 無（論文明言未檢驗） | **不成立** | a×b = −0.0017 [−0.027, +0.024] |
-| H7a | 威脅強化 need→票 | 無 | 不成立（null） | −0.002 [−0.127, +0.155] |
+| H3 | 威脅提高保護需求 | 無：p.795 列為未來方向 | **成立，且僅此一個需求** | +0.310 [0.125, 0.496] |
+| H4 | 需求 → 原型 | **有**：Table 13, p.789 | **不成立；前測顯著反向** | −0.16 [−0.29, −0.02] |
+| H5 | 需求 → 有效性（支配側） | **有**：Table 3, p.773 | **null，複製成功** | −0.002 [−0.139, +0.132] |
+| H5 | 需求 → 有效性（聲望側） | **有**：Table 3, p.773 | 三條皆未複製 | 區間全含 0 |
+| H6 | 中介 | 無：p.795 明言未檢驗 | **不成立** | a×b = −0.0017 [−0.027, +0.024] |
+| H7a | 威脅強化 need→票 | 無：p.789 列為待答 | 不成立（null） | −0.002 [−0.127, +0.155] |
 | H7b | 威脅縮小兩層落差 | 無 | 不成立（方向相反） | −0.467 [−0.822, −0.159] |
 
 **七個假設中，論文做過的只有 H4 與 H5 兩個**，而它們正是本研究的兩個對照：
