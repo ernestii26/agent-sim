@@ -1265,9 +1265,15 @@ python3 tools/power_sim.py                                     # 投票的檢定
 `results/**/checkpoints/` 與 `logs/` 不進版控（`.gitignore`），摘要 JSON 與圖表進版控。
 重跑同一道 `run` 指令會跳過已完成的場次，只補缺的——中斷、配額用盡或機器重開皆可續跑。
 
-**已知的記錄缺口**：`save_summary` 不記錄產生該摘要的模型與 temperature，因此
-`results/` 下的摘要 JSON 無法自證其產生條件。三次 measure-check 的區分目前依賴
-檔名後綴（`_t0`、`_fixorder`）與本報告。
+**產生條件的記錄**（2026-09-07 起）：每份摘要都帶一個 `provenance` 區塊，記錄三個模型
+與其 temperature、rounds、以及**每份量表的指紋**。指紋是關鍵的那一項——item id 是位置
+編號，所以 `leader_ideal` 這個名字本身並不指明是哪一版。2026-08-26 以前的摘要沒有這個
+區塊，三次 measure-check 仍依賴檔名後綴（`_t0`、`_fixorder`）與本報告區分。
+
+**本報告的原型層數字對應 1994 重建版**（`leader_ideal_1994.json`，指紋見該檔）。
+2018 版已於 2026-09-07 接上為 `leader_ideal.json`，兩版共用 36 個 item id 而其中 28 個
+題目不同，因此 `RunRecord` 會拒絕以其中一版計分另一版收集的作答——對既有 checkpoint
+執行 `run.py report` 會停在 run 1 並指出 `attractiveness_*`。原型層要更新需重跑。
 
 ---
 

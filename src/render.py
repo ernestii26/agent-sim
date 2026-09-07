@@ -346,10 +346,27 @@ def render_measure_check(study: Study, summary: dict[str, Any]) -> bool:
 # Output files                                                                 #
 # --------------------------------------------------------------------------- #
 
-def save_summary(summary: dict[str, Any], output_dir: Path, prefix: str) -> Path:
+def save_summary(
+    summary: dict[str, Any],
+    output_dir: Path,
+    prefix: str,
+    *,
+    provenance: dict[str, Any] | None = None,
+) -> Path:
+    """Write a summary, stamped with what produced it.
+
+    Without the stamp a file in results/ cannot say which model, which temperature or
+    which version of an instrument it came from. That is not hypothetical: three
+    measure-check runs on 2026-08-26 differed in temperature and item ordering and were
+    told apart only by a suffix added to the filename by hand, and the ILT has since been
+    replaced by a version sharing 36 item ids with the old one.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
+    stamped = dict(summary)
+    stamped["provenance"] = {"written": datetime.now().isoformat(timespec="seconds"),
+                             **(provenance or {})}
     path = output_dir / f"{prefix}_{datetime.now():%Y%m%d_%H%M%S}.json"
-    path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+    path.write_text(json.dumps(stamped, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"\nSummary saved -> {path}")
     return path
 

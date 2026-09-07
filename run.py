@@ -17,6 +17,7 @@ import argparse
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 _PROJECT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(_PROJECT_DIR / "src"))
@@ -36,6 +37,22 @@ from render import (  # noqa: E402
 )
 from runtime import setup_file_logging  # noqa: E402
 from study import Study, list_studies, load_study  # noqa: E402
+
+
+def _provenance(config: RunConfig, study: Study) -> dict[str, Any]:
+    """What produced a summary: the models, their temperatures, and the exact wording of
+    every instrument. Item ids are positional, so the instrument key alone does not
+    identify a version — the fingerprint does."""
+    return {
+        "discussion_model": config.discussion_model,
+        "discussion_temperature": config.discussion_temperature,
+        "vote_model": config.vote_model,
+        "vote_temperature": config.vote_temperature,
+        "survey_model": config.survey_model,
+        "survey_temperature": config.survey_temperature,
+        "rounds": config.rounds,
+        "instruments": {i.key: i.fingerprint for i in study.instruments},
+    }
 
 
 def _output_dir(config: RunConfig, study: Study, condition_key: str) -> Path:
@@ -76,7 +93,7 @@ def cmd_validate(args: argparse.Namespace) -> None:
     )
     summary = summarize_validation(study, records)
     render_validation(study, summary)
-    save_summary(summary, out, "validation")
+    save_summary(summary, out, "validation", provenance=_provenance(config, study))
     if not summary["passed"]:
         print("\nAgents speak on nearly every turn — speech-rate metrics will be uninformative.")
         sys.exit(1)
@@ -99,7 +116,7 @@ def cmd_run(args: argparse.Namespace) -> None:
     records = run_condition(
         study, condition, config, runs=runs, rounds=rounds, output_dir=out, on_progress=print,
     )
-    _report(study, condition, records, out)
+    _report(study, condition, records, out, _provenance(config, study))
 
 
 def cmd_report(args: argparse.Namespace) -> None:
@@ -112,10 +129,11 @@ def cmd_report(args: argparse.Namespace) -> None:
     if args.runs:
         records = records[: args.runs]
     print(f"\nLoaded {len(records)} completed runs from {out / 'checkpoints'}")
-    _report(study, condition, records, out)
+    _report(study, condition, records, out, _provenance(config, study))
 
 
-def _report(study: Study, condition, records: list, out: Path) -> None:
+def _report(study: Study, condition, records: list, out: Path,
+            provenance: dict[str, Any] | None = None) -> None:
     if not records:
         raise SystemExit("No completed runs to report.")
     summary = summarize_contrast(study, condition, records)
@@ -144,7 +162,7 @@ def _report(study: Study, condition, records: list, out: Path) -> None:
             render_rater_agreement(study, agreement)
             summary["rater_agreement"] = agreement
 
-    save_summary(summary, out, condition.key)
+    save_summary(summary, out, condition.key, provenance=provenance)
     plot_contrast(study, condition, summary, out)
 
 
@@ -176,7 +194,8 @@ def cmd_measure_check(args: argparse.Namespace) -> None:
     for instrument in checkable:
         summary = summarize_measure_check(study, record, instrument)
         passed &= render_measure_check(study, summary)
-        save_summary(summary, out, f"measure_check_{instrument.key}")
+        save_summary(summary, out, f"measure_check_{instrument.key}",
+                     provenance=_provenance(config, study))
     if not passed:
         sys.exit(1)
 
@@ -207,7 +226,8 @@ def cmd_mediate(args: argparse.Namespace) -> None:
         study, by_condition, needs, need=args.need, outcome_group=args.group,
     )
     render_mediation(study, med)
-    save_summary(med, Path(config.output_dir) / study.name, f"mediation_{args.need}")
+    save_summary(med, Path(config.output_dir) / study.name, f"mediation_{args.need}",
+                 provenance=_provenance(config, study))
 
 
 def cmd_layers(args: argparse.Namespace) -> None:
@@ -243,7 +263,8 @@ def cmd_layers(args: argparse.Namespace) -> None:
         contrast=contrast, need=args.need, outcome_group=args.group,
     )
     render_layer_moderation(study, out)
-    save_summary(out, Path(config.output_dir) / study.name, "layers")
+    save_summary(out, Path(config.output_dir) / study.name, "layers",
+                 provenance=_provenance(config, study))
 
 
 def main() -> None:

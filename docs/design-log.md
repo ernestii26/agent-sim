@@ -2161,8 +2161,30 @@ figure this study's evaluation layer *can* produce is absent from every report.
 technical report §12. Three `measure-check` runs are distinguishable only by a filename
 suffix added by hand.
 
-### Fix order
+**Fixed 2026-09-07.** Every summary now carries a `provenance` block: the three models
+and their temperatures, the rounds, and a fingerprint per instrument. The instrument
+fingerprints are the part that mattered — item ids are positional, so `leader_ideal`
+alone does not say which of two versions produced a number.
 
-A1 and A2 first: they are what a reader takes away. Then C2 and D1 together, since the
-correction needs the number to exist in the pipeline. Then A3-A7 and B1, which are
-report-level. Then A8-A12, C3, C4 and D2.
+### Fix order, and what was done
+
+All nineteen were fixed on 2026-09-07 in the order below.
+
+| | commit |
+|---|---|
+| A1 H6's null excludes a medium mediation, not a small one | `1c9473a` |
+| A2 affiliation did replicate the paper's strongest link | `9e432b2` |
+| C2, D1 inter-rater ICC exists, is computed, and is printed | `88b6b6e` |
+| A3-A12, B1, B2 report-level corrections and two new validity threats | `b52f89f` |
+| C3, C4 and the weekly report | `f4b043d` |
+| The 2018 ILT wired in, with guards against mixing versions | `9c5a367` |
+| D2 provenance stamped on every summary | this commit |
+
+One thing found while fixing rather than while auditing, and it was the most dangerous
+of the set: **wiring in the 2018 ILT would have corrupted every report in silence.**
+Item ids are positional, the two versions share 36 of them, and 28 of those ask
+different questions — `strength_1` is "strong" in one and "commanding" in the other. The
+overlap would have been scored and reported as data. `Instrument.fingerprint` plus a
+foreign-item-id check now stop it with the run, persona and item named. That guard is
+the same idea as D2's provenance block, one level down: a number should be able to say
+what produced it.
