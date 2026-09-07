@@ -1,7 +1,7 @@
 {
   "key": "leader_ideal",
   "title": "Implicit leadership theories (leader prototype ratings)",
-  "instructions": "Think about leaders in general — not anyone in this meeting. Rate how characteristic each trait is of a leader.",
+  "instructions": "Rate how characteristic each of the following is of a leader in general. Answer about leaders as a category — not about any specific person in this meeting.",
   "scale": [
     1,
     10
@@ -18,65 +18,70 @@
     "baseline",
     "post"
   ],
-  "citation": "Traits and factor structure from Offermann, L. R., Kennedy, J. K., & Wirtz, P. W. (1994). Implicit leadership theories: Content, structure, and generalizability. The Leadership Quarterly, 5(1), 43-58 — reproduced in Appendix A of Bhatia, S., Olivola, C. Y., Bhatia, N. & Ameen, A. (2022), The Leadership Quarterly 33(5), 101535. The femininity and ethics dimensions are the two Sheng, Andrews & van Vugt (2026) added themselves, quoted from their footnote 13. Response format follows Sheng et al.: 10-point, 1 = not at all characteristic of a leader, 10 = extremely characteristic.",
-  "license": "",
-  "note": "RECONSTRUCTION, not the instrument Sheng et al. administered. They used Offermann & Coats (2018), a 46-item nine-factor revision, plus femininity and ethics, for 51 items. This is the 1994 41-trait eight-factor ancestor plus those same two additions: 10 of their 11 dimensions, missing only creativity, which is new in 2018. The 2018 paper's own finding is that seven of the eight 1994 factors replicated, and that attractiveness became well-groomed. Two known defects: the source appendix lists 40 traits where its body text says 41, so one trait may be missing; and neither the 1994 nor the 2018 wording has been checked against the original article. Dual model alignment (Cheng et al., 2013): strength, tyranny, masculinity and attractiveness are the dominance side — the four dimensions Sheng et al. found protection and status predicting; sensitivity, dedication, charisma, intelligence and ethics are the prestige side. Replaces a 12-adjective scale taken from Sheng et al.'s Table 1, which was a theory-exposition table rather than an administered instrument and gave every subscale only 2 items. `predicts` maps each FFNI need onto the ILT dimensions it should move, taken from Sheng et al.'s own Study 5 (Sample B) results rather than invented: protection -> Strength; status -> Tyranny, Masculinity, Well-Groomed; vision -> Sensitivity, Dedication, Charisma; expertise -> Sensitivity, Charisma, Intelligence; fairness -> Dedication, Intelligence, Ethics. Creativity is dropped from vision's list because it does not exist in the 1994 factor structure. Affiliation is the one theoretical entry: their text groups it with the prestige-side dimensions but reports no per-dimension increment for it, so sensitivity is assigned on the Table 1 grounds (compassionate, friendly) rather than on a published coefficient. Administered at baseline as well as post: a baseline fork carries no transcript, so it is the cheapest call in the design, and it turns the cognition layer from a cross-sectional correlation into a within-person change — did the situation move the prototype, and did it move with the need? That is the one thing this design can ask and the source paper's correlational data cannot.",
   "subscales": {
-    "strength": [
-      "strong",
-      "bold"
-    ],
-    "tyranny": [
-      "domineering",
-      "pushy",
-      "dominant",
-      "manipulative",
-      "power-hungry",
-      "conceited",
-      "selfish",
-      "obnoxious",
-      "demanding",
-      "loud"
-    ],
-    "masculinity": [
-      "male",
-      "masculine"
-    ],
-    "attractiveness": [
-      "well-groomed",
-      "attractive",
-      "well-dressed",
-      "classy"
-    ],
     "sensitivity": [
+      "caring",
       "sympathetic",
-      "sensitive",
       "compassionate",
-      "understanding",
-      "sincere",
-      "warm",
-      "forgiving",
-      "helpful"
+      "kind",
+      "empathetic",
+      "selfless",
+      "friendly",
+      "sensitive"
     ],
     "dedication": [
-      "dedicated",
       "motivated",
-      "hardworking",
-      "goal-oriented"
+      "dedicated",
+      "focused",
+      "determined",
+      "good decision maker",
+      "goal oriented",
+      "handles stress"
+    ],
+    "tyranny": [
+      "controlling",
+      "pushy",
+      "intimidating",
+      "domineering",
+      "coercive",
+      "demanding",
+      "risky",
+      "power-hungry"
     ],
     "charisma": [
-      "energetic",
       "charismatic",
-      "inspiring",
-      "enthusiastic",
-      "dynamic"
+      "sociable",
+      "dynamic",
+      "bold"
+    ],
+    "strength": [
+      "commanding",
+      "assertive",
+      "authoritative",
+      "tough",
+      "strong",
+      "firm"
+    ],
+    "creativity": [
+      "creative",
+      "innovative",
+      "clever",
+      "courageous"
+    ],
+    "well_groomed": [
+      "well-groomed",
+      "well-dressed"
+    ],
+    "masculinity": [
+      "masculine",
+      "tall",
+      "male",
+      "attractive"
     ],
     "intelligence": [
-      "intellectual",
       "educated",
-      "intelligent",
-      "knowledgeable",
-      "clever"
+      "intellectual",
+      "intelligent"
     ],
     "femininity": [
       "female",
@@ -95,12 +100,13 @@
     "status": [
       "tyranny",
       "masculinity",
-      "attractiveness"
+      "well_groomed"
     ],
     "vision": [
       "sensitivity",
       "dedication",
-      "charisma"
+      "charisma",
+      "creativity"
     ],
     "expertise": [
       "sensitivity",
@@ -112,5 +118,8 @@
       "intelligence",
       "ethics"
     ]
-  }
+  },
+  "citation": "Offermann, L. R., & Coats, M. R. (2018). Implicit theories of leadership: Stability and change over two decades. The Leadership Quarterly, 29(4), 513-522. Items and factor assignments transcribed from Figure 2 (p.518), which prints all 46 items with their highest factor loadings. Femininity (female, feminine) and ethics (fair, honest, ethical) added as Sheng, Andrews & van Vugt (2026) did, per their footnote 13, giving the 51 items their Appendix (p.801) records for Study 5.",
+  "license": "",
+  "note": "The instrument Sheng et al. actually administered, replacing the 1994 reconstruction kept at leader_ideal_1994.json. Three assignments differ from the 1994 version in ways that matter here: 'bold' is in CHARISMA, not strength (the 2018 discussion, p.520: 'the trait bold moved from the Strength factor from 1994 to the Charismatic factor'); STRENGTH is six command-and-assertion items rather than {strong, bold}; and 'attractive' sits in MASCULINITY while WELL-GROOMED keeps only well-groomed and well-dressed. predicts is unchanged in substance -- it is still Table 13's significant increments -- but now names the 2018 dimensions, so status reaches well_groomed rather than the 1994 'attractiveness', and vision reaches creativity, a dimension the reconstruction did not have."
 }

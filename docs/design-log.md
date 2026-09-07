@@ -1836,6 +1836,36 @@ dominance endorsement no matter how well it is measured or how many runs are col
   the validity of persona simulations for mechanism work, and it is more useful than the
   null it explains.
 
+### Superseded 2026-09-07 by the instrument itself
+
+This section's whole framing — that a two-item Strength scale is too thin to dilute one
+word's semantics — assumed `bold` belongs to Strength. It does not. Offermann & Coats
+(2018) Figure 2, now in the repo, puts `bold` in **Charisma** (loading .41) and builds
+Strength from `commanding, assertive, authoritative, tough, strong, firm`. The article's
+discussion says so in as many words: "the trait *bold* moved from the Strength factor
+from 1994 to the [Charismatic] factor."
+
+Rescoring the collected baseline data under the 2018 assignment:
+
+| scoring | protection beta | 95% CI |
+|---|---|---|
+| 1994, strength = strong + bold | −0.159 | [−0.297, −0.013] |
+| 2018, `bold` removed from strength | **−0.067** | **[−0.214, +0.077]** |
+| `bold` scored into charisma | +0.152 | [+0.042, +0.262] |
+
+**The significant reversal is an artefact of the wrong item assignment.** Under the
+assignment the paper used it becomes a null, and `bold` in charisma is significantly
+positive — which is what the 2018 authors report about boldness and charisma. Section 28's
+"protection replicates backwards" and this section's "protection is a prestige-flavoured
+need" both rest on that artefact and are withdrawn to: **H4's dominance side is null here,
+not reversed**, and the reason it looked reversed is that one charisma item was scored as
+strength.
+
+Caveat: the 2018 Strength has six items and the collected data contain one of them
+(`strong`), so the middle row is a single-item scale with no estimable reliability. It
+establishes where the reversal came from, not that H4 would hold under the real
+instrument.
+
 ### If it is to be pursued
 
 The neutrals' personas are generated from a Big Five description and an occupation and
@@ -1875,14 +1905,12 @@ Intelligence (5), Strength (2) — **40 traits, eight factors**, matching sectio
 note that the appendix lists 40 where the body text says 41. Our `leader_ideal.json`
 is exactly this plus femininity (2) and ethics (3) = 45.
 
-**One unverified lead, recorded as a lead and not as a fact.** A search-engine summary
-of the 2018 abstract and citing works described the nine-factor structure as including
-**Strength = forceful, bold, powerful, strong** — four items rather than 1994's two.
-If true it matters a great deal: section 29 traced H4's entire reversal to `bold`
-(protection to `strong` is −0.02, to `bold` is −0.29), and three more items would
-dilute exactly that. **This came from a generated summary, not from the article, and
-must not be used until the article itself is read.** The obvious route is institutional
-access to *The Leadership Quarterly* 29(4), 513–522.
+**One unverified lead, recorded as a lead and not as a fact — and it was wrong.** A
+search-engine summary described the 2018 structure as **Strength = forceful, bold,
+powerful, strong**. The article, obtained 2026-09-07, gives **commanding, assertive,
+authoritative, tough, strong, firm** — six items, and `bold` is not among them at all;
+it is a Charisma item. Recording it as a lead rather than a fact is why it did no
+damage, and it is left here as the reason for that habit.
 
 ### The effectiveness criterion: the criterion is fine, the reliability is not
 

@@ -1,6 +1,7 @@
 """One simulation run's output — the thing checkpoints hold and every report reads.
 
-The on-disk shape is fixed: {run_no, condition, members, transcript, votes, measures}.
+The on-disk shape is fixed: {run_no, condition, members, transcript, votes, measures,
+instruments}.
 Readers ask questions here instead of walking that dict, which is also where the
 tolerance for pre-instrument checkpoints (no "measures" key) lives — see `responses`.
 """
@@ -21,6 +22,9 @@ class RunRecord:
     transcript: list[dict[str, Any]]
     votes: list[dict[str, Any]]
     measures: dict[str, dict[str, Any]] = field(default_factory=dict)
+    # {instrument key: fingerprint} for the wording this run was collected with. Absent
+    # in checkpoints written before 2026-09-07; the item-id check below covers those.
+    instruments: dict[str, str] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -30,6 +34,7 @@ class RunRecord:
             "transcript": self.transcript,
             "votes": self.votes,
             "measures": self.measures,
+            "instruments": self.instruments,
         }
 
     @classmethod
@@ -41,6 +46,7 @@ class RunRecord:
             transcript=data.get("transcript", []),
             votes=data.get("votes", []),
             measures=data.get("measures", {}),
+            instruments=data.get("instruments", {}),
         )
 
     # -- discussion -------------------------------------------------------- #
@@ -76,10 +82,41 @@ class RunRecord:
 
     def needs(self, timing: str, instrument: Instrument) -> dict[str, dict[str, float]]:
         """{persona_id: {subscale: mean}} for a self/prototype instrument."""
-        return {
-            pid: subscale_scores(answers, instrument)
-            for pid, answers in self.responses(timing, instrument).items()
-        }
+        answered = self.responses(timing, instrument)
+        self._reject_foreign_answers(answered, instrument, timing)
+        return {pid: subscale_scores(a, instrument) for pid, a in answered.items()}
+
+    def _reject_foreign_answers(
+        self, answered: dict[str, Any], instrument: Instrument, timing: str
+    ) -> None:
+        """Refuse to score answers that were given to a different version of a scale.
+
+        A stored fingerprint that disagrees is decisive. Without one, an item id the
+        instrument does not define is the same signal: these answers came from a scale
+        that had questions this one does not. Either way the overlap would be scored
+        against the wrong wording, which is worse than missing data because it looks
+        like data.
+        """
+        stored = self.instruments.get(instrument.key)
+        if stored and stored != instrument.fingerprint:
+            raise SystemExit(
+                f"{timing}/{instrument.key}: run {self.run_no} was collected with "
+                f"instrument {stored}, and {instrument.fingerprint} is loaded. The item "
+                f"ids overlap but the wording differs, so scoring these together would "
+                f"be silently wrong. Re-run the condition, or load the instrument the "
+                f"data was collected with."
+            )
+        known = {item_id for item_id, _, _ in instrument.items}
+        for pid, a in answered.items():
+            unknown = {k for k in a if k != "_meta"} - known
+            if unknown:
+                raise SystemExit(
+                    f"{timing}/{instrument.key}: run {self.run_no}, persona {pid} answered "
+                    f"{len(unknown)} item(s) this instrument does not define "
+                    f"({', '.join(sorted(unknown)[:4])}...). These answers belong to a "
+                    f"different version of the scale; scoring the overlap would be "
+                    f"silently wrong."
+                )
 
     def ratings(self, instrument: Instrument) -> dict[str, dict[str, float]]:
         """{rater_id: {target_id: mean rating}} for an about=each_candidate instrument."""

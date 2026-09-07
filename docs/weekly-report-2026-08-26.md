@@ -668,31 +668,36 @@ H5 的支配側**預期是 null**。20 場的時候，這個檢定會在「其�
 
 :::
 
-# The null that has content
+# What the null does and does not rule out
 
 - The interval is narrow in absolute terms
 - Dividing by path a puts path b inside roughly [−.09, .08]
-- That excludes even the *small* effect the simulation was sized for
-- And the simulation catches a medium effect 95% of the time here
-- So: we looked, and can rule out anything but a very small effect
+- That excludes a **medium** mediation — the simulation's medium case lands at +.14
+- It does **not** exclude a small one: the small case lands at +.02, inside
+- So: we looked, and can rule out a medium effect but not a small one
 
 ::: notes
 
-**這頁解釋為什麼這個 null 值得一提**
+**這頁解釋這個 null 的內容有多少——以及它的上限**
 
-前面講過，null 只有在區間夠窄的時候才有內容。
+前面講過，null 只有在區間夠窄的時候才有內容。間接效果的區間是 [−0.027, 0.024]，用 path a = 0.31 除回去，path b 的區間大約是 **[−0.09, 0.08]**。
 
-間接效果的區間是 [−0.027, 0.024]。用 path a = 0.31 除回去，path b 的區間大約是 **[−0.09, 0.08]**。
+**先前的版本說這排除了「小效果」。那是錯的，2026-09-07 更正。**
 
-而檢定力模擬裡，「小效果」那格用的是 path b = 0.10——**已經被排除在區間之外**。同一個模擬顯示，中效果在這個樣本數下有 95% 會被抓到。
+原因是模擬裡的 `b_vote` 乘的是**真實**的需求變化，而估計式迴歸的是**觀測**的需求變化——中間隔著量表的雜訊。用模擬器自己的產生器實測：
 
-**所以這不是一個「沒看到」的研究，是一個「看了，而且能排除除了極小效果之外的一切」的研究。**
+- `b_vote = 0.10`（小效果）→ 估計式實際看到 **+0.023**，**落在區間內**
+- `b_vote = 0.25`（中效果）→ 估計式實際看到 **+0.142**，落在區間外
 
-Sheng 等人在論文裡明說這個中介「被假設但從未被實證檢驗」。現在檢驗了：情境是被操弄的（不是觀察的）、需求是人內前後測（不是單次橫斷）、結果是行為（不是評分）。
+還有第二層：把間接效果除以 path a 是**把 a 當成已知**，但 a 自己的區間是 [0.125, 0.496]，取下界的話連中效果都框不住。
 
-**它不成立。**
+**所以正確的說法是：能排除中等強度的中介，不能排除微小的中介。**
 
-……但這句話能推到多遠，下一頁要打個折扣。
+這仍然比「沒看到」強——中效果若存在，在這個樣本數下有 95% 會被抓到——但遠不到「排除除極小效果之外的一切」。
+
+Sheng 等人明說這個中介「被假設但從未被實證檢驗」。現在檢驗了，而且是在情境被操弄、需求人內前後測、結果是行為的條件下。**中等強度的版本不成立。**
+
+……而這句話能推到多遠，下一頁還要再打折扣。
 
 :::
 
@@ -701,8 +706,9 @@ Sheng 等人在論文裡明說這個中介「被假設但從未被實證檢驗�
 - H4 is not our hypothesis — it is **their published positive result**
 - It was built in as the study's positive control
 - Baseline-only test (their conditions): expertise and vision replicate
-- **Protection replicates backwards**: −0.16, CI [−0.29, −0.01]
-- The prestige side reproduces; the dominance side does not
+- Protection looked **reversed** at −0.16 — but that was the wrong scale
+- The paper's own instrument puts `bold` in Charisma, not Strength
+- Rescored its way, protection → Strength is a **null**, not a reversal
 
 ::: notes
 
@@ -715,6 +721,10 @@ H4 就是這個角色。它**不是我們發明的假設**，是論文 Study 5 �
 而我們的 H4 是 null。
 
 **進一步的診斷**：論文是在「冷測」條件下測的——沒有討論、單次施測、用水準值。而我們的 H4 用的是討論**之後**的分數。既然這週剛加了前測，最接近論文條件的分析其實就躺在同一批資料裡，只是沒人算過。
+
+**2026-09-07 補充：這一頁的結論後來被推翻了一半。** 拿到 Offermann & Coats (2018) 原文後發現，`bold` 在論文實際使用的量表裡屬於 **Charisma**，不屬於 Strength。而我們的重建把它放在 Strength，且整個「反向」都由它承載。用論文的歸屬重新計分：protection → Strength 從 −0.16（顯著反向）變成 **−0.067，CI [−0.214, +0.077]——含 0，是 null 不是反向**。
+
+所以正對照仍然沒複製成功（null），但「做成反方向」那句話是計分錯誤造成的。下面的數字保留為當時的記錄。
 
 算出來（前測對前測，80 場、240 人、重抽場次的區間）：
 

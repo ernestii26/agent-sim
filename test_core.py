@@ -480,7 +480,8 @@ def test_run_record_round_trips_and_tolerates_pre_instrument_checkpoints() -> No
 
     data = _needs_record(1, protection=5, d_rating=4).to_dict()
     assert RunRecord.from_dict(data).to_dict() == data
-    assert list(data) == ["run_no", "condition", "members", "transcript", "votes", "measures"]
+    assert list(data) == ["run_no", "condition", "members", "transcript", "votes",
+                          "measures", "instruments"]
 
     # A checkpoint written before instruments existed has no "measures" key at all.
     legacy = RunRecord.from_dict({"run_no": 7, "members": {"P": ["P1"]},
@@ -1009,6 +1010,50 @@ def test_icc_separates_agreeing_raters_from_disagreeing_ones() -> None:
     assert icc_one_way(ragged)[2] == 4
     # Too few cells is n/a, never a fabricated coefficient.
     assert math.isnan(icc_one_way(agree[:2])[0])
+
+
+def test_answers_from_another_version_of_a_scale_are_refused() -> None:
+    """Item ids are positional, so two versions of an instrument share them while asking
+    different questions — the 1994 and 2018 ILT share 36 ids of which 28 differ in
+    wording. Scoring one's answers against the other rates "strong" as if it were
+    "commanding", and looks like data rather than like missing data."""
+    study = load_study("ffni_mediation")
+    ideals = study.prototype
+    good = {f"{name}_{i}": 5 for name, texts in ideals.subscales.items()
+            for i in range(1, len(texts) + 1)}
+
+    ok = RunRecord.from_dict({
+        "run_no": 1, "condition": "threat", "members": {"N": ["N1"]},
+        "transcript": [], "votes": [],
+        "measures": {"post": {ideals.key: {"N1": dict(good)}}},
+        "instruments": {ideals.key: ideals.fingerprint},
+    })
+    assert ok.needs("post", ideals)["N1"]["strength"] == 5
+
+    # A fingerprint from a different wording is decisive even when every id matches.
+    wrong_version = RunRecord.from_dict({**ok.to_dict(), "instruments": {ideals.key: "deadbeef1234"}})
+    try:
+        wrong_version.needs("post", ideals)
+    except SystemExit as exc:
+        assert "silently wrong" in str(exc), exc
+    else:
+        raise AssertionError("a disagreeing fingerprint was scored anyway")
+
+    # Without a fingerprint — every checkpoint written before 2026-09-07 — an item id the
+    # instrument does not define is the same signal.
+    stale = RunRecord.from_dict({
+        **ok.to_dict(), "instruments": {},
+        "measures": {"post": {ideals.key: {"N1": {**good, "retired_subscale_1": 6}}}},
+    })
+    try:
+        stale.needs("post", ideals)
+    except SystemExit as exc:
+        assert "does not define" in str(exc), exc
+    else:
+        raise AssertionError("answers to a retired subscale were scored anyway")
+
+    # A checkpoint with no fingerprint and no foreign ids still scores.
+    assert RunRecord.from_dict({**ok.to_dict(), "instruments": {}}).needs("post", ideals)
 
 
 if __name__ == "__main__":

@@ -49,6 +49,21 @@ class Instrument:
             for i, text in enumerate(texts, start=1)
         ]
 
+    @property
+    def fingerprint(self) -> str:
+        """Short hash of (item_id, text) pairs — the identity of this exact wording.
+
+        Item ids are positional (`{subscale}_{i}`), so they carry no information about
+        what the item says. Two versions of an instrument can therefore share ids while
+        asking different questions: the 1994 and 2018 ILT share 36 ids of which 28 have
+        different text, so scoring one's answers against the other silently rates
+        "strong" as if it were "commanding". This is what a checkpoint stores so that
+        cannot happen quietly.
+        """
+        import hashlib
+        blob = "\n".join(f"{i}\t{t}" for i, _, t in self.items)
+        return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
     def is_valid_rating(self, value: object) -> bool:
         low, high = self.scale
         return isinstance(value, (int, float)) and not isinstance(value, bool) and low <= value <= high

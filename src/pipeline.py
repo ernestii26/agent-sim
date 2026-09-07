@@ -200,6 +200,10 @@ def run_condition(
             transcript=transcript,
             votes=votes,
             measures=measures,
+            # The exact wording each battery was answered against. Item ids are
+            # positional, so two versions of a scale can share them while asking
+            # different questions; this is what lets a later report refuse to mix them.
+            instruments={i.key: i.fingerprint for i in study.instruments},
         )
         records.append(record)
         ckpt.write_text(
