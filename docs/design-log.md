@@ -2232,3 +2232,71 @@ that the dominance-side null is actually about.
 way. H1, H2, H3, H6 and H7 make no claims about specific needs beyond protection and
 status, so there is less to get wrong, but they have not been checked against the tables
 line by line the way H4 and H5 now have.
+
+---
+
+## 33. The remaining five hypotheses, checked against the tables (2026-09-07)
+
+Section 32 warned that H1, H2, H3, H6 and H7 had never been read against the paper the
+way H4 and H5 had. Two of the five were wrong.
+
+### H3 predicted a need the paper does not
+
+It read "Threat raises Protection **and Status** needs". The paper maps situations to
+needs explicitly (p.795):
+
+| situation | needs it raises |
+|---|---|
+| **intergroup conflict** | **protection** |
+| economic inequality | fairness, status |
+| male-biased sex ratios | protection, status |
+
+and asks separately whether "**aggressive** wars elevate **status** needs, while
+**defensive** wars activate **protection** needs".
+
+This study's threat is an organisational consolidation the unit may not survive:
+intergroup conflict, and defensive. **Protection is what the paper predicts; status is
+not.** The "and Status" had no source.
+
+This changes how the result reads. Section 27 reported it as "H3 holds, **and only** for
+protection", with the phrasing of a partial success, and noted that status's interval
+contains zero "including status, which the paper also predicts would rise". That
+parenthesis was wrong. Protection moving (+0.310 [0.125, 0.496]) and status not
+(−0.002 [−0.102, 0.092]) is **exactly the pattern the paper predicts for a defensive
+intergroup conflict**. The result is a clean confirmation, not a partial one.
+
+### H7's first half named the wrong layer, and its second half is ours
+
+The paper's question, p.789: "would intergroup conflict situations (e.g., trade wars,
+**organizational crises**) strengthen the FFN **protection–authoritarianism** link?"
+Authoritarianism is one of Table 3's effectiveness criteria, so the question is about the
+**evaluation layer**.
+
+H7's first half was stated as "threat strengthens the Protection → dominance link" and
+implemented as the between-condition difference in the slope from induced protection to
+the respondent's own vote — which is neither the evaluation layer nor the prototype
+layer. The quantity that answers the paper's question is the between-condition difference
+in the protection → Dominance-effectiveness beta, and this study has it: **+0.164,
+CI [−0.083, +0.442]** — the paper's direction, interval containing zero. It was computed
+only as an intermediate in section 6.7's gap decomposition and never reported as H7's
+test.
+
+H7's second half — that threat narrows the gap between the cognition and evaluation
+layers — **is not asked anywhere in the paper.** It is this study's own extension, which
+is legitimate but should not have sat in a hypothesis alongside a replication without
+saying so. It is now marked exploratory.
+
+### H1, H2 and H6 check out
+
+H1 and H2 are not from this paper at all; they come from the dual-strategies literature
+and the paper cites that work only as background (p.795). There is nothing in its tables
+to check them against, which is already recorded in section 6's correspondence table.
+H6 is the mediation the paper states has never been tested, so likewise.
+
+### What this run of checks says about the others
+
+Both errors, and both of section 32's, came from the same habit: hypotheses were written
+from the paper's prose and its framing sections, which group needs and speak in general
+terms, rather than from its tables and its situation-to-need mappings, which are
+specific. Four of seven hypotheses named the wrong needs or the wrong layer. The tables
+were available the whole time.

@@ -53,11 +53,11 @@ Fundamental Follower Needs Inventory (FFNI)，並在 p.795 明確指出：先前
 | **H1** | 協作情境下，聲望型獲得的同儕票數多於支配型 | 背書 |
 | **H2** | 威脅情境下，支配型獲得的同儕票數多於聲望型 | 背書 |
 | **交互作用** | 威脅情境的「支配−聲望」票數差，**大於**協作情境的同一差距 | 背書 |
-| **H3** | 威脅相對於協作，提高 protection 與 status 需求（人內前後測） | 需求 |
+| **H3** | 威脅相對於協作，提高 **protection** 需求（人內前後測）。**只有 protection**——論文 p.795 把 intergroup conflict 對到 protection，把 status 對到經濟不平等與性別比 | 需求 |
 | **H4** | **認知層**：每個需求預測 Table 13 給它顯著增量的那些原型維度（protection→strength；status→tyranny/masculinity/well-groomed；vision、expertise、fairness→聲望側維度）。**affiliation 刻意沒有條目**，見下 | 需求 → 原型 |
 | **H5** | **評價層**：論文對**六個需求全部**都有預測。成立的是 affiliation、vision、expertise、fairness，以及 protection→**Safety**；不成立的是 protection→Authoritarianism 與 status 的三條（**這裡的 null 是預期結果**） | 需求 → 評價 |
 | **H6** | protection 需求**中介**「情境 → 支配型背書」的效果 | 需求承載情境到背書 |
-| **H7** | 威脅強化 protection → 支配型的連結，並縮小認知層與評價層之間的落差 | 情境調節上述 |
+| **H7** | 威脅強化 protection → **評價層**的支配側連結（論文 p.789 的待答問題，原文是 protection–authoritarianism，而 authoritarianism 是 Table 3 的效標）。「縮小兩層落差」那半**是本研究自己的延伸**，論文沒問過 | 情境調節上述 |
 
 三件要先講清楚的事：
 
@@ -674,8 +674,13 @@ $T$ 與 $C$ 分別為威脅與協作條件的受試者集合；信賴區間以�
 | expertise | −0.169 | −0.258 | −0.089 | [−0.203, 0.033] | |
 | fairness | +0.106 | +0.077 | −0.029 | [−0.115, 0.050] | |
 
-**H3 成立，且僅 protection 成立。** 威脅推動的正是論文預測的那一個需求，其餘五個
-（含 status，論文亦預測會上升）的區間皆含 0。
+**H3 成立。** 威脅推動的正是論文對這種情境預測的那一個需求，其餘五個的區間皆含 0。
+
+**注意 status 的區間含 0 不是缺憾。** 論文 p.795 把 status 對應到經濟不平等與性別比，
+把 intergroup conflict 對應到 protection，並另外問「攻擊性戰爭是否提升 status 需求，而
+防禦性戰爭啟動 protection 需求」。本研究的威脅是單位可能不保的組織整併——是群體間衝突，
+而且是防禦性的。**因此 protection 動、status 不動，正是論文的預測本身**，而非部分達成。
+（H3 原本寫成「提高 protection 與 status」，那個 status 沒有論文依據，見 design log §33。）
 
 **必須注意的細節**：$M_p < 0$ 在兩個條件皆成立——protection 都在**下降**，威脅只是讓它跌得較少。
 組間比較成立，但這不是「威脅使需求絕對上升」。六個需求在合併資料上的人內變化
