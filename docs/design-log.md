@@ -1963,3 +1963,162 @@ not administered the way the paper administered it.
    section 29's diagnosis survives.
 3. Re-run `measure-check` after either change. Both gates are per-subscale now, so a
    weak new subscale will be caught before a study is paid for.
+
+---
+
+## 31. Defect register: everything found wrong on 2026-09-07
+
+An audit of `docs/technical-report-2026-08-26.md` against the code, the saved results and
+the two source articles, plus three things found while getting the instruments. Recorded
+in full before any of it is fixed, so the fixes can be checked off and nothing is quietly
+dropped. Severity is about how far a reader would be misled, not how hard it is to fix.
+
+### A. Claims that are wrong
+
+**A1 — H6's null does not rule out a small effect. SEVERE.**
+Reported in technical report §6.6 and §11.1, design log §27 and §28, and the weekly
+report's "The null that has content" slide: dividing the indirect CI by `a = 0.31` gives
+`b ∈ [−0.087, +0.078]`, said to exclude the simulation's small case `b_vote = 0.10`.
+Two errors compound.
+
+- The simulation's `b_vote` multiplies the **true** induced change
+  (`tools/layer_power.py`: `P(vote) = 0.5 + b_vote × induced`, pre-noise), while the
+  estimator regresses the observed change. Running the simulator's own generator at
+  `b_vote = 0.10` yields an observed path b of **+0.023** — comfortably inside the
+  interval. At `b_vote = 0.25` it yields **+0.142**, which is outside.
+- Dividing by `a` treats `a` as known. Its own CI is [0.125, 0.496]; at the lower bound
+  the implied interval is [−0.216, +0.193], which contains even the medium case.
+
+Correct statement: **the interval excludes a medium path b and does not exclude a small
+one.** H6's null is informative about medium mediation only.
+
+**A2 — "every paper-supported positive effect failed to replicate" is false. SEVERE.**
+Technical report §11.1. `affiliation → prestige-side effectiveness` is **+0.151,
+CI [+0.013, +0.303]**, excluding zero, and `→ dominance-side` is −0.190 [−0.318, −0.070].
+The paper's two largest supported links are Affiliation → Benevolence .31\*\*\* and
+→ Team-building .46\*\*\* (Table 3, Model 2). A paper-supported positive prediction
+replicated in the right direction on both sides. The sentence is the one that bounds
+every downstream inference, so its being a false universal matters more than its size.
+
+**A3 — "the paper measured needs cross-sectionally, once" is false. MODERATE.**
+Technical report §1's contrast table. Sample E administered the FFNI at two time points
+a week apart (p.775: "E in two time points"; Table 5 prints T1 and T2 columns; Table 8
+reports both). The real contribution — pre/post around a *manipulated* event inside one
+session — stands, but as written the table understates the paper.
+
+**A4 — §6.7's decomposition does not close arithmetically. MODERATE.**
+Reported: cognition −0.305, evaluation +0.178, total gap difference −0.467. But
+−0.305 − 0.178 = −0.483. Recomputed deterministically from the checkpoints: cognition
+collab +0.052, threat −0.251 → −0.303; evaluation collab −0.078, threat +0.086 → +0.164;
+−0.303 − 0.164 = −0.467, matching the saved summary. The two reported components came
+from bootstrap means rather than point estimates. The conclusion survives; the numbers
+do not.
+
+**A5 — "the 2018 instrument is unavailable here" is now false. MODERATE.**
+Technical report §4.1 and §11.5. `docs/1-s2.0-S1048984317304988-main.pdf` is in the repo
+and its Figure 2 prints all 46 items with factor assignments.
+
+**A6 — the ILT reconstruction is described too kindly. MODERATE.**
+§4.1 says "41 traits, reproduced verbatim". `leader_ideal.json` holds **40**, and its own
+note says no wording was ever checked against the original. Item-by-item against the
+instrument the paper used, **17 of the 45 administered traits do not appear in it at
+all**, and of the 28 shared, three sit on different factors: `bold` → charisma,
+`attractive` → masculinity, `clever` → creativity.
+
+**A7 — §6.5 enumerates 11 criteria where there are 12 scales. MINOR-MODERATE.**
+The omitted one is **Safety**, which is the criterion where protection is strongly
+supported (.43\*\*\*/.20\*\*\*) and therefore the one that makes the collapsing problem
+concrete. Table 3 has 13 rows because Authoritarianism appears twice.
+
+**A8 — §5.4's reason for using Welch contradicts §2.2. LOW-MODERATE.**
+§5.4 says the two conditions' runs "have no pairing relationship"; §2.2 says run *i*
+draws the same cast in both, and the checkpoints confirm it for 40/40 runs. Welch is
+still defensible as the conservative choice, but not for the reason given.
+
+**A9 — §2.1 misdescribes the pairing assertion. LOW.**
+Cited as `pair_bank.py:150-158`; it is at 163-171. It compares *sorted multisets* of
+OCEAN traits, occupation and age group between the P and D groups, so a permutation of
+which bank row feeds which D index would pass it. Index-wise pairing is guaranteed by the
+construction loop, not by the check.
+
+**A10 — provenance strings that do not resolve. LOW, but they are citations.**
+`ffni.json`'s licence says the items come from "Table 4"; in the published article they
+are **Table 5, p.779** (Table 4 is the study/sample overview). Technical report L22 cites
+the mediation quote to "p.45-46", which under its own page convention does not exist —
+it is **p.795**, correctly cited later in §6. And the CC BY-NC-ND 4.0 licence asserted in
+`ffni.json` and repeated as fact in §4.1 **appears nowhere in the article**, every page
+of which carries APA's "All rights reserved"; it is to be marked unverified rather than
+removed, since the preprint may carry it.
+
+**A11 — small factual slips. LOW.**
+"the paper's headline increments are .02-.06" — Table 13's significant increments run
+.01-.06. The Table 8 range quoted as .21-.87 mixes two triangles and two samples; the
+full table reaches .08. "(attractiveness = the 1994 name for well-groomed)" inverts the
+direction: *attractiveness* is 1994, *well-groomed* is the 2018 rename. §5.7's interval
+formula uses a ceiling for the upper order statistic where the code uses a floor. §5.7
+quotes "12% → 14%" for clustering, but that row was measured on the *uncentred*
+estimator, where 12% is the condition confound rather than a clustering floor.
+
+**A12 — the report's own reproducibility claim is not strictly true. LOW.**
+The header says every number can be reproduced at commit `0067e63`. §11.7's exploratory
+behavioural mediation reproduces exactly, but no script in the repo computes it and §12
+lists no command for it.
+
+### B. Omissions
+
+**B1 — the independent variable has never been checked. MODERATE-HIGH.**
+No study administers a manipulation check of the P/D styles. `pd_matched` has
+`"instruments": []`; `ffni_mediation` carries only ffni, leader_ideal and effectiveness.
+The style blocks in `tools/sample_bank.py` are written for this project and carry no
+citation — correctly, the report never claims one — but no measure has ever asked whether
+neutrals perceive D as dominant or P as prestigious. The only evidence the manipulation
+bites is behavioural: the claim-rate contrast (D 0.17-0.25, P 0.00). §11 enumerates seven
+validity threats and does not include this one.
+
+**B2 — §13's threat-check evidence predates the deadline fix. LOW.**
+It was collected on `pd_matched` under the pre-fix collaborative wording, which had no
+48-hour deadline. §13 argues the evidence still transfers; the technical report cites the
+deadline fix without noting that the manipulation evidence sits on the other side of it.
+
+### C. Errors in this log
+
+**C1 — §30 called the effectiveness measure "not an instrument at all".** Corrected in
+commit `ea0ed3c`: the paper's criterion *is* one question and a 1-7 scale, its 57 items
+are stimuli.
+
+**C2 — "no reliability can be computed for a single-item rating" is wrong. MODERATE.**
+Stated in §30 as corrected and in `effectiveness.json`'s note. Cronbach's alpha indeed
+cannot be computed, but **inter-rater reliability can**: three neutrals rate the same
+target's same performance in every run, giving 160 (run x target) cells of three ratings.
+Computed: **ICC(1,1) = 0.723, ICC(1,3) = 0.887** over 480 ratings, MSB 2.021 / MSW 0.229.
+For a measure of an observed person that is the more appropriate coefficient than alpha —
+alpha asks whether rewordings agree, ICC asks whether observers of one performance agree.
+The claim that this "is not fixable by adding items" was answering the wrong question.
+
+**C3 — §28 and §29's explanation ranking for H4 is superseded.** Both rank causes for the
+failed positive control without knowing that `bold` is a *charisma* item in the
+instrument the paper used. The framing "the reconstruction has too few items to dilute
+one word's semantics" is wrong: the word does not belong to that factor at all.
+
+**C4 — §30's "unverified lead" about the 2018 Strength items was wrong.** It recorded a
+search summary claiming `forceful, bold, powerful, strong`. Figure 2 gives
+`commanding, assertive, authoritative, tough, strong, firm` — six items, and `bold` is
+not among them. Recorded as a lead rather than a fact, which is why it did no damage.
+
+### D. Code gaps
+
+**D1 — no inter-rater reliability anywhere in the pipeline.** `summarize_measure_check`
+computes subscale differentiation, straight-lining, alpha and test-retest.
+`about: each_candidate` instruments get none of these, and the ICC in C2 was computed by
+hand. Nothing in `run.py report` or `run.py layers` reports it, so the one reliability
+figure this study's evaluation layer *can* produce is absent from every report.
+
+**D2 — `save_summary` records neither model nor temperature**, already noted in the
+technical report §12. Three `measure-check` runs are distinguishable only by a filename
+suffix added by hand.
+
+### Fix order
+
+A1 and A2 first: they are what a reader takes away. Then C2 and D1 together, since the
+correction needs the number to exist in the pipeline. Then A3-A7 and B1, which are
+report-level. Then A8-A12, C3, C4 and D2.
