@@ -1901,11 +1901,14 @@ descriptions averaged into one effectiveness score. Applying the same question a
 to a different stimulus — an agent the respondent just watched — is using their measure,
 not inventing one. `effectiveness.json` now carries their question and anchors verbatim.
 
-What the substitution really costs is **reliability**. A style score built from 4-6
-ratings has an alpha; one rating of one person does not, and `measure-check` cannot
-produce one for this instrument. That is not fixable by adding paraphrased items: the
-paper's multiple items are different stimuli for one style, and paraphrases would
-measure agreement between rewordings rather than between observations.
+What the substitution costs is **not** reliability — that was the second wrong answer in
+this section, corrected 2026-09-07 (section 31 C2). A style score built from 4-6 ratings
+has an alpha and one rating of one person has none, but every run has three neutrals
+rating the same target's same performance. That gives the coefficient an observed target
+actually admits: **ICC(1,1) = .72, ICC(1,3) = .89** over 160 (run x target) cells and 480
+ratings. `stats.icc_one_way` and `analysis.rater_agreement` compute it and `run.py
+report` prints it. `measure-check` still cannot, because it administers instruments with
+no meeting and this one asks about a meeting.
 
 The second cost stands as recorded below: their dominance-side null is specific to
 Authoritarianism, Narcissism and Dominance as separate scales, while

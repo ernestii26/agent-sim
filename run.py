@@ -23,7 +23,7 @@ sys.path.insert(0, str(_PROJECT_DIR / "src"))
 os.chdir(_PROJECT_DIR)  # TinyTroupe reads config.ini from the CWD
 
 from analysis import (  # noqa: E402
-    need_outcome_links, summarize_contrast, summarize_layer_moderation,
+    need_outcome_links, rater_agreement, summarize_contrast, summarize_layer_moderation,
     summarize_measure_check, summarize_mediation, summarize_needs, summarize_validation,
 )
 from config import RunConfig  # noqa: E402
@@ -31,7 +31,8 @@ from instrument import BASELINE  # noqa: E402
 from pipeline import load_records, run_condition, run_measure_check  # noqa: E402
 from render import (  # noqa: E402
     plot_contrast, render_contrast, render_layer_moderation, render_layers,
-    render_mediation, render_measure_check, render_needs, render_validation, save_summary,
+    render_mediation, render_measure_check, render_needs, render_rater_agreement,
+    render_validation, save_summary,
 )
 from runtime import setup_file_logging  # noqa: E402
 from study import Study, list_studies, load_study  # noqa: E402
@@ -134,6 +135,14 @@ def _report(study: Study, condition, records: list, out: Path) -> None:
         )
         render_layers(study, links)
         summary["layers"] = links
+
+        # The evaluation layer's own reliability. alpha cannot see it (one item) and
+        # measure-check cannot produce it (no meeting), so this is the only place it
+        # appears.
+        if study.candidate_rating is not None:
+            agreement = rater_agreement(records, study.candidate_rating)
+            render_rater_agreement(study, agreement)
+            summary["rater_agreement"] = agreement
 
     save_summary(summary, out, condition.key)
     plot_contrast(study, condition, summary, out)

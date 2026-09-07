@@ -180,6 +180,27 @@ def render_layers(study: Study, links: dict[str, Any]) -> None:
     print("=" * 88)
 
 
+def render_rater_agreement(study: Study, out: dict[str, Any]) -> None:
+    """How far several observers of one performance agree — the reliability an
+    each_candidate instrument has and measure-check cannot reach."""
+    print()
+    print("=" * 74)
+    print(f"INTER-RATER AGREEMENT — {out['instrument']}")
+    print("=" * 74)
+    print(f"  {out['cells']} (run x target) cells, {out['raters_per_cell']} raters each, "
+          f"{out['ratings']} ratings")
+    print(f"  ICC(1,1)  a single rater          : {_fmt(out['icc_single'], 3)}")
+    print(f"  ICC(1,{out['raters_per_cell']})  the mean of {out['raters_per_cell']} raters "
+          f"      : {_fmt(out['icc_average'], 3)}")
+    print()
+    print(f"  {'ID':<5}  {'Group':<12}  {'Ratings':>7}  {'Mean':>6}  {'SD':>6}")
+    print("  " + "-" * 44)
+    for pid, m in out["per_target"].items():
+        print(f"  {pid:<5}  {study.label_of(study.group_of(pid)):<12}  "
+              f"{m['n']:>7}  {_fmt(m['mean'], 2):>6}  {_fmt(m['sd'], 2):>6}")
+    print("=" * 74)
+
+
 def render_layer_moderation(study: Study, out: dict[str, Any]) -> None:
     """H3, H4, H5 and H7 with intervals, so each one can be decided rather than admired."""
     low, high = out["conditions"]["low"], out["conditions"]["high"]

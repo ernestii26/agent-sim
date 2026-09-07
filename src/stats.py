@@ -123,3 +123,33 @@ def partial_betas(
     # Each delta costs a refit, and a bootstrap wants only the betas.
     deltas = [r2 - fit([c for c in every if c != i])[1] for i in every] if with_deltas else nan_k
     return [float(b) for b in beta], deltas, r2, int(n)
+
+
+def icc_one_way(cells: list[list[float]]) -> tuple[float, float, int, int]:
+    """One-way random-effects ICC(1,1) and ICC(1,k) over equal-sized rating cells.
+
+    A cell is every rating of one target on one occasion — here the three neutrals who
+    watched one meeting rating one candidate. This is the reliability a single-item
+    rating of an observed person CAN have: Cronbach's alpha asks whether rewordings of a
+    question agree, which needs several items, while this asks whether several observers
+    of one performance agree, which is the question an observed-target rating raises.
+
+    Returns (single-rater ICC, k-rater ICC, number of cells, k). NaN when there are too
+    few cells, ragged cells, or no between-cell variance.
+    """
+    usable = [[v for v in c if not math.isnan(v)] for c in cells]
+    sizes = {len(c) for c in usable}
+    if len(sizes) != 1:
+        k = max(sizes, default=0)
+        usable = [c for c in usable if len(c) == k]
+    k = len(usable[0]) if usable else 0
+    n = len(usable)
+    if n < 3 or k < 2:
+        return float("nan"), float("nan"), n, k
+
+    grand = mean([v for c in usable for v in c])
+    msb = sum(k * (mean(c) - grand) ** 2 for c in usable) / (n - 1)
+    msw = sum((v - mean(c)) ** 2 for c in usable for v in c) / (n * (k - 1))
+    if msb == 0:
+        return float("nan"), float("nan"), n, k
+    return (msb - msw) / (msb + (k - 1) * msw), (msb - msw) / msb, n, k

@@ -33,7 +33,7 @@ from persona_store import Participant  # noqa: E402
 from pipeline import BalancedSampler  # noqa: E402
 from run_record import RunRecord  # noqa: E402
 from stats import (  # noqa: E402
-    cronbach_alpha, paired_ttest_onesided, partial_betas, slope,
+    cronbach_alpha, icc_one_way, paired_ttest_onesided, partial_betas, slope,
 )
 from study import list_studies, load_study  # noqa: E402
 
@@ -986,6 +986,29 @@ def test_a_degenerate_path_is_reported_as_unestimable_not_as_a_null() -> None:
     assert math.isnan(med["path_b"])              # but nobody ever endorsed D
     assert med["supported"] is False
     assert med["bootstrap_draws"] == 0, "nothing resampleable, and the report must say so"
+
+
+def test_icc_separates_agreeing_raters_from_disagreeing_ones() -> None:
+    """A one-item rating of an observed person cannot have an alpha, but it can have an
+    inter-rater ICC: several neutrals rate the same target's same performance. alpha asks
+    whether rewordings agree; this asks whether observers do, which is the question an
+    observed target raises."""
+    agree = [[5.0, 5.0, 5.0], [2.0, 2.0, 2.0], [6.0, 6.0, 6.0], [3.0, 3.0, 3.0]]
+    single, average, n, k = icc_one_way(agree)
+    assert n == 4 and k == 3
+    assert single > 0.99 and average > 0.99, (single, average)
+
+    rng = random.Random(4)
+    noise = [[rng.uniform(1, 7) for _ in range(3)] for _ in range(40)]
+    single, average, _, _ = icc_one_way(noise)
+    assert abs(single) < 0.35, single           # targets do not differ -> no reliability
+    assert average < single + 1.0
+
+    # Ragged cells are dropped to the modal width rather than silently averaged.
+    ragged = agree + [[4.0, 4.0]]
+    assert icc_one_way(ragged)[2] == 4
+    # Too few cells is n/a, never a fabricated coefficient.
+    assert math.isnan(icc_one_way(agree[:2])[0])
 
 
 if __name__ == "__main__":

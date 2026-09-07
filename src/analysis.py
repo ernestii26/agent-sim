@@ -11,7 +11,9 @@ from typing import Any
 
 from instrument import BASELINE, POST, Instrument
 from run_record import RunRecord
-from stats import cronbach_alpha, mean, paired_ttest_onesided, partial_betas, slope, std
+from stats import (
+    cronbach_alpha, icc_one_way, mean, paired_ttest_onesided, partial_betas, slope, std,
+)
 from study import Condition, Study
 
 SILENCE_THRESHOLD = 0.80  # a persona below this stayed quiet at least sometimes
@@ -271,6 +273,39 @@ def weak_subscales(summary: dict[str, Any], threshold: float = 0.60) -> dict[str
         if math.isnan(alpha) or alpha <= threshold:
             weak[name] = alpha
     return weak
+
+
+def rater_agreement(records: list[RunRecord], instrument: Instrument) -> dict[str, Any]:
+    """Inter-rater reliability for an about=each_candidate instrument.
+
+    Every run has several respondents rating the same target on the same performance, so
+    a single-item rating of an observed person is not without reliability — it has the
+    kind alpha cannot express. `measure-check` cannot produce this: it administers
+    instruments with no meeting, and this one asks about a meeting.
+    """
+    cells: list[list[float]] = []
+    per_target: dict[str, list[float]] = {}
+    for record in records:
+        by_target: dict[str, list[float]] = {}
+        for rater, marks in record.ratings(instrument).items():
+            for target, value in marks.items():
+                if not math.isnan(value):
+                    by_target.setdefault(target, []).append(value)
+                    per_target.setdefault(target, []).append(value)
+        cells.extend(v for v in by_target.values() if len(v) > 1)
+
+    single, average, n_cells, k = icc_one_way(cells)
+    return {
+        "instrument": instrument.key,
+        "icc_single": single,
+        "icc_average": average,
+        "cells": n_cells,
+        "raters_per_cell": k,
+        "ratings": sum(len(v) for v in cells),
+        "per_target": {
+            t: {"n": len(v), "mean": mean(v), "sd": std(v)} for t, v in sorted(per_target.items())
+        },
+    }
 
 
 def need_outcome_links(
