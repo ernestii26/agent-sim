@@ -321,7 +321,10 @@ re-running the power simulation before committing to a run count.
 
 Everything `studies/ffni_mediation/study.json` claimed about Sheng, Andrews & van Vugt
 (2026) had been recorded from an earlier reading and never re-verified. Checked against
-`docs/ffni-paper.pdf` (90-page preprint; the article's own page N is PDF page N+2).
+the 90-page preprint, then at `docs/ffni-paper.pdf` (the article's own page N is PDF
+page N+2). That file was later replaced by the published version at
+`docs/2027-27008-001.pdf`, whose pagination is the journal's own — which is why this
+section's page numbers do not match sections 23 onward.
 
 **Confirmed as recorded.** All 22 FFNI items are verbatim from Table 4 — only difference
 is our JSON uses ASCII `'` where the paper has `’`. All six Table 1 leadership-ideal
@@ -2161,8 +2164,10 @@ figure this study's evaluation layer *can* produce is absent from every report.
 technical report §12. Three `measure-check` runs are distinguishable only by a filename
 suffix added by hand.
 
-**Fixed 2026-09-07.** Every summary now carries a `provenance` block: the three models
-and their temperatures, the rounds, and a fingerprint per instrument. The instrument
+**Fixed 2026-09-07.** Every summary written *from now on* carries a `provenance` block:
+the three models and their temperatures, the rounds, and a fingerprint per instrument.
+Nothing currently in `results/` has one — every summary there predates the change, which
+is exactly the gap the block closes and cannot close retroactively. The instrument
 fingerprints are the part that mattered — item ids are positional, so `leader_ideal`
 alone does not say which of two versions produced a number.
 

@@ -173,7 +173,7 @@ format, so `run.py report` cannot read them.
 
 Adds the Fundamental Follower Needs Inventory as a **mediator** between context and endorsement,
 reusing the same 18 personas (`personas_from`). Sheng, Andrews & van Vugt (2026, *JAP* 111(6),
-768-801; `docs/ffni-paper.pdf`) validated the FFNI and left two questions open, both of which this
+768-801; `docs/2027-27008-001.pdf`) validated the FFNI and left two questions open, both of which this
 study is shaped to answer:
 
 - follower needs are *assumed* to mediate the known conflict-to-dominant-leader effect, but were

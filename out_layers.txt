@@ -1,2 +1,0 @@
-  collaborative: 40 runs
-  threat: 40 runs
