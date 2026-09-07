@@ -1736,10 +1736,15 @@ H6's null has to be stated at two different scopes, and only the first survives:
 - **About this simulation**: the induced protection need does not predict these agents'
   endorsements. The interval is narrow and rules out anything but a very small effect.
   That claim stands.
-- **About people**: much weaker than section 27 implied. These agents fail to reproduce
-  an *established* protection-to-Strength association, and reproduce it backwards. An
-  untested mediation coming back null in a population that cannot reproduce the tested
-  association is thin evidence about the population the paper is describing.
+- **About people**: weaker than section 27 implied, though section 31 A2 narrows the
+  charge. These agents fail to reproduce the established protection-to-Strength
+  association — and section 31 C3 shows why: `bold`, which carries the whole reversal,
+  is a *charisma* item in the instrument the paper administered. They do reproduce the
+  paper's strongest supported link, affiliation to prestige-side effectiveness
+  (+0.151 [+0.013, +0.303] against Benevolence .31*** and Team-building .46***). So the
+  population reproduces some of the paper's structure and not other parts of it, which
+  is a weaker warrant than section 27 assumed but not the blanket failure section 28
+  described.
 
 Section 27's "the null has content" stands as written about the simulation and should not
 be read as being about human followers. The behavioural result (interaction p = .0076) is
