@@ -1871,7 +1871,34 @@ dilute exactly that. **This came from a generated summary, not from the article,
 must not be used until the article itself is read.** The obvious route is institutional
 access to *The Leadership Quarterly* 29(4), 513–522.
 
-### The effectiveness criterion: our version is not an instrument at all
+### The effectiveness criterion: the criterion is fine, the reliability is not
+
+**Corrected 2026-09-07.** The paragraph below originally read "our version is not an
+instrument at all" and treated a 57-items-to-1 gap as the finding. That was wrong about
+what the paper measures. The paper's effectiveness measure **is one question and one
+1-7 scale**:
+
+> "Please answer to what extent you perceive these leadership descriptions as effective
+> if these individuals were your own leaders… (1 = not at all effective as a leader,
+> 7 = extremely effective as a leader)" — p.785
+
+Its 57 items are the **stimuli**, not the criterion: twelve published leadership-style
+scales reworded as descriptions of hypothetical leaders, with each style's 4-6
+descriptions averaged into one effectiveness score. Applying the same question and scale
+to a different stimulus — an agent the respondent just watched — is using their measure,
+not inventing one. `effectiveness.json` now carries their question and anchors verbatim.
+
+What the substitution really costs is **reliability**. A style score built from 4-6
+ratings has an alpha; one rating of one person does not, and `measure-check` cannot
+produce one for this instrument. That is not fixable by adding paraphrased items: the
+paper's multiple items are different stimuli for one style, and paraphrases would
+measure agreement between rewordings rather than between observations.
+
+The second cost stands as recorded below: their dominance-side null is specific to
+Authoritarianism, Narcissism and Dominance as separate scales, while
+`protection → Safety` is .43***/.20***, and one rating cannot separate them.
+
+### What the paper actually administered
 
 Sheng et al.'s Appendix (p.801) lists "Leadership Effectiveness" as **twelve published
 scales, 57 items**:
@@ -1891,14 +1918,11 @@ scales, 57 items**:
 | Safety | 3 | X. W. Hu et al. (2025) |
 | Narcissism | 6 | Back et al. (2013) |
 
-Ours is **one self-written item** — "This person would be effective as my leader." — on
-a 1–7 scale. Its `citation` field claims only the response format, and its `license`
-field is empty. The technical report's §6.5 said the criteria "differ"; that
-understated it. The paper's dominance side is three separate scales
-(Authoritarianism, Dominance, Narcissism) and its null is specific to them, while
-`protection → Safety` is **.43\*\*\*/.20\*\*\*** — strongly supported. A single item
-cannot separate "wants protection" from "rates an authoritarian effective", so what we
-replicated is a null about a construct we collapsed.
+Ours applies their question to **one stimulus, rated once**. The paper's dominance side
+is three separate scales (Authoritarianism, Dominance, Narcissism) and its null is
+specific to them, while `protection → Safety` is **.43\*\*\*/.20\*\*\*** — strongly
+supported. A single rating cannot separate "wants protection" from "rates an
+authoritarian effective", so what we replicated is a null about a construct we collapsed.
 
 **Found so far**, verbatim, from Leckelt et al.'s NARQ-S validation:
 
