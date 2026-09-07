@@ -54,8 +54,8 @@ Fundamental Follower Needs Inventory (FFNI)，並在 p.795 明確指出：先前
 | **H2** | 威脅情境下，支配型獲得的同儕票數多於聲望型 | 背書 |
 | **交互作用** | 威脅情境的「支配−聲望」票數差，**大於**協作情境的同一差距 | 背書 |
 | **H3** | 威脅相對於協作，提高 protection 與 status 需求（人內前後測） | 需求 |
-| **H4** | **認知層**：protection/status 預測支配側的領導者原型；affiliation/vision/expertise/fairness 預測聲望側原型 | 需求 → 原型 |
-| **H5** | **評價層**：vision/expertise/fairness 預測對聲望型的有效性評分（論文成立）；protection/status 預測對支配型的有效性評分（**論文不成立——這裡的 null 是預期結果**） | 需求 → 評價 |
+| **H4** | **認知層**：每個需求預測 Table 13 給它顯著增量的那些原型維度（protection→strength；status→tyranny/masculinity/well-groomed；vision、expertise、fairness→聲望側維度）。**affiliation 刻意沒有條目**，見下 | 需求 → 原型 |
+| **H5** | **評價層**：論文對**六個需求全部**都有預測。成立的是 affiliation、vision、expertise、fairness，以及 protection→**Safety**；不成立的是 protection→Authoritarianism 與 status 的三條（**這裡的 null 是預期結果**） | 需求 → 評價 |
 | **H6** | protection 需求**中介**「情境 → 支配型背書」的效果 | 需求承載情境到背書 |
 | **H7** | 威脅強化 protection → 支配型的連結，並縮小認知層與評價層之間的落差 | 情境調節上述 |
 
@@ -65,11 +65,23 @@ Fundamental Follower Needs Inventory (FFNI)，並在 p.795 明確指出：先前
 **變化**的宣稱。H1 與 H2 各自顯著並不等於兩者之間有差異，只有交互作用直接檢定那個差距
 （§6.2）。§8 的檢定力模擬也顯示交互作用比單一條件更有力，因為協作條件往反方向錨定。
 
-**H5 的支配側預期是 null。** 論文 Study 5 發現 protection/status 預測領導者原型
-（成立）卻不預測支配型領導的知覺有效性（不成立）。想要被保護與認為威權老闆有效是兩件
-事：分類與聯想是一個歷程，實質評價是另一個。因此本研究若在支配側得到 null，
-那是**複製成功**，不是失敗——這也是 §5.6 為什麼必須用增量而非雙變量相關：
+**H5 的支配側預期是 null，但那個 null 有明確範圍。** 論文 Table 3 的
+protection → **Safety** 是 **.20\*\*\***（強烈成立），protection → **Authoritarianism**
+才是 −.01（不成立）；status 的三條（Narcissism、Authoritarianism、Dominance）全部不成立。
+所以「想要被保護」與「認為以安全為導向的領導有效」是成立的，與「認為**威權**領導有效」
+才不成立——分類與聯想是一個歷程，實質評價是另一個。
+
+本研究以**一個被觀察者、一題評分**代表「對支配型的有效性」，把 Safety 與
+Authoritarianism 壓成同一個數字，因此複製到的是一個被合併過的構念的 null（§11.7）。
+即便如此，null 是**預期結果**而非失敗——這也是 §5.6 為什麼必須用增量而非雙變量相關：
 一個不可能失敗的檢定無法複製任何 null。
+
+**affiliation 在 H4 缺席是刻意的，在 H5 則是最強的一條。** 論文 Table 13（原型層）給
+affiliation 的 ΔR² 在全部十一個維度上都是 .00 或 .01、無一顯著，儘管它的雙變量相關高達
+.54——那正是雙變量算法看不見的混淆，所以 `predicts` 沒有它的條目（§23），它只作為控制
+變項留在迴歸裡。但論文 Table 3（評價層）給它的是 Benevolence .31\*\*\* 與 Team-building
+.46\*\*\*，**是十三條裡最強的兩條**。同一個需求在兩層的地位完全不同，這本身就是四層架構
+要分開測的理由。
 
 **H4 是正對照。** 它不是本研究發明的假設，是論文已發表的正面結果（Study 5, Sample B,
 Table 13）。它在設計裡的職責是回答「我們的測量在這批 agent 上能不能重現已知的關聯」，

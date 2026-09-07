@@ -2193,3 +2193,42 @@ overlap would have been scored and reported as data. `Instrument.fingerprint` pl
 foreign-item-id check now stop it with the run, persona and item named. That guard is
 the same idea as D2's provenance block, one level down: a number should be able to say
 what produced it.
+
+---
+
+## 32. H4 and H5 named the wrong needs (2026-09-07)
+
+Found by reading the hypothesis list added to the technical report, and the two errors
+point in opposite directions. Both were in `study.json` from the start and were copied
+into every document downstream.
+
+**H5 omitted `affiliation` entirely.** It read "Vision/Expertise/Fairness predict Prestige
+effectiveness ratings". The paper's Table 3 predicts all six needs, and affiliation's two
+links are the largest in the table: Benevolence **.31\*\*\*** and Team-building
+**.46\*\*\*** (Model 2, controlling the other five). This is not a cosmetic omission —
+section 31 A2 found that affiliation is the one need whose paper-supported positive
+effect this study *did* replicate (+0.151 [+0.013, +0.303] toward the prestige candidate,
+−0.190 [−0.318, −0.070] toward the dominance one). The hypothesis as written did not
+mention the need that produced the only positive replication in the study.
+
+**H4 claimed `affiliation` predicts prestige-side ideals, which Table 13 does not
+support.** Section 23 removed affiliation's `predicts` entry after reading that table —
+delta R2 of .00 or .01 on all eleven dimensions, significant on none, against bivariate
+correlations up to .54 — but the hypothesis text still asserted the link. The map and the
+hypothesis disagreed for two weeks.
+
+**The pattern is the same one in both directions:** the hypothesis text was written from
+the paper's prose ("prestige-side needs are affiliation, vision, expertise, fairness")
+rather than from its tables, and prose groups the needs while the tables report which
+link survives a control. Affiliation belongs to the prestige side conceptually and
+reaches it on the evaluation layer, but not on the cognition layer.
+
+Both statements are rewritten against the tables. H5 now names all six needs with which
+of the paper's links held and which did not, including that `protection → Safety` is
+**.20\*\*\*** and strongly supported while `protection → Authoritarianism` is the −.01
+that the dominance-side null is actually about.
+
+**A caution this leaves behind.** Every hypothesis in `study.json` was written the same
+way. H1, H2, H3, H6 and H7 make no claims about specific needs beyond protection and
+status, so there is less to get wrong, but they have not been checked against the tables
+line by line the way H4 and H5 now have.
