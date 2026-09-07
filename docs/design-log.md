@@ -1653,13 +1653,21 @@ effectiveness is -.00, CI [-.14, .13].
     path b    -0.006     which predicted nothing about the respondent's own vote
     indirect  -0.002     CI [-0.027, 0.024]
 
-### The null has content
+### The null has content, and a ceiling on it
 
-The interval is narrow in absolute terms. Dividing through by path a puts path b's
-interval at roughly [-.09, .08], which excludes the `b_vote = 0.10` that section 26's
-simulation called the *small* case — and the same simulation detects a medium path b 95%
-of the time at this n. So this is not a study that failed to look; it is a study that
-looked and can rule out anything but a very small effect.
+**Corrected 2026-09-07, see section 31 A1.** Dividing through by path a puts path b's
+interval at roughly [-.09, .08]. That was read as excluding section 26's *small* case,
+`b_vote = 0.10`. It does not. The simulation's `b_vote` multiplies the true induced
+change while the estimator regresses the observed one, and running the simulator's own
+generator at `b_vote = 0.10` produces an observed path b of **+0.023**, inside the
+interval; at `b_vote = 0.25` it produces **+0.142**, outside it. The division also treats
+path a as known, and at the bottom of a's own CI (0.125) the implied interval widens to
+[-.22, +.19].
+
+What survives: **the data exclude a medium mediation and do not exclude a small one.**
+The simulation detects a medium path b 95% of the time at this n, so this is still a
+study that looked rather than one that failed to look — but the claim "can rule out
+anything but a very small effect" was wrong.
 
     threat ─────────────────────────────────→ endorsement shifts to Dominance   (p = .008)
        └→ protection need rises (H3)  ──✗──→ the vote (H6)
