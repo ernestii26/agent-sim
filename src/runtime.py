@@ -31,7 +31,12 @@ def _apply_file_logging() -> None:
 
     Creates two files per session:
       info_<ts>.log     — INFO+, clean aligned columns, easy to tail
-      warnings_<ts>.log — WARNING+, multi-line verbose format for debugging
+
+    There used to be a second warnings_<ts>.log at WARNING+. It carried nothing the
+    info log does not: verified across eleven pairs, identical WARNING/ERROR counts and
+    identical message text, differing only in showing a full date instead of a time and
+    wrapping the message onto its own line. It cost 8.5 MB across the collected runs.
+    `grep -E 'WARNING|ERROR' info_<ts>.log` is the replacement.
     """
     global _logging_configured
     if _logging_configured or _pending_log_dir is None:
@@ -45,29 +50,19 @@ def _apply_file_logging() -> None:
         fmt="%(asctime)s  %(levelname)-7s  %(name)-16s  %(message)s",
         datefmt="%H:%M:%S",
     )
-    warn_fmt = logging.Formatter(
-        fmt="%(asctime)s  %(levelname)-8s  %(name)s\n    %(message)s\n",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-
     info_fh = logging.FileHandler(_pending_log_dir / f"info_{ts}.log", encoding="utf-8")
     info_fh.setLevel(logging.INFO)
     info_fh.setFormatter(info_fmt)
 
-    warn_fh = logging.FileHandler(_pending_log_dir / f"warnings_{ts}.log", encoding="utf-8")
-    warn_fh.setLevel(logging.WARNING)
-    warn_fh.setFormatter(warn_fmt)
-
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
     root.addHandler(info_fh)
-    root.addHandler(warn_fh)
 
-    # Pydantic / stdlib warnings → warnings.log
+    # Pydantic / stdlib warnings → the info log
     _warnings_module.filterwarnings("always")
     logging.captureWarnings(True)
 
-    print(f"  Logs → {_pending_log_dir}/info_{ts}.log  |  warnings_{ts}.log")
+    print(f"  Logs → {_pending_log_dir}/info_{ts}.log")
 
 
 def ensure_tinytroupe_imports() -> tuple[Any, Any, Any, Any]:

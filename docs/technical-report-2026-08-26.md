@@ -178,9 +178,32 @@ RUNS = 40   ROUNDS = 3
   屬 masculinity、`clever` 屬 creativity。這不是「題數較少的同一份量表」，而是不同的
   工具。正確的 51 題已建於 `instruments/leader_ideal_2018.json`（尚未接上，接上需重跑
   原型層）。後果見 §9 與 design log §31 C3。
-- **`effectiveness`**：單題，「Think about how this person behaved in the meeting you
-  just had. Rate how effective they would be as your own leader.」每位中立者對每位
-  **候選人**評分（§21 起不再評其他中立者——那 6 次呼叫沒有任何分析讀取）。
+- **`effectiveness`**：**問句與量尺取自論文，逐字**；不同的只有被評的對象，而那是刻意的。
+
+  論文（Study 5, Sample E, p.785）的指導語是：「Please answer to what extent you perceive
+  these leadership **descriptions** as effective **if these individuals were your own
+  leaders**… (1 = not at all effective as a leader, 7 = extremely effective as a leader)」。
+  本研究用同一個問句、同一組錨點、同一個 1–7，只把 `these leadership descriptions` /
+  `these individuals` 換成 `this person`：
+
+  > Think about how this person behaved in the meeting you just had. Please answer to what
+  > extent you perceive this person as effective if they were your own leader.
+
+  **關鍵的理解：論文的效標就是這個問句與這個量尺，不是一份 57 題的量表。** 那 57 題是
+  **刺激材料**——12 份已發表的領導風格量表（Cheng et al. 2004/2014；Wang & Howell 2010；
+  Bai et al. 2020；Hu et al. 2025；Back et al. 2013，清單見論文附錄 p.801）改寫成假想
+  領導者的描述，每份量表的 4–6 段描述評分平均成一個「該風格的有效性」分數。把同一個
+  問句用在不同的刺激上，是**在用他們的測量**，不是自己發明一個。
+
+  本研究的刺激是**受試者剛觀察三輪的具體某人**，這正是 `study.json` 宣稱的第五個缺口
+  （論文的受試者從未觀察過任何人）。每位中立者對每位**候選人**評一次（§21 起不再評其他
+  中立者——那 6 次呼叫沒有任何分析讀取）。
+
+  **代價是信度，而它不是零。** Cronbach's α 確實算不出來（單題）。但每一場有 3 位中立者
+  評同一位被評者的同一場表現，這給出更適合「被觀察對象」的係數：**評分者間信度
+  ICC(1,1) = .72、ICC(1,3) = .89**（160 個「場次 × 被評者」單元、480 個評分，
+  `analysis.rater_agreement`，`run.py report` 會印）。α 問的是「不同說法是否一致」，
+  ICC 問的是「不同觀察者看同一個表現是否一致」，後者才是這裡的問題。
 
 ### 4.2 題目呈現
 
@@ -850,7 +873,8 @@ $$
 2 個工具 × 2 次 = 144 次呼叫，約 8 分鐘、2 美金。
 
 `effectiveness` 無法以此方式檢驗——它詢問「你剛開完的那場會」，而此處沒有會議。
-這仍是未解的限制。
+**但這不代表它沒有信度**：它的評分者間信度由 `analysis.rater_agreement` 從正式資料算出
+（ICC(1,1) = .72、ICC(1,3) = .89），印在 `run.py report` 裡，見 §4.1。
 
 ### 7.1 四個閘門
 

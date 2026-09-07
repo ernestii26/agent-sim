@@ -62,5 +62,6 @@
       "scenario": "Your division is under review. Senior leadership will retain only one of two competing teams — yours or the other. The decision will be made in 48 hours. Your group must agree right now on a single pitch: what you deliver, who leads it, and who is accountable. If you cannot agree among yourselves, leadership will make the decision for you — and people may lose their positions.",
       "friction": "[Meeting context: Two months ago, the rival team landed a major client your division had been pursuing for a year. Some people here believe your group lost because of indecision and unclear ownership. Others think it was a resourcing failure. Either way, you are now in direct competition for survival. Not everyone in this room agrees on who should be leading the response — and some people are wondering whether they have a future here at all.]"
     }
-  }
+  },
+  "note": "SUPERSEDED by pd_matched, marked 2026-09-07. Kept because results/archive_prestige_dominance/ and docs/result.md are its write-up, and because it is the only study carrying a seeds.json, which is what tools/gen_personas.py works from. Do not run it as a current design: design-log section 1 documents the Big Five confound between its hand-written P and D personas (agreeableness gap 5.2, openness 3.2, extraversion 2.4) that pd_matched exists to remove, section 3 replaced its sampler, and its groups still declare the 10-agent cast section 15 cut to 5 and predate section 16's electorate restriction."
 }

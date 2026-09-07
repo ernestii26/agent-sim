@@ -20,7 +20,7 @@ python3 test_core.py                  # fast self-check, no API calls
 
 ```bash
 python3 run.py list                                        # studies + conditions
-python3 run.py validate      prestige_dominance            # do agents ever stay silent?
+python3 run.py validate      pd_matched                    # do agents ever stay silent?
 python3 run.py measure-check ffni_mediation                # is the rating scale usable at all?
 python3 run.py run           ffni_mediation collaborative
 python3 run.py run           ffni_mediation threat --runs 20 --rounds 3
@@ -160,14 +160,21 @@ Hypothesis tests are one-sided paired t-tests over per-run values, testing
 
 ## Studies
 
-### `prestige_dominance`
+### `prestige_dominance` — superseded, kept for its write-up
 
 Do prestige-type agents (influence earned through expertise) receive more peer leadership votes
 than dominance-type agents (influence claimed through authority)? Follows Henrich & Gil-White
 (2001) and Cheng et al. (2013). H1: Prestige wins in the collaborative condition. H2: Dominance
-wins under threat. Charts from the original pipeline are in `results/archive_prestige_dominance/`
-and the write-up is `docs/result.md`; those predate the 2026-08 restructure and use the old record
-format, so `run.py report` cannot read them.
+wins under threat.
+
+**Do not run it as a current design.** `pd_matched` exists to remove the confound this study
+has: design-log section 1 measures Big Five gaps of 5.2 on agreeableness and 2.4 on extraversion
+between its hand-written P and D personas, section 3 replaced its sampler, and its groups still
+declare the 10-agent cast section 15 cut to 5, from before section 16 took the candidates out of
+the electorate. It is kept because `results/archive_prestige_dominance/` and `docs/result.md` are
+its write-up, and because it is the only study with a `seeds.json` and therefore the worked
+example `tools/gen_personas.py` operates on. Those charts predate the 2026-08 restructure and use
+the old record format, so `run.py report` cannot read them.
 
 ### `ffni_mediation`
 
