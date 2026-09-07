@@ -1,5 +1,10 @@
 digraph gap {
   rankdir=LR; bgcolor="white"; nodesep=0.45; ranksep=0.95;
+  labelloc=b; labeljust=l; fontname="Helvetica" fontsize=11 fontcolor="#7a828c";
+  label=<<br/><i>Both solid links start at &#9312;: the paper treats ideals and effectiveness as two <b>parallel</b> outcomes of<br align="left"/>
+  needs, never as a chain (p.18). The dotted links are ours to test. And the two were measured in<br align="left"/>
+  <b>different samples</b> &#8212; ideals in the US (n=261) and UK (n=295), effectiveness in China (n=367). No sample<br align="left"/>
+  carries both, so the red null is a cross-sample contrast, not a break seen within one set of people.</i><br align="left"/>>;
   node [shape=box style="rounded,filled" fontname="Helvetica" fontsize=13
         color="#8a9099" penwidth=1.2 margin="0.19,0.13"];
   edge [penwidth=2.0 arrowsize=0.9 fontname="Helvetica" fontsize=12];
@@ -22,9 +27,11 @@ digraph gap {
        fillcolor="#fbf0ee" color="#b5473a" style="rounded,filled,dashed" penwidth=2.2 fontcolor="#b5473a"];
 
   pn -> pi [label="  supported  " color="#4a7a4a" fontcolor="#4a7a4a"];
-  pi -> pe [label="  supported  " color="#4a7a4a" fontcolor="#4a7a4a"];
+  pn -> pe [label="  supported  " color="#4a7a4a" fontcolor="#4a7a4a"];
   dn -> di [label="  supported  " color="#4a7a4a" fontcolor="#4a7a4a"];
-  di -> de [label="  NOT supported  " color="#b5473a" fontcolor="#b5473a" style=dashed penwidth=2.4];
+  dn -> de [label="  NOT supported  " color="#b5473a" fontcolor="#b5473a" style=dashed penwidth=2.4];
+  di -> de [label="  never modelled  " color="#8a9099" fontcolor="#8a9099" style=dotted penwidth=1.4];
+  pi -> pe [label="  never modelled  " color="#8a9099" fontcolor="#8a9099" style=dotted penwidth=1.4];
   de -> gap [style=dotted color="#b5473a" penwidth=1.8];
   pe -> gap [style=dotted color="#b5473a" penwidth=1.8];
 
@@ -32,4 +39,5 @@ digraph gap {
   {rank=same; hi; di; pi;}
   {rank=same; he; de; pe;}
   {rank=same; hx; gap;}
+
 }

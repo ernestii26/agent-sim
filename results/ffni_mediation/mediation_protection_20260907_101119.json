@@ -1,0 +1,25 @@
+{
+  "need": "protection",
+  "outcome_group": "D",
+  "conditions": {
+    "low": "collaborative",
+    "high": "threat"
+  },
+  "n": {
+    "collaborative": 120,
+    "threat": 120
+  },
+  "runs": {
+    "collaborative": 40,
+    "threat": 40
+  },
+  "path_a": 0.3104166666666667,
+  "path_b": -0.005516638468002366,
+  "indirect": -0.0017124565244424012,
+  "ci95": [
+    -0.027020697368995598,
+    0.02413489970430752
+  ],
+  "bootstrap_draws": 1000,
+  "supported": false
+}

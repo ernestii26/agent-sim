@@ -7,7 +7,6 @@
     "occupation": {
       "title": "pharmacist"
     },
-    "leadership_style": "neutral",
     "personality": {
       "description": "This person is highly organized and meticulous, often making detailed plans, checking their work carefully, and keeping routines that help them stay in control. They are socially energetic and talkative, readily joining group conversations and introducing new ideas when they seem useful, though they usually prefer familiar structures over constant change. When faced with moral dilemmas, they tend to judge situations skeptically, weighing outcomes against their own goals and becoming cautious if they suspect others are not being fully honest. In group discussions, they speak directly and confidently, but their tone can become tense or argumentative under stress, especially when they feel pressured or uncertain.",
       "big_five": {
@@ -24,8 +23,7 @@
       ]
     },
     "style": {
-      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction.",
-      "register": "Their temperament shows through as-is; they are not seeking influence."
+      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction."
     },
     "relationships": [
       {

@@ -1,0 +1,87 @@
+{
+  "study": "ffni_mediation",
+  "instrument": "ffni",
+  "runs": 1,
+  "subscales": {
+    "protection": {
+      "baseline_mean": 5.583333333333333,
+      "baseline_sd": 0.6436503043467892,
+      "post_mean": 5.666666666666667,
+      "post_sd": 0.7071067811865476,
+      "delta_mean": 0.08333333333333333,
+      "delta_sd": 0.3964124835860459,
+      "delta_n": 36,
+      "alpha": 0.9265644955300127
+    },
+    "affiliation": {
+      "baseline_mean": 5.583333333333333,
+      "baseline_sd": 1.3282641733803235,
+      "post_mean": 5.604166666666667,
+      "post_sd": 1.3827702525830425,
+      "delta_mean": 0.020833333333333332,
+      "delta_sd": 0.37973204838600144,
+      "delta_n": 36,
+      "alpha": 0.98845404108562
+    },
+    "status": {
+      "baseline_mean": 2.4375,
+      "baseline_sd": 0.7155791859945141,
+      "post_mean": 2.4583333333333335,
+      "post_sd": 0.5809475019311126,
+      "delta_mean": 0.020833333333333332,
+      "delta_sd": 0.24910554274959723,
+      "delta_n": 36,
+      "alpha": 0.9315121573186089
+    },
+    "vision": {
+      "baseline_mean": 5.777777777777778,
+      "baseline_sd": 0.7725447539304094,
+      "post_mean": 5.842592592592593,
+      "post_sd": 0.7014095156482947,
+      "delta_mean": 0.06481481481481483,
+      "delta_sd": 0.2962136128019289,
+      "delta_n": 36,
+      "alpha": 0.9711879432624113
+    },
+    "expertise": {
+      "baseline_mean": 5.62037037037037,
+      "baseline_sd": 0.9566899873639311,
+      "post_mean": 5.787037037037037,
+      "post_sd": 0.8286641680143833,
+      "delta_mean": 0.16666666666666663,
+      "delta_sd": 0.39440531887330776,
+      "delta_n": 36,
+      "alpha": 0.9691685133442528
+    },
+    "fairness": {
+      "baseline_mean": 6.659722222222222,
+      "baseline_sd": 0.8131788982966298,
+      "post_mean": 6.756944444444445,
+      "post_sd": 0.5990650784797661,
+      "delta_mean": 0.09722222222222222,
+      "delta_sd": 0.5009910812500193,
+      "delta_n": 36,
+      "alpha": 0.9877728602505439
+    }
+  },
+  "straight_lining": {
+    "baseline": 0.0,
+    "post": 0.0
+  },
+  "test_retest": {
+    "protection": 0.8317883872610065,
+    "affiliation": 0.9615542190274977,
+    "status": 0.9471657349065125,
+    "vision": 0.9237065666968983,
+    "expertise": 0.9122291976812307,
+    "fairness": 0.789440044027444
+  },
+  "gated_subscales": [
+    "affiliation",
+    "expertise",
+    "fairness",
+    "protection",
+    "status",
+    "vision"
+  ]
+}

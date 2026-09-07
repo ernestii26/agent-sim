@@ -7,7 +7,6 @@
     "occupation": {
       "title": "pharmacist"
     },
-    "leadership_style": "neutral",
     "personality": {
       "description": "This person tends to rely on familiar routines and proven methods, and may be cautious or skeptical when faced with unfamiliar ideas. They keep a moderate level of order in daily life, balancing planning with enough flexibility to adjust when needed. In moral dilemmas, they usually stay calm, weigh practical consequences, and prefer choices that preserve stability and consistency, though they will defend a principle if it feels important. In group discussions, they speak in a steady, measured way, listen without much fuss, and contribute their views directly when they think a point needs to be clarified.",
       "big_five": {
@@ -24,8 +23,7 @@
       ]
     },
     "style": {
-      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction.",
-      "register": "Their temperament shows through as-is; they are not seeking influence."
+      "influence": "Participates without trying to run the room. Contributes when they have something to add and is content to let others set direction."
     },
     "relationships": [],
     "speech_examples": [

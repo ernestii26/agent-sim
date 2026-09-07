@@ -12,6 +12,7 @@ import math
 import random
 import sys
 import tempfile
+import threading
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -19,16 +20,21 @@ sys.path.insert(0, str(PROJECT_DIR / "src"))
 
 from analysis import (  # noqa: E402
     group_metrics, need_outcome_links, persona_metrics, straight_lining, summarize_contrast,
-    summarize_mediation, summarize_needs, summarize_validation,
+    summarize_layer_moderation, summarize_mediation, summarize_needs,
+    summarize_validation, weak_subscales,
 )
-from discussion import APIQuotaExhausted, AgentTransport, _administer  # noqa: E402
+from discussion import (  # noqa: E402
+    APIQuotaExhausted, AgentTransport, _administer, _clone_agent, rated_by,
+)
 from instrument import (  # noqa: E402
     ABOUT_SELF, Instrument, load_instrument, subscale_scores,
 )
 from persona_store import Participant  # noqa: E402
 from pipeline import BalancedSampler  # noqa: E402
 from run_record import RunRecord  # noqa: E402
-from stats import cronbach_alpha, paired_ttest_onesided  # noqa: E402
+from stats import (  # noqa: E402
+    cronbach_alpha, icc_one_way, paired_ttest_onesided, partial_betas, slope,
+)
 from study import list_studies, load_study  # noqa: E402
 
 
@@ -72,23 +78,79 @@ def test_every_study_loads() -> None:
 
 
 def test_balanced_sampler_exhausts_pool_before_repeating() -> None:
-    sampler = BalancedSampler(["a", "b", "c"])
+    sampler = BalancedSampler(3)
     drawn = [sampler.take(1)[0] for _ in range(9)]
     for start in (0, 3, 6):
-        assert sorted(drawn[start : start + 3]) == ["a", "b", "c"], drawn
-    batch = BalancedSampler(["a", "b", "c"]).take(4)
-    assert sorted(batch[:3]) == ["a", "b", "c"] and len(batch) == 4, batch
+        assert sorted(drawn[start : start + 3]) == [0, 1, 2], drawn
+    batch = BalancedSampler(3).take(4)
+    assert sorted(batch[:3]) == [0, 1, 2] and len(batch) == 4, batch
+
+
+def test_a_run_never_seats_the_same_persona_twice() -> None:
+    """8 neutrals taken 3 at a time run the queue dry in the middle of run 3's draw.
+    Refilling with a fresh cycle of all 8 could hand back somebody already in that
+    cast, and TinyWorld rejects the duplicate name — the study died on run 3."""
+    sampler = BalancedSampler(8)
+    for run_no in range(1, 30):
+        cast = sampler.take(3)
+        assert len(set(cast)) == 3, f"run {run_no} drew {cast}"
+
+    # Every id still appears before any repeats: 8 runs of 3 is three full cycles.
+    counts: dict[int, int] = {}
+    fresh = BalancedSampler(8)
+    for _ in range(8):
+        for i in fresh.take(3):
+            counts[i] = counts.get(i, 0) + 1
+    assert sorted(counts) == list(range(8))
+    assert max(counts.values()) - min(counts.values()) <= 1, counts
+
+    # A draw wider than the pool has no choice but to repeat, and still may.
+    assert len(BalancedSampler(3).take(4)) == 4
+
+
+def test_balanced_sampler_is_seeded_so_conditions_align() -> None:
+    # Run i must draw the same positions in every condition, or the two conditions
+    # are compared across different casts.
+    a = [BalancedSampler(6, seed=7).take(1)[0] for _ in range(12)]
+    b = [BalancedSampler(6, seed=7).take(1)[0] for _ in range(12)]
+    assert a == b, (a, b)
+    assert a != [BalancedSampler(6, seed=8).take(1)[0] for _ in range(12)]
+
+
+def test_paired_groups_draw_the_matching_index() -> None:
+    # pd_matched builds P_i and D_i from one bank row; drawing them independently
+    # throws that away, which is what pair_with exists to prevent.
+    from pipeline import compose_run, make_samplers
+    from persona_store import Participant
+
+    study = load_study("pd_matched")
+    assert study.groups["D"].pair_with == "P", "pd_matched must pair D to P"
+    pool = {
+        pid: Participant(agent=None, persona_id=pid, name=pid, group=group.key)
+        for group in study.groups.values()
+        for pid in group.ids
+    }
+    samplers = make_samplers(study)
+    assert "D" not in samplers, "a paired group must not carry its own sampler"
+    for _ in range(20):
+        cast = compose_run(study, pool, samplers)
+        picked = {p.group: p.persona_id for p in cast if p.group in ("P", "D")}
+        assert picked["P"][1:] == picked["D"][1:], picked
 
 
 def test_compose_run_respects_group_sampling() -> None:
-    study = load_study("prestige_dominance")
-    from pipeline import make_samplers
+    from pipeline import compose_run, make_samplers
+    from persona_store import Participant
 
+    study = load_study("prestige_dominance")
+    pool = {
+        pid: Participant(agent=None, persona_id=pid, name=pid, group=group.key)
+        for group in study.groups.values()
+        for pid in group.ids
+    }
     samplers = make_samplers(study)
     for _ in range(20):
-        chosen: list[str] = []
-        for key, group in study.groups.items():
-            chosen.extend(group.ids if group.sample is None else samplers[key].take(group.sample))
+        chosen = [p.persona_id for p in compose_run(study, pool, samplers)]
         assert len(chosen) == len(set(chosen)), "a persona was cast twice in one run"
         for key, group in study.groups.items():
             n = sum(1 for pid in chosen if study.group_of(pid) == key)
@@ -108,11 +170,18 @@ def _record(run_no: int = 1, p_votes: int = 2, neutrals: tuple[str, ...] = ()) -
             spoke = (i + r) % 2 == 0  # each neutral is quiet exactly half the time
             tr.append({"round": r, "persona_id": pid, "group": "N",
                        "spoke": spoke, "word_count": 12 if spoke else 0})
-    voters = ["P1", "D1"] + list(neutrals)
+    # `p_votes` counts NEUTRAL ballots for P; the two candidates cross-vote, the way
+    # they do in the real records, so the electorate restriction has something to strip.
     votes = [
-        {"voter_id": v, "voted_for_id": "P1" if i < p_votes else "D1",
+        {"voter_id": pid, "voter_group": "N",
+         "voted_for_id": "P1" if i < p_votes else "D1",
          "voted_for_group": "P" if i < p_votes else "D", "reason": ""}
-        for i, v in enumerate(voters)
+        for i, pid in enumerate(neutrals)
+    ] + [
+        {"voter_id": "P1", "voter_group": "P",
+         "voted_for_id": "D1", "voted_for_group": "D", "reason": ""},
+        {"voter_id": "D1", "voter_group": "D",
+         "voted_for_id": "P1", "voted_for_group": "P", "reason": ""},
     ]
     return RunRecord.from_dict(
         {"run_no": run_no, "condition": "collaborative",
@@ -148,16 +217,21 @@ def test_ttest_direction_and_degenerate_input() -> None:
     assert t_flat != t_flat
 
 
-def test_summarize_contrast_follows_the_conditions_direction() -> None:
+def test_summarize_contrast_counts_only_the_electorate() -> None:
+    """The contrasted groups stand for election, so their own ballots stay out of the DV."""
     study = load_study("prestige_dominance")
-    records = [_record(1, p_votes=2), _record(2, p_votes=1)]  # P gets 2 then 1 vote
+    ns = ("N1", "N2", "N3")
+    records = [_record(1, p_votes=2, neutrals=ns), _record(2, p_votes=3, neutrals=ns)]
 
     collab = summarize_contrast(study, study.condition("collaborative"), records)
-    assert collab["contrast"] == ["P", "D"]
-    assert collab["per_run"] == [{"run_no": 1, "P": 2.0, "D": 0.0},
-                                 {"run_no": 2, "P": 1.0, "D": 1.0}]
-    assert collab["wins"] == 1
-    assert collab["metrics"]["votes"]["P"]["mean"] == 1.5
+    assert collab["electorate"] == ["N"]
+    # Each candidate voted for the other; neither ballot reaches per_run.
+    assert collab["candidate_votes"] == {"P": 2, "D": 2}, collab["candidate_votes"]
+    assert collab["per_run"] == [{"run_no": 1, "P": 2.0, "D": 1.0},
+                                 {"run_no": 2, "P": 3.0, "D": 0.0}]
+    assert collab["wins"] == 2
+    assert collab["metrics"]["votes"]["P"]["mean"] == 2.5
+    assert collab["metrics"]["votes"]["D"]["mean"] == 0.5
 
     # The threat condition flips the contrast, so the same records must reverse.
     threat = summarize_contrast(study, study.condition("threat"), records)
@@ -217,10 +291,20 @@ def test_ffni_matches_the_published_instrument() -> None:
 
 
 def test_ffni_mediation_borrows_personas_instead_of_copying_them() -> None:
+    """It borrows pd_matched's, not prestige_dominance's — the mediation has to run on
+    the matched pairs, or every confound pd_matched removes comes back."""
     study = load_study("ffni_mediation")
-    assert study.personas_from == "prestige_dominance"
-    assert study.personas_dir == load_study("prestige_dominance").personas_dir
+    matched = load_study("pd_matched")
+    assert study.personas_from == "pd_matched"
+    assert study.personas_dir == matched.personas_dir
     assert (study.personas_dir / "P1.agent.json").exists()
+    assert study.groups["D"].pair_with == "P"
+    assert {k: g.ids for k, g in study.groups.items()} == {k: g.ids for k, g in matched.groups.items()}
+    # design-log section 13's manipulation evidence was measured on pd_matched's wording,
+    # so it only transfers while the wording stays identical.
+    for key, cond in study.conditions.items():
+        assert cond.scenario == matched.conditions[key].scenario, key
+        assert cond.friction == matched.conditions[key].friction, key
 
 
 def test_subscale_scores_drop_bad_ratings_rather_than_impute() -> None:
@@ -250,20 +334,35 @@ def test_cronbach_alpha_high_when_items_agree_and_nan_when_flat() -> None:
     assert math.isnan(cronbach_alpha([[1, 2, 3]]))                # too few respondents
 
 
-def _needs_record(run_no: int, protection: int, d_rating: int, p_rating: int = 4) -> RunRecord:
-    """A run where every neutral reports the same protection need and rates the same way."""
+def _needs_record(run_no: int, protection: int, d_rating: int, p_rating: int = 4,
+                  baseline_protection: int | None = None, d_voters: int = 0) -> RunRecord:
+    """A run where every neutral reports the same protection need and rates the same way.
+
+    `baseline_protection` defaults to `protection`, i.e. the scenario induced no change.
+    `d_voters` is how many of the four neutrals endorse D; the rest endorse P.
+    """
     ffni_answers = {}
     for name, count in (("protection", 4), ("affiliation", 4), ("status", 4),
                         ("vision", 3), ("expertise", 3), ("fairness", 4)):
         for i in range(1, count + 1):
             ffni_answers[f"{name}_{i}"] = protection if name == "protection" else 4
     neutrals = ["N1", "N2", "N3", "N4"]
+    base_answers = dict(ffni_answers)
+    if baseline_protection is not None:
+        for i in range(1, 5):
+            base_answers[f"protection_{i}"] = baseline_protection
+    votes = [
+        {"voter_id": pid, "voter_group": "N",
+         "voted_for_id": "D1" if i < d_voters else "P1",
+         "voted_for_group": "D" if i < d_voters else "P", "reason": ""}
+        for i, pid in enumerate(neutrals)
+    ]
     return RunRecord.from_dict({
         "run_no": run_no, "condition": "threat",
         "members": {"P": ["P1"], "D": ["D1"], "N": neutrals},
-        "transcript": [], "votes": [],
+        "transcript": [], "votes": votes,
         "measures": {
-            "baseline": {"ffni": {pid: dict(ffni_answers) for pid in neutrals}},
+            "baseline": {"ffni": {pid: dict(base_answers) for pid in neutrals}},
             "post": {
                 "ffni": {pid: dict(ffni_answers) for pid in neutrals},
                 "effectiveness": {
@@ -295,34 +394,57 @@ def test_summarize_needs_reports_the_within_persona_change() -> None:
 
 
 def test_mediation_finds_the_indirect_path_when_it_is_there() -> None:
-    """Threat raises protection, and higher protection goes with rating D as effective."""
+    """Threat induces more protection, and within a condition a bigger induced change
+    goes with endorsing D."""
     study = load_study("ffni_mediation")
     ffni = next(i for i in study.instruments if i.key == "ffni")
-    effectiveness = next(i for i in study.instruments if i.key == "effectiveness")
+
+    def runs(spec):  # (induced change, how many of 4 neutrals endorse D), x3 runs each
+        spec = spec * 3
+        return [_needs_record(i, protection=3 + rise, d_rating=4,
+                              baseline_protection=3, d_voters=dv)
+                for i, (rise, dv) in enumerate(spec, 1)]
 
     by_condition = {
-        "collaborative": [_needs_record(i, protection=p, d_rating=d)
-                          for i, (p, d) in enumerate([(3, 2), (4, 3), (3, 3), (4, 2)], 1)],
-        "threat": [_needs_record(i, protection=p, d_rating=d)
-                   for i, (p, d) in enumerate([(6, 6), (7, 7), (6, 5), (7, 6)], 1)],
+        "collaborative": runs([(0, 0), (0, 1), (1, 1), (1, 2)]),
+        "threat": runs([(2, 2), (2, 3), (3, 3), (3, 4)]),
     }
     med = summarize_mediation(
-        study, by_condition, ffni,
-        need="protection", outcome_group="D", effectiveness=effectiveness, bootstrap=300,
+        study, by_condition, ffni, need="protection", outcome_group="D", bootstrap=300,
     )
-    assert med["path_a"] > 0, med["path_a"]       # threat raises protection
-    assert med["path_b"] > 0, med["path_b"]       # protection tracks D effectiveness
+    assert med["path_a"] > 0, med["path_a"]       # threat induces more protection
+    assert med["path_b"] > 0, med["path_b"]       # within condition, more change -> more D
     assert med["indirect"] > 0
     assert med["supported"] is True
 
-    # A design with no condition difference must not produce mediation.
-    flat = {"collaborative": by_condition["collaborative"],
-            "threat": [_needs_record(i, protection=3, d_rating=2) for i in range(1, 5)]}
-    null = summarize_mediation(
-        study, flat, ffni,
-        need="protection", outcome_group="D", effectiveness=effectiveness, bootstrap=300,
+
+def test_mediation_is_not_fooled_by_a_condition_difference_alone() -> None:
+    """The regression test for the pooled-slope bug: threat shifts BOTH the induced need
+    and endorsement, but within a condition the two are unrelated. Estimating path b on
+    raw pooled scores reports mediation here; centring within condition does not."""
+    study = load_study("ffni_mediation")
+    ffni = next(i for i in study.instruments if i.key == "ffni")
+
+    def runs(spec):
+        return [_needs_record(i, protection=3 + rise, d_rating=4,
+                              baseline_protection=3, d_voters=dv)
+                for i, (rise, dv) in enumerate(spec, 1)]
+
+    by_condition = {
+        "collaborative": runs([(0, 1), (0, 1), (1, 1), (1, 1)]),   # endorsement flat at 1/4
+        "threat": runs([(2, 3), (2, 3), (3, 3), (3, 3)]),          # flat at 3/4
+    }
+    med = summarize_mediation(
+        study, by_condition, ffni, need="protection", outcome_group="D", bootstrap=300,
     )
-    assert abs(null["path_a"]) < 1.0
+    assert med["path_a"] > 0, med["path_a"]        # the condition really did shift the need
+    assert abs(med["path_b"]) < 1e-9, med["path_b"]  # but nothing within condition
+    assert med["supported"] is False, med["ci95"]
+    assert med["bootstrap_draws"] > 0, "a usable path b must still produce draws"
+    # A mediator doing nothing produces exactly [0, 0] once the bootstrap resamples runs
+    # rather than respondents. That interval must read as no evidence, not as two bounds
+    # agreeing in sign.
+    assert med["ci95"] == [0.0, 0.0] or med["ci95"][0] <= 0 <= med["ci95"][1], med["ci95"]
 
 
 def test_need_outcome_links_separates_cognition_from_evaluation() -> None:
@@ -336,8 +458,9 @@ def test_need_outcome_links_separates_cognition_from_evaluation() -> None:
         [(2, 2, 5), (4, 5, 5), (6, 8, 5), (7, 9, 5)], 1
     ):
         record = _needs_record(run_no, protection=protection, d_rating=d_rating)
+        # protection is predicted to move the ILT strength dimension (strong, bold).
         record.measures["post"]["leader_ideal"] = {
-            pid: {"protection_ideal_1": ideal, "protection_ideal_2": ideal}
+            pid: {"strength_1": ideal, "strength_2": ideal}
             for pid in record.members("N")
         }
         records.append(record)
@@ -357,7 +480,8 @@ def test_run_record_round_trips_and_tolerates_pre_instrument_checkpoints() -> No
 
     data = _needs_record(1, protection=5, d_rating=4).to_dict()
     assert RunRecord.from_dict(data).to_dict() == data
-    assert list(data) == ["run_no", "condition", "members", "transcript", "votes", "measures"]
+    assert list(data) == ["run_no", "condition", "members", "transcript", "votes",
+                          "measures", "instruments"]
 
     # A checkpoint written before instruments existed has no "measures" key at all.
     legacy = RunRecord.from_dict({"run_no": 7, "members": {"P": ["P1"]},
@@ -568,6 +692,368 @@ def test_assigned_style_reaches_the_generation_prompt() -> None:
     # contain unrelated braces (the rendered score dict does).
     assert "{existing_names}" in dominance
     assert dominance.replace("{existing_names}", "Ana, Bo").count("Ana, Bo") == 1
+
+
+def test_a_survey_clone_never_shares_memory_with_the_agent_that_votes() -> None:
+    """After a discussion the agent still holds its TinyWorld, and the world holds a
+    lock deepcopy cannot follow. That failure used to be swallowed and the ORIGINAL
+    agent handed back, so every post-discussion survey wrote its items into the agent
+    that voted moments later. The lock here stands in for the live world."""
+
+    class FakeAgent:
+        def __init__(self) -> None:
+            self.environment = threading.RLock()
+            self._accessible_agents: list = []
+            self.episodic_memory = ["turn 1", "turn 2"]
+            self.actions_count = 7
+
+    original = FakeAgent()
+    world = original.environment
+    clone = _clone_agent(original)
+
+    assert clone is not original, "a survey must never run on the agent that votes"
+    assert clone.episodic_memory == ["turn 1", "turn 2"]   # the discussion carries over
+    clone.episodic_memory.append("SURVEY ITEM")
+    assert "SURVEY ITEM" not in original.episodic_memory
+    assert clone.environment is None and clone.actions_count == 0
+    assert original.environment is world, "the original's wiring must be put back"
+
+    # A copy that genuinely cannot be made is an error, not a silent original.
+    broken = FakeAgent()
+    broken.episodic_memory = threading.RLock()    # not live wiring, so not detachable
+    try:
+        _clone_agent(broken)
+    except Exception:
+        pass
+    else:
+        raise AssertionError("an impossible clone must raise, not return the original")
+
+
+def test_alpha_gate_judges_each_read_subscale_not_the_average() -> None:
+    """A mean over ten subscales waves a dead one through on the back of the long ones.
+    It matters here because `protection` reaches exactly one prototype dimension."""
+    summary = {
+        "subscales": {
+            "strength": {"alpha": 0.05},        # 2 items, and protection's only outlet
+            "tyranny": {"alpha": 0.92},         # 10 items
+            "sensitivity": {"alpha": 0.88},     # 8 items
+            "femininity": {"alpha": float("nan")},
+        },
+        "gated_subscales": ["sensitivity", "strength", "tyranny"],
+    }
+    assert (0.05 + 0.92 + 0.88) / 3 > 0.60, "the old mean-based gate would have passed this"
+    assert set(weak_subscales(summary)) == {"strength"}
+
+    summary["subscales"]["strength"]["alpha"] = 0.71
+    assert weak_subscales(summary) == {}
+
+    # An alpha that could not be computed does not pass either.
+    summary["gated_subscales"].append("femininity")
+    assert set(weak_subscales(summary)) == {"femininity"}
+
+
+def test_the_gate_covers_every_prototype_dimension_an_analysis_reads() -> None:
+    """`gated_subscales` comes from the prediction map, so a dimension added to
+    `predicts` is gated automatically and one nothing reads never blocks a study."""
+    ideals = load_study("ffni_mediation").prototype
+    read = {dim for dims in ideals.predicts.values() for dim in dims}
+    assert read <= set(ideals.subscales)
+    assert ideals.predicts["protection"] == ("strength",), \
+        "protection has one outlet; if that changes, the alpha gate's stakes change too"
+    assert "femininity" in ideals.subscales and "femininity" not in read
+    # Sheng et al. Table 13 gives affiliation no significant increment on any of the
+    # eleven dimensions — its bivariate correlations are large and its delta R2 is .00
+    # or .01 throughout. An entry here would be a guess dressed as a replication.
+    assert "affiliation" not in ideals.predicts
+
+
+def test_each_candidate_rates_only_the_candidates() -> None:
+    """Every rating is its own API call carrying the whole transcript, and
+    need_outcome_links reads only the contrasted groups — so rating the neutrals is
+    the most expensive way in the design to collect data nothing looks at."""
+    room = [
+        Participant(agent=None, persona_id=pid, name=pid, group=g)
+        for pid, g in (("P4", "P"), ("D4", "D"), ("N4", "N"), ("N7", "N"), ("N8", "N"))
+    ]
+    rater = room[2]                                   # N4
+
+    everyone = rated_by(room, rater)                  # no contrast: the whole room
+    assert [p.persona_id for p in everyone] == ["P4", "D4", "N7", "N8"]
+
+    candidates = rated_by(room, rater, ("D", "P"))
+    assert [p.persona_id for p in candidates] == ["P4", "D4"]
+    assert rater not in candidates, "nobody rates themselves"
+
+    # At a cast of 5 that is 6 calls per run instead of 12.
+    neutrals = [p for p in room if p.group == "N"]
+    assert sum(len(rated_by(room, n, ("D", "P"))) for n in neutrals) == 6
+    assert sum(len(rated_by(room, n)) for n in neutrals) == 12
+
+
+def test_partial_betas_separate_a_real_predictor_from_its_correlate() -> None:
+    """Sheng et al.'s six needs intercorrelate .60-.72, so their Table 13's bivariate
+    column makes all six predict every prototype dimension at p < .001 while the
+    increment over the other five picks out one. H4 is the second claim, not the first."""
+    rng = random.Random(7)
+    protection, tagalong, outcome = [], [], []
+    for _ in range(200):
+        p = rng.gauss(0, 1)
+        protection.append(p)
+        tagalong.append(p + rng.gauss(0, 0.5))       # rides on protection, causes nothing
+        outcome.append(2 * p + rng.gauss(0, 1))      # driven by protection alone
+
+    assert slope(tagalong, outcome)[1] > 0.6, "bivariately the tag-along looks real"
+
+    predictors = [[a, b] for a, b in zip(protection, tagalong)]
+    betas, deltas, model_r2, n = partial_betas(predictors, outcome)
+    assert n == 200 and model_r2 > 0.7
+    assert betas[0] > 0.7 and abs(betas[1]) < 0.20, betas
+    # delta R2 is UNIQUE variance, so collinearity shrinks it: the tag-along at r ~ .89
+    # leaves protection only a fraction of what it explains alone. This is why the
+    # paper's headline increments are .02-.06 while the same betas are .19-.32 — a small
+    # delta R2 there is not a weak result, and the gate on it must not read like one.
+    assert deltas[0] > 0.10 and deltas[1] < 0.01, deltas
+
+    # Missing values drop the whole row, not the column.
+    predictors[0][1] = float("nan")
+    assert partial_betas(predictors, outcome)[3] == 199
+    # Too few rows to fit is n/a, never a fabricated coefficient.
+    assert math.isnan(partial_betas(predictors[:2], outcome[:2])[2])
+
+
+def test_no_two_personas_in_a_study_share_a_name() -> None:
+    """TinyWorld rejects a duplicate name and kills the run mid-study. The sampler can no
+    longer seat one persona twice, so the remaining way in is two personas that were
+    written with the same name — a hand edit, or a generator drawing from a pool with a
+    repeat in it."""
+    for name in list_studies():
+        study = load_study(name)
+        seen: dict[str, str] = {}
+        for group in study.groups.values():
+            for pid in group.ids:
+                path = study.personas_dir / f"{pid}.agent.json"
+                if not path.exists():
+                    continue
+                spec = json.loads(path.read_text(encoding="utf-8"))
+                who = (spec.get("persona") or spec)["name"]
+                assert who not in seen, f"{name}: {pid} and {seen[who]} are both '{who}'"
+                seen[who] = pid
+
+
+def test_the_neutral_pool_is_wide_enough_to_identify_the_need_regressions() -> None:
+    """H4 and H5 regress a respondent's six need scores on their ratings. A need level is
+    largely a property of the persona, so the number of DISTINCT neutrals caps the
+    between-person variance however many runs are collected — eight of them against six
+    predictors is a saturated model wearing a large n."""
+    study = load_study("ffni_mediation")
+    neutrals = study.groups["N"]
+    needs = study.self_report
+    assert len(neutrals.ids) > 3 * len(needs.subscales), \
+        f"{len(neutrals.ids)} neutrals against {len(needs.subscales)} predictors"
+    # The pool must also divide evenly by the draw, or every cycle ends on a short batch.
+    assert len(neutrals.ids) % neutrals.sample == 0
+
+
+def _layer_run(run_no: int, condition: str, rng: random.Random, lift: float) -> RunRecord:
+    """A run where protection reaches the prototype, reaches nothing else, and the
+    scenario lifts it by `lift`. Every other need is noise, so a bivariate reading and
+    an incremental one should agree here — the point of the fixture is the layer gap
+    and the condition difference, not the collinearity H4 was fixed for."""
+    neutrals = [f"N{i}" for i in range(1, 4)]
+    baseline, post, ideals, ideals_base, effect, votes = {}, {}, {}, {}, {}, []
+    for pid in neutrals:
+        level = rng.uniform(2.0, 6.0)
+        base, after = level, level + lift + rng.gauss(0, 0.2)
+        baseline[pid] = {f"protection_{i}": base for i in range(1, 5)}
+        post[pid] = {f"protection_{i}": after for i in range(1, 5)}
+        for name, count in (("affiliation", 4), ("status", 4), ("vision", 3),
+                            ("expertise", 3), ("fairness", 4)):
+            noise = rng.uniform(2.0, 6.0)
+            for i in range(1, count + 1):
+                baseline[pid][f"{name}_{i}"] = noise
+                post[pid][f"{name}_{i}"] = noise
+        # Prototype tracks protection at both times, so the within-person change in one
+        # goes with the within-person change in the other. Effectiveness does not.
+        ideals_base[pid] = {"strength_1": base + rng.gauss(0, 0.1),
+                            "strength_2": base + rng.gauss(0, 0.1)}
+        ideals[pid] = {"strength_1": after + rng.gauss(0, 0.1),
+                       "strength_2": after + rng.gauss(0, 0.1)}
+        effect[pid] = {"D1": {"effectiveness_1": rng.uniform(2, 6)},
+                       "P1": {"effectiveness_1": rng.uniform(2, 6)}}
+        endorsed = "D" if after > 4.5 else "P"
+        votes.append({"voter_id": pid, "voter_group": "N",
+                      "voted_for_id": endorsed + "1", "voted_for_group": endorsed,
+                      "reason": ""})
+    return RunRecord.from_dict({
+        "run_no": run_no, "condition": condition,
+        "members": {"P": ["P1"], "D": ["D1"], "N": neutrals},
+        "transcript": [], "votes": votes,
+        "measures": {"baseline": {"ffni": baseline, "leader_ideal": ideals_base},
+                     "post": {"ffni": post, "leader_ideal": ideals,
+                              "effectiveness": effect}},
+    })
+
+
+def test_layer_moderation_separates_the_two_layers_and_the_two_conditions() -> None:
+    """H3, H4, H5 and H7 have to be decidable, not just printable. Threat lifts
+    protection here, protection reaches the prototype and not the observed person, so
+    the induced difference and the layer gap must both clear zero and the effectiveness
+    link must not."""
+    study = load_study("ffni_mediation")
+    rng = random.Random(11)
+    by_condition = {
+        "collaborative": [_layer_run(i, "collaborative", rng, lift=0.0) for i in range(1, 21)],
+        "threat": [_layer_run(i, "threat", rng, lift=1.5) for i in range(1, 21)],
+    }
+    out = summarize_layer_moderation(
+        study, by_condition, study.self_report,
+        ideals=study.prototype, effectiveness=study.candidate_rating,
+        contrast=("D", "P"), bootstrap=200, seed=3,
+    )
+    protection = out["needs"]["protection"]
+
+    # H3: the scenario moved the need, and the interval says so.
+    assert protection["induced"]["difference"] > 1.0
+    assert protection["induced"]["ci95"][0] > 0, protection["induced"]
+
+    # H4, between persons: protection reaches its prototype dimension.
+    assert protection["cognition"]["beta"] > 0.5
+    assert protection["cognition"]["ci95"][0] > 0
+
+    # H4, within a person: the change in the need went with the change in the prototype.
+    # This is the reading the level scores cannot give, and it is why leader_ideal is
+    # administered at baseline as well.
+    induced = protection["cognition_induced"]
+    assert induced["beta"] > 0.4, induced
+    assert induced["ci95"][0] > 0, induced
+    assert set(protection["cognition_induced_by_condition"]) == {"collaborative", "threat"}
+
+    # H5: it does not reach the effectiveness of the person in the room.
+    assert abs(protection["evaluation_a"]["beta"]) < 0.3
+    lo, hi = protection["evaluation_a"]["ci95"]
+    assert lo < 0 < hi, "a null needs an interval that contains zero, not a small point"
+
+    # H7: the gap between the layers is real, and reported per condition.
+    assert protection["layer_gap"] > 0.4
+    assert set(protection["layer_gap_by_condition"]) == {"collaborative", "threat"}
+    assert out["conditions"] == {"low": "collaborative", "high": "threat"}
+    assert out["runs"] == {"collaborative": 20, "threat": 20}
+    assert out["bootstrap_draws"] > 150
+
+    # status's prototype dimensions were never administered in this fixture, so it has
+    # to read n/a — a number invented out of missing data would be worse than no number.
+    assert math.isnan(out["needs"]["status"]["cognition"]["beta"])
+    assert math.isnan(out["needs"]["affiliation"]["cognition"]["beta"]), \
+        "affiliation has no predicted dimension at all since Table 13 removed its entry"
+
+
+def test_item_order_is_fixed_per_respondent_and_differs_between_them() -> None:
+    """Re-ordering the same person between baseline and post puts order sensitivity into
+    the pre-post difference, which is H3's dependent variable and H6's mediator. Order
+    still has to vary across people, or position bias accumulates over the sample."""
+    ask, calls = _scripted('{"a": 3, "b": 4}')
+    one = Participant(agent=None, persona_id="N1", name="One", group="N")
+    two = Participant(agent=None, persona_id="N2", name="Two", group="N")
+
+    _administer(one, _PROBE, target=None, ask=ask)
+    _administer(one, _PROBE, target=None, ask=ask)      # the same person, a second time
+    _administer(two, _PROBE, target=None, ask=ask)
+
+    def order(prompt: str) -> list[int]:
+        return [prompt.index(item_id) for item_id, _, _ in _PROBE.items]
+
+    assert order(calls[0]) == order(calls[1]), "one respondent must see one order"
+    orders = {tuple(order(c)) for c in calls}
+    assert len(orders) > 1, "two respondents must not share an order"
+
+
+def test_a_degenerate_path_is_reported_as_unestimable_not_as_a_null() -> None:
+    """Every respondent endorsing the same way leaves the outcome with no variance, so
+    path b cannot be fitted at all. A smoke run on gpt-4o-mini did exactly that — no
+    neutral endorsed D in either condition — and the report called it 'no mediation
+    evidence', which is a claim the data cannot support either way."""
+    study = load_study("ffni_mediation")
+    ffni = next(i for i in study.instruments if i.key == "ffni")
+    by_condition = {
+        "collaborative": [_needs_record(i, protection=3, d_rating=4,
+                                        baseline_protection=3, d_voters=0) for i in (1, 2, 3)],
+        "threat": [_needs_record(i, protection=5, d_rating=4,
+                                 baseline_protection=3, d_voters=0) for i in (1, 2, 3)],
+    }
+    med = summarize_mediation(
+        study, by_condition, ffni, need="protection", outcome_group="D", bootstrap=100,
+    )
+    assert med["path_a"] > 0                      # the condition did shift the need
+    assert math.isnan(med["path_b"])              # but nobody ever endorsed D
+    assert med["supported"] is False
+    assert med["bootstrap_draws"] == 0, "nothing resampleable, and the report must say so"
+
+
+def test_icc_separates_agreeing_raters_from_disagreeing_ones() -> None:
+    """A one-item rating of an observed person cannot have an alpha, but it can have an
+    inter-rater ICC: several neutrals rate the same target's same performance. alpha asks
+    whether rewordings agree; this asks whether observers do, which is the question an
+    observed target raises."""
+    agree = [[5.0, 5.0, 5.0], [2.0, 2.0, 2.0], [6.0, 6.0, 6.0], [3.0, 3.0, 3.0]]
+    single, average, n, k = icc_one_way(agree)
+    assert n == 4 and k == 3
+    assert single > 0.99 and average > 0.99, (single, average)
+
+    rng = random.Random(4)
+    noise = [[rng.uniform(1, 7) for _ in range(3)] for _ in range(40)]
+    single, average, _, _ = icc_one_way(noise)
+    assert abs(single) < 0.35, single           # targets do not differ -> no reliability
+    assert average < single + 1.0
+
+    # Ragged cells are dropped to the modal width rather than silently averaged.
+    ragged = agree + [[4.0, 4.0]]
+    assert icc_one_way(ragged)[2] == 4
+    # Too few cells is n/a, never a fabricated coefficient.
+    assert math.isnan(icc_one_way(agree[:2])[0])
+
+
+def test_answers_from_another_version_of_a_scale_are_refused() -> None:
+    """Item ids are positional, so two versions of an instrument share them while asking
+    different questions — the 1994 and 2018 ILT share 36 ids of which 28 differ in
+    wording. Scoring one's answers against the other rates "strong" as if it were
+    "commanding", and looks like data rather than like missing data."""
+    study = load_study("ffni_mediation")
+    ideals = study.prototype
+    good = {f"{name}_{i}": 5 for name, texts in ideals.subscales.items()
+            for i in range(1, len(texts) + 1)}
+
+    ok = RunRecord.from_dict({
+        "run_no": 1, "condition": "threat", "members": {"N": ["N1"]},
+        "transcript": [], "votes": [],
+        "measures": {"post": {ideals.key: {"N1": dict(good)}}},
+        "instruments": {ideals.key: ideals.fingerprint},
+    })
+    assert ok.needs("post", ideals)["N1"]["strength"] == 5
+
+    # A fingerprint from a different wording is decisive even when every id matches.
+    wrong_version = RunRecord.from_dict({**ok.to_dict(), "instruments": {ideals.key: "deadbeef1234"}})
+    try:
+        wrong_version.needs("post", ideals)
+    except SystemExit as exc:
+        assert "silently wrong" in str(exc), exc
+    else:
+        raise AssertionError("a disagreeing fingerprint was scored anyway")
+
+    # Without a fingerprint — every checkpoint written before 2026-09-07 — an item id the
+    # instrument does not define is the same signal.
+    stale = RunRecord.from_dict({
+        **ok.to_dict(), "instruments": {},
+        "measures": {"post": {ideals.key: {"N1": {**good, "retired_subscale_1": 6}}}},
+    })
+    try:
+        stale.needs("post", ideals)
+    except SystemExit as exc:
+        assert "does not define" in str(exc), exc
+    else:
+        raise AssertionError("answers to a retired subscale were scored anyway")
+
+    # A checkpoint with no fingerprint and no foreign ids still scores.
+    assert RunRecord.from_dict({**ok.to_dict(), "instruments": {}}).needs("post", ideals)
 
 
 if __name__ == "__main__":

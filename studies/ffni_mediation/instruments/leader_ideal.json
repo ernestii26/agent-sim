@@ -1,7 +1,7 @@
 {
   "key": "leader_ideal",
-  "title": "Leadership ideals (prototype ratings)",
-  "instructions": "Think about leaders in general — not anyone in this meeting. Rate how characteristic each trait is of a leader.",
+  "title": "Implicit leadership theories (leader prototype ratings)",
+  "instructions": "Rate how characteristic each of the following is of a leader in general. Answer about leaders as a category — not about any specific person in this meeting.",
   "scale": [
     1,
     10
@@ -15,35 +15,111 @@
     "N"
   ],
   "timing": [
+    "baseline",
     "post"
   ],
-  "citation": "Adjectives are the 'Leadership ideals' column of Table 1 in Sheng, Andrews & van Vugt (2026), which pairs each fundamental follower need with its predicted leader prototype. Response format follows the ILT measure they used (Offermann & Coats, 2018): 10-point, 1 = not at all characteristic of a leader, 10 = extremely characteristic.",
-  "license": "",
-  "note": "This is NOT the 51-item Offermann & Coats ILT scale. It uses the source paper's own need-to-ideal mapping, so each dimension here corresponds one-to-one with an FFNI subscale, which is what H4 predicts. Dual model alignment (Cheng et al., 2013): protection_ideal and status_ideal are the dominance side; affiliation_ideal, vision_ideal, expertise_ideal and fairness_ideal are the prestige side. Scores are not comparable to published ILT norms.",
   "subscales": {
-    "protection_ideal": [
-      "strong",
-      "tough"
-    ],
-    "affiliation_ideal": [
+    "sensitivity": [
+      "caring",
+      "sympathetic",
       "compassionate",
-      "friendly"
+      "kind",
+      "empathetic",
+      "selfless",
+      "friendly",
+      "sensitive"
     ],
-    "status_ideal": [
+    "dedication": [
+      "motivated",
+      "dedicated",
+      "focused",
+      "determined",
+      "good decision maker",
+      "goal oriented",
+      "handles stress"
+    ],
+    "tyranny": [
+      "controlling",
+      "pushy",
+      "intimidating",
       "domineering",
+      "coercive",
+      "demanding",
+      "risky",
       "power-hungry"
     ],
-    "vision_ideal": [
+    "charisma": [
       "charismatic",
+      "sociable",
+      "dynamic",
+      "bold"
+    ],
+    "strength": [
+      "commanding",
+      "assertive",
+      "authoritative",
+      "tough",
+      "strong",
+      "firm"
+    ],
+    "creativity": [
+      "creative",
+      "innovative",
+      "clever",
       "courageous"
     ],
-    "expertise_ideal": [
+    "well_groomed": [
+      "well-groomed",
+      "well-dressed"
+    ],
+    "masculinity": [
+      "masculine",
+      "tall",
+      "male",
+      "attractive"
+    ],
+    "intelligence": [
       "educated",
+      "intellectual",
       "intelligent"
     ],
-    "fairness_ideal": [
+    "femininity": [
+      "female",
+      "feminine"
+    ],
+    "ethics": [
+      "fair",
       "honest",
       "ethical"
     ]
-  }
+  },
+  "predicts": {
+    "protection": [
+      "strength"
+    ],
+    "status": [
+      "tyranny",
+      "masculinity",
+      "well_groomed"
+    ],
+    "vision": [
+      "sensitivity",
+      "dedication",
+      "charisma",
+      "creativity"
+    ],
+    "expertise": [
+      "sensitivity",
+      "charisma",
+      "intelligence"
+    ],
+    "fairness": [
+      "dedication",
+      "intelligence",
+      "ethics"
+    ]
+  },
+  "citation": "Offermann, L. R., & Coats, M. R. (2018). Implicit theories of leadership: Stability and change over two decades. The Leadership Quarterly, 29(4), 513-522. Items and factor assignments transcribed from Figure 2 (p.518), which prints all 46 items with their highest factor loadings. Femininity (female, feminine) and ethics (fair, honest, ethical) added as Sheng, Andrews & van Vugt (2026) did, per their footnote 13, giving the 51 items their Appendix (p.801) records for Study 5.",
+  "license": "",
+  "note": "The instrument Sheng et al. actually administered, replacing the 1994 reconstruction kept at leader_ideal_1994.json. Three assignments differ from the 1994 version in ways that matter here: 'bold' is in CHARISMA, not strength (the 2018 discussion, p.520: 'the trait bold moved from the Strength factor from 1994 to the Charismatic factor'); STRENGTH is six command-and-assertion items rather than {strong, bold}; and 'attractive' sits in MASCULINITY while WELL-GROOMED keeps only well-groomed and well-dressed. predicts is unchanged in substance -- it is still Table 13's significant increments -- but now names the 2018 dimensions, so status reaches well_groomed rather than the 1994 'attractiveness', and vision reaches creativity, a dimension the reconstruction did not have."
 }

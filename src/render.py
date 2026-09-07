@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from analysis import SILENCE_THRESHOLD
+from analysis import SILENCE_THRESHOLD, weak_subscales
 from instrument import BASELINE, POST
 from stats import mean, std
 from study import Condition, Study
@@ -65,6 +65,14 @@ def render_contrast(study: Study, condition: Condition, summary: dict[str, Any])
     if summary["hypothesis"]:
         print(f"Hypothesis: {summary['hypothesis']}")
     print()
+
+    if summary.get("electorate"):
+        voting = ", ".join(study.label_of(g) for g in summary["electorate"])
+        cv = summary["candidate_votes"]
+        print(f"Electorate: {voting} only — the two contrasted groups stand, so they do not vote.")
+        print(f"  (set aside: {label_b} gave {label_a} {cv[a]} votes, "
+              f"{label_a} gave {label_b} {cv[b]})")
+        print()
 
     print(f"  {'Run':>3}  {label_a + ' votes':>16}  {label_b + ' votes':>16}  {'Diff':>6}")
     print("  " + "-" * 48)
@@ -124,12 +132,14 @@ def render_needs(study: Study, summary: dict[str, Any]) -> None:
     print("=" * 88)
     print(f"{study.title.upper()} — {summary['instrument'].upper()} ({summary['runs']} runs)")
     print("=" * 88)
-    print(f"{'Subscale':<18}  {'T1 mean':>9}  {'T2 mean':>9}  {'delta':>9}  {'n_d':>5}  {'alpha':>7}")
+    print(f"{'Subscale':<18}  {'T1 mean':>9}  {'T2 mean':>9}  {'delta':>9}  "
+          f"{'delta SD':>9}  {'n_d':>5}  {'alpha':>7}")
     print("-" * 88)
     for name, s in summary["subscales"].items():
         print(
             f"{name:<18}  {_fmt(s['baseline_mean'], 2):>9}  {_fmt(s['post_mean'], 2):>9}  "
-            f"{_fmt(s['delta_mean'], 2):>9}  {s['delta_n']:>5}  {_fmt(s['alpha'], 2):>7}"
+            f"{_fmt(s['delta_mean'], 2):>9}  {_fmt(s['delta_sd'], 2):>9}  "
+            f"{s['delta_n']:>5}  {_fmt(s['alpha'], 2):>7}"
         )
     sl = summary["straight_lining"]
     print()
@@ -149,15 +159,107 @@ def render_layers(study: Study, links: dict[str, Any]) -> None:
     print("Cognition = matching leader-ideal prototype rating.  Evaluation = effectiveness rating.")
     print("The source paper found protection/status predict the prototype but NOT effectiveness.")
     print()
-    print(f"{'Need':<14}  {'r prototype':>12}  {'r eff ' + label_a:>14}  {'r eff ' + label_b:>14}  {'gap':>8}")
+    print("Bivariate r is reported for contrast only. The needs intercorrelate, so every need")
+    print("tracks every dimension; beta and delta R2 hold the other five constant, which is")
+    print("the increment H4 is actually about (Sheng et al., Table 13).")
+    print()
+    print(f"{'Need':<13}  {'PROTOTYPE':>21}  {'EFF ' + label_a:>15}  {'EFF ' + label_b:>15}  {'gap':>6}")
+    print(f"{'':<13}  {'r':>6} {'beta':>6} {'dR2':>7}  {'r':>6} {'beta':>7}  {'r':>6} {'beta':>7}")
     print("-" * 88)
     for name, s in links["needs"].items():
+        c, ea, eb = s["cognition"], s["evaluation_a"], s["evaluation_b"]
         print(
-            f"{name:<14}  {_fmt(s['cognition']['r'], 2):>12}  "
-            f"{_fmt(s['evaluation_a']['r'], 2):>14}  {_fmt(s['evaluation_b']['r'], 2):>14}  "
-            f"{_fmt(s['layer_gap'], 2):>8}"
+            f"{name:<13}  {_fmt(c['r'], 2):>6} {_fmt(c['beta'], 2):>6} {_fmt(c['delta_r2'], 3):>7}  "
+            f"{_fmt(ea['r'], 2):>6} {_fmt(ea['beta'], 2):>7}  "
+            f"{_fmt(eb['r'], 2):>6} {_fmt(eb['beta'], 2):>7}  {_fmt(s['layer_gap'], 2):>6}"
         )
+    print()
+    print("  gap = prototype beta - effectiveness beta, both from a six-need fit. The paper")
+    print("  found protection and status reach the prototype and NOT effectiveness, so a")
+    print("  positive gap there is the result being replicated, not a failure.")
     print("=" * 88)
+
+
+def render_rater_agreement(study: Study, out: dict[str, Any]) -> None:
+    """How far several observers of one performance agree — the reliability an
+    each_candidate instrument has and measure-check cannot reach."""
+    print()
+    print("=" * 74)
+    print(f"INTER-RATER AGREEMENT — {out['instrument']}")
+    print("=" * 74)
+    print(f"  {out['cells']} (run x target) cells, {out['raters_per_cell']} raters each, "
+          f"{out['ratings']} ratings")
+    print(f"  ICC(1,1)  a single rater          : {_fmt(out['icc_single'], 3)}")
+    print(f"  ICC(1,{out['raters_per_cell']})  the mean of {out['raters_per_cell']} raters "
+          f"      : {_fmt(out['icc_average'], 3)}")
+    print()
+    print(f"  {'ID':<5}  {'Group':<12}  {'Ratings':>7}  {'Mean':>6}  {'SD':>6}")
+    print("  " + "-" * 44)
+    for pid, m in out["per_target"].items():
+        print(f"  {pid:<5}  {study.label_of(study.group_of(pid)):<12}  "
+              f"{m['n']:>7}  {_fmt(m['mean'], 2):>6}  {_fmt(m['sd'], 2):>6}")
+    print("=" * 74)
+
+
+def render_layer_moderation(study: Study, out: dict[str, Any]) -> None:
+    """H3, H4, H5 and H7 with intervals, so each one can be decided rather than admired."""
+    low, high = out["conditions"]["low"], out["conditions"]["high"]
+    runs = out["runs"]
+
+    def ci(bounds: list[float]) -> str:
+        return f"[{_fmt(bounds[0], 2)}, {_fmt(bounds[1], 2)}]"
+
+    print()
+    print("=" * 100)
+    print(f"LAYERS ACROSS CONDITIONS — {low} ({runs.get(low, 0)} runs) vs "
+          f"{high} ({runs.get(high, 0)} runs)")
+    print("=" * 100)
+    print(f"Intervals are percentile bootstrap over RUNS ({out['bootstrap_draws']} draws), not")
+    print("over respondents: three neutrals in a room saw one discussion between them.")
+    print()
+    print("H3  did the situation move the need?")
+    print(f"  {'Need':<14}  {'induced ' + low:>16}  {'induced ' + high:>16}  "
+          f"{'difference':>11}  {'95% CI':>16}")
+    print("  " + "-" * 96)
+    for name, s in out["needs"].items():
+        ind = s["induced"]
+        print(f"  {name:<14}  {_fmt(ind[low], 2):>16}  {_fmt(ind[high], 2):>16}  "
+              f"{_fmt(ind['difference'], 2):>11}  {ci(ind['ci95']):>16}")
+
+    label_a = study.label_of(out.get("outcome_group", "D"))
+    print()
+    print("H4  within a person: did the change in the need go with the change in the prototype?")
+    print(f"  {'Need':<14}  {'induced b':>10} {'95% CI':>16}  "
+          f"{low + ' b':>16}  {high + ' b':>16}  {'difference':>11}")
+    print("  " + "-" * 96)
+    for name, s in out["needs"].items():
+        ind = s["cognition_induced"]
+        by = s["cognition_induced_by_condition"]
+        print(f"  {name:<14}  {_fmt(ind['beta'], 2):>10} {ci(ind['ci95']):>16}  "
+              f"{_fmt(by.get(low, float('nan')), 2):>16}  {_fmt(by.get(high, float('nan')), 2):>16}  "
+              f"{_fmt(s['cognition_induced_difference'], 2):>11}")
+
+    print()
+    print("H4 / H5 / H7  which layer does the need reach, and does threat change that?")
+    print(f"  {'Need':<14}  {'proto b':>8} {'95% CI':>14}  {'eff ' + label_a:>8} {'95% CI':>14}  "
+          f"{'gap':>6}  {'gap diff':>8} {'95% CI':>14}")
+    print("  " + "-" * 96)
+    for name, s in out["needs"].items():
+        c, e = s["cognition"], s["evaluation_a"]
+        print(f"  {name:<14}  {_fmt(c['beta'], 2):>8} {ci(c['ci95']):>14}  "
+              f"{_fmt(e['beta'], 2):>8} {ci(e['ci95']):>14}  {_fmt(s['layer_gap'], 2):>6}  "
+              f"{_fmt(s['layer_gap_difference'], 2):>8} {ci(s['layer_gap_difference_ci95']):>14}")
+
+    es = out["endorsement_slope"]
+    print()
+    print(f"H7  induced {out['endorsement_need']} -> endorsing {label_a}, within condition:")
+    print(f"  {low} {_fmt(es[low], 3)}   {high} {_fmt(es[high], 3)}   "
+          f"difference {_fmt(es['difference'], 3)}  {ci(es['ci95'])}")
+    print()
+    print("  A gap above zero with an interval clear of it is the paper's own result: the")
+    print("  need reaches the prototype and not the person. An effectiveness interval that")
+    print("  contains zero is the null being replicated, not a failure to find anything.")
+    print("=" * 100)
 
 
 def render_mediation(study: Study, med: dict[str, Any]) -> None:
@@ -168,8 +270,9 @@ def render_mediation(study: Study, med: dict[str, Any]) -> None:
           f"{study.label_of(med['outcome_group'])} endorsement")
     print("=" * 88)
     rows = [
-        (f"path a   {lo} -> {hi} shift in {med['need']}", _fmt(med["path_a"], 3)),
-        (f"path b   {med['need']} -> effectiveness slope", _fmt(med["path_b"], 3)),
+        (f"path a   {lo} -> {hi} shift in induced {med['need']}", _fmt(med["path_a"], 3)),
+        (f"path b   induced {med['need']} -> endorsement (centred within condition)",
+         _fmt(med["path_b"], 3)),
         ("indirect a*b", _fmt(med["indirect"], 3)),
         (f"95% CI   percentile bootstrap, {med['bootstrap_draws']} draws",
          f"[{_fmt(med['ci95'][0], 3)}, {_fmt(med['ci95'][1], 3)}]"),
@@ -179,7 +282,16 @@ def render_mediation(study: Study, med: dict[str, Any]) -> None:
     for label, value in rows:
         print(f"  {label:<{width}}  :  {value}")
     print()
-    verdict = "CI excludes zero — mediation supported" if med["supported"] else "CI includes zero — no mediation evidence"
+    # "Could not be computed" is not "no evidence". A degenerate path — every respondent
+    # in a condition endorsing the same way, so the outcome has no variance — leaves the
+    # bootstrap with nothing to resample and must say so rather than report a null.
+    if med["supported"]:
+        verdict = "CI excludes zero — mediation supported"
+    elif not med["bootstrap_draws"] or math.isnan(med["indirect"]):
+        verdict = (f"NOT ESTIMABLE — {med['bootstrap_draws']} usable bootstrap draws. "
+                   f"A path is degenerate, not null.")
+    else:
+        verdict = "CI includes zero — no mediation evidence"
     print(f"  Verdict: {verdict}")
     print("  (~20 runs per condition: treat as suggestive, not confirmatory.)")
     print("=" * 88)
@@ -192,7 +304,7 @@ def render_measure_check(study: Study, summary: dict[str, Any]) -> bool:
     means = [s["baseline_mean"] for s in subscales.values() if not math.isnan(s["baseline_mean"])]
     spread = std(means)
     flat = summary["straight_lining"][BASELINE]
-    alphas = [s["alpha"] for s in subscales.values() if not math.isnan(s["alpha"])]
+    weak = weak_subscales(summary)
     retest = summary["test_retest"]
     mean_retest = mean(list(retest.values()))
 
@@ -201,16 +313,28 @@ def render_measure_check(study: Study, summary: dict[str, Any]) -> bool:
     print("-" * 36)
     for name, r in retest.items():
         print(f"{name:<18}  {_fmt(r, 2):>14}")
+    print()
+    print("  The delta SD column above is this instrument's noise floor: how far a score")
+    print("  moves when nothing happened between the two administrations. Any change a")
+    print("  real study attributes to its scenario has to clear it.")
 
     checks = {
         "differentiates subscales (SD of means > 0.30)": spread > 0.30,
         "few straight-liners (< 0.30)": not math.isnan(flat) and flat < 0.30,
-        "internal consistency (mean alpha > 0.60)": bool(alphas) and mean(alphas) > 0.60,
-        "stable across administrations (mean r > 0.50)": mean_retest > 0.50,
+        "internal consistency (every subscale read by an analysis > 0.60)": not weak,
+        # One-sided since 2026-08-26. The upper bound was there to catch agents too
+        # stable for a situation to move, but item order is now fixed per respondent
+        # (design-log section 26), so two administrations with nothing in between are
+        # the same prompt and a high r means the scale reproduces itself — which is
+        # what a measurement is for. Whether a situation can move the score is not
+        # answerable by asking twice with nothing happening; H3's path a answers it.
+        "reproduces its own answers (mean r > 0.40)": mean_retest > 0.40,
     }
     print()
     for label, ok in checks.items():
         print(f"  [{'PASS' if ok else 'FAIL'}]  {label}")
+    if weak:
+        print("          " + ", ".join(f"{n} alpha={_fmt(a, 2)}" for n, a in weak.items()))
     passed = all(checks.values())
     print()
     print(f"  Verdict: {'USABLE' if passed else 'NOT USABLE — do not spend a full study on this'}")
@@ -222,10 +346,27 @@ def render_measure_check(study: Study, summary: dict[str, Any]) -> bool:
 # Output files                                                                 #
 # --------------------------------------------------------------------------- #
 
-def save_summary(summary: dict[str, Any], output_dir: Path, prefix: str) -> Path:
+def save_summary(
+    summary: dict[str, Any],
+    output_dir: Path,
+    prefix: str,
+    *,
+    provenance: dict[str, Any] | None = None,
+) -> Path:
+    """Write a summary, stamped with what produced it.
+
+    Without the stamp a file in results/ cannot say which model, which temperature or
+    which version of an instrument it came from. That is not hypothetical: three
+    measure-check runs on 2026-08-26 differed in temperature and item ordering and were
+    told apart only by a suffix added to the filename by hand, and the ILT has since been
+    replaced by a version sharing 36 item ids with the old one.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
+    stamped = dict(summary)
+    stamped["provenance"] = {"written": datetime.now().isoformat(timespec="seconds"),
+                             **(provenance or {})}
     path = output_dir / f"{prefix}_{datetime.now():%Y%m%d_%H%M%S}.json"
-    path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+    path.write_text(json.dumps(stamped, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"\nSummary saved -> {path}")
     return path
 

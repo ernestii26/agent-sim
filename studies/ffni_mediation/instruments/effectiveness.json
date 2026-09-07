@@ -1,7 +1,7 @@
 {
   "key": "effectiveness",
   "title": "Perceived leadership effectiveness",
-  "instructions": "Think about how this person behaved in the meeting you just had. Rate how effective they would be as your own leader.",
+  "instructions": "Think about how this person behaved in the meeting you just had. Please answer to what extent you perceive this person as effective if they were your own leader.",
   "scale": [
     1,
     7
@@ -17,12 +17,12 @@
   "timing": [
     "post"
   ],
-  "citation": "Response format follows Sheng, Andrews & van Vugt (2026), Study 5.",
+  "citation": "Sheng, Andrews & van Vugt (2026), Study 5, Sample E. The operative question and the anchors are theirs verbatim: 'to what extent you perceive these leadership descriptions as effective if these individuals were your own leaders… (1 = not at all effective as a leader, 7 = extremely effective as a leader)'. Only the stimulus differs, and deliberately.",
   "license": "",
-  "note": "Single-item effectiveness rating, administered once per other participant.",
+  "note": "The paper's effectiveness measure IS this question and this 1-7 scale; its 57 items are the STIMULI, not the criterion — twelve published leadership-style scales (Cheng et al. 2004/2014; Wang & Howell 2010; Bai et al. 2020; Hu et al. 2025; Back et al. 2013) reworded as descriptions of hypothetical leaders, each style's 4-6 descriptions averaged into one score. Here the stimulus is a specific agent the respondent has just watched for three rounds, which is the gap the study exists to address: no participant in their Study 5 ever observed anyone.\n\nThe real cost of that substitution is not reliability, which was the second wrong answer here. Their score for a style averages 4-6 ratings and so has an alpha; one rating of one person has none. But every run has three neutrals rating the same target's same performance, which gives the coefficient that actually fits an observed target: inter-rater agreement. Over the 2026-08-26 data, ICC(1,1) = .72 and ICC(1,3) = .89 across 160 cells and 480 ratings. `run.py report` prints it; `measure-check` cannot, because it administers instruments with no meeting and this one asks about a meeting. alpha asks whether rewordings of a question agree, ICC asks whether observers of one performance agree, and the second is the question a single observed target raises.\n\nA second cost: their dominance-side null is specific to Authoritarianism, Narcissism and Dominance as separate scales, while protection -> Safety is .43***/.20***, strongly supported. One rating of one person cannot separate those, so H5's replication here is of a construct this design collapses.",
   "subscales": {
     "effectiveness": [
-      "This person would be effective as my leader."
+      "Indicate your perception of this person's effectiveness as a leader."
     ]
   }
 }

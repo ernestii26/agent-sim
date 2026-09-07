@@ -114,37 +114,51 @@ def main() -> None:
     neutral_rows = [rng.choice(by_profile[p])
                     for p in profiles[args.pairs:args.pairs + args.neutrals]]
 
-    names = list(NAME_POOL)
-    rng.shuffle(names)
-    if args.pairs * 2 + args.neutrals > len(names):
-        raise SystemExit(f"NAME_POOL has {len(names)} names, need "
-                         f"{args.pairs * 2 + args.neutrals}")
+    # A name is identity, so it must not move when --neutrals does. It used to: the pool
+    # was shuffled by the same rng that had already drawn the rows, so asking for more
+    # neutrals renamed everyone, P and D included. A persona that exists on disk now
+    # keeps the name it has and only new personas draw, which makes the assignment
+    # append-only by construction rather than by a seed coincidence.
+    personas_dir = _PROJECT_DIR / "studies" / args.study / "personas"
+    existing: dict[str, str] = {}
+    for path in sorted(personas_dir.glob("*.agent.json")) if personas_dir.exists() else []:
+        spec = json.loads(path.read_text(encoding="utf-8"))
+        existing[path.name.split(".")[0]] = (spec.get("persona") or spec)["name"]
+
+    spare = [n for n in NAME_POOL if n not in set(existing.values())]
+    rng.shuffle(spare)
+    wanted = args.pairs * 2 + args.neutrals
+    if wanted - len(existing) > len(spare):
+        raise SystemExit(f"NAME_POOL has {len(spare)} unused names, need "
+                         f"{wanted - len(existing)} more")
+
+    def name_for(pid: str) -> str:
+        if pid not in existing:
+            existing[pid] = spare.pop(0)
+        return existing[pid]
 
     specs: list[tuple[str, dict]] = []
     provenance: list[dict] = []
-    cursor = 0
     group_ids: dict[str, list[str]] = {"P": [], "D": [], "N": []}
 
     for i, row in enumerate(leader_rows, start=1):
         for group in ("P", "D"):
             pid = f"{group}{i}"
-            specs.append((pid, to_tinyperson_spec(row, group, pid, names[cursor])))
+            specs.append((pid, to_tinyperson_spec(row, group, pid, name_for(pid))))
             group_ids[group].append(pid)
             provenance.append({"persona_id": pid, "group": group, "pair": i,
-                               "name": names[cursor], "occupation": row["occupation"],
+                               "name": name_for(pid), "occupation": row["occupation"],
                                "ocean": row["ocean_description"]["ocean"],
                                "demographic": row["demographic"]})
-            cursor += 1
 
     for i, row in enumerate(neutral_rows, start=1):
         pid = f"N{i}"
-        specs.append((pid, to_tinyperson_spec(row, "N", pid, names[cursor])))
+        specs.append((pid, to_tinyperson_spec(row, "N", pid, name_for(pid))))
         group_ids["N"].append(pid)
         provenance.append({"persona_id": pid, "group": "N", "pair": None,
-                           "name": names[cursor], "occupation": row["occupation"],
+                           "name": name_for(pid), "occupation": row["occupation"],
                            "ocean": row["ocean_description"]["ocean"],
                            "demographic": row["demographic"]})
-        cursor += 1
 
     # The check: matching is the entire point, so it is verified rather than asserted in
     # a docstring. Any future edit that breaks the pairing fails here, not 1600 API calls in.
@@ -160,9 +174,17 @@ def main() -> None:
 
     out_dir = _PROJECT_DIR / "studies" / args.study
     (out_dir / "personas").mkdir(parents=True, exist_ok=True)
+    written, kept = [], []
     for pid, spec in specs:
-        (out_dir / "personas" / f"{pid}.agent.json").write_text(
-            json.dumps(spec, indent=2, ensure_ascii=False), encoding="utf-8")
+        path = out_dir / "personas" / f"{pid}.agent.json"
+        if path.exists():
+            kept.append(pid)
+            continue
+        path.write_text(json.dumps(spec, indent=2, ensure_ascii=False), encoding="utf-8")
+        written.append(pid)
+    if kept:
+        print(f"  kept {len(kept)} existing persona(s): {', '.join(kept)}")
+        print("  delete studies/<study>/personas/ to regenerate them from scratch")
 
     study = {
         "name": args.study,
@@ -185,13 +207,27 @@ def main() -> None:
         "persona_bank": {"source": args.bank, "setting": args.setting,
                          "seed": args.seed, "matching": "P_i and D_i share one bank row"},
     }
-    (out_dir / "study.json").write_text(
-        json.dumps(study, indent=2, ensure_ascii=False), encoding="utf-8")
+    # Only bootstrap study.json; never overwrite one. Regenerating personas is a routine
+    # thing to want (a style block changes, a leaked field is removed), but this dict is
+    # built from hardcoded defaults and would silently revert every design decision made
+    # in the file since: pair_with, sample sizes, the vote prompt, scenario edits, notes.
+    # ponytail: refuse rather than merge — a merge would need to know which side is newer.
+    study_path = out_dir / "study.json"
+    if study_path.exists():
+        wrote_study = False
+    else:
+        study_path.write_text(json.dumps(study, indent=2, ensure_ascii=False), encoding="utf-8")
+        wrote_study = True
     (out_dir / "bank_sample.json").write_text(
         json.dumps({"bank": args.bank, "setting": args.setting, "seed": args.seed,
                     "personas": provenance}, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    print(f"\nWrote {len(specs)} personas + study.json to {out_dir}")
+    print(f"\nWrote {len(written)} new persona(s) to {out_dir}")
+    if wrote_study:
+        print("  study.json created")
+    else:
+        print("  study.json left alone — it already exists and holds hand-made design "
+              "decisions.\n  Delete it first if you really want the generated defaults back.")
     print(f"  {args.pairs} matched pairs, {args.neutrals} neutrals")
     print("  matching verified: Big Five, occupation, age group, parental status")
     print("\nMatched pairs:")

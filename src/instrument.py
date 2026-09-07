@@ -6,7 +6,7 @@ anchors, who answers, and when all come from studies/<name>/instruments/<key>.js
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 # Who the rating is about. Drives prompt shape only; parsing is identical for all three.
@@ -34,6 +34,11 @@ class Instrument:
     citation: str
     license: str
     note: str
+    # Which of THIS instrument's subscales each subscale of another instrument is
+    # predicted to move. Only the prototype layer uses it: the source paper's needs map
+    # many-to-many onto ILT dimensions (status reaches tyranny, masculinity AND
+    # well-groomed), so a name-matching convention cannot express the hypothesis.
+    predicts: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
     @property
     def items(self) -> list[tuple[str, str, str]]:
@@ -43,6 +48,21 @@ class Instrument:
             for subscale, texts in self.subscales.items()
             for i, text in enumerate(texts, start=1)
         ]
+
+    @property
+    def fingerprint(self) -> str:
+        """Short hash of (item_id, text) pairs — the identity of this exact wording.
+
+        Item ids are positional (`{subscale}_{i}`), so they carry no information about
+        what the item says. Two versions of an instrument can therefore share ids while
+        asking different questions: the 1994 and 2018 ILT share 36 ids of which 28 have
+        different text, so scoring one's answers against the other silently rates
+        "strong" as if it were "commanding". This is what a checkpoint stores so that
+        cannot happen quietly.
+        """
+        import hashlib
+        blob = "\n".join(f"{i}\t{t}" for i, _, t in self.items)
+        return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
     def is_valid_rating(self, value: object) -> bool:
         low, high = self.scale
@@ -78,6 +98,15 @@ def load_instrument(path: Path) -> Instrument:
     if len(anchors) != 2:
         raise SystemExit(f"{path}: anchors must be a pair [low_label, high_label]")
 
+    predicts = {k: tuple(v) for k, v in spec.get("predicts", {}).items()}
+    for source, targets in predicts.items():
+        unknown_subscales = set(targets) - set(subscales)
+        if unknown_subscales:
+            raise SystemExit(
+                f"{path}: predicts['{source}'] names subscale(s) "
+                f"{sorted(unknown_subscales)} that this instrument does not have"
+            )
+
     return Instrument(
         key=spec.get("key", path.stem),
         title=spec.get("title", path.stem),
@@ -91,6 +120,7 @@ def load_instrument(path: Path) -> Instrument:
         citation=spec.get("citation", ""),
         license=spec.get("license", ""),
         note=spec.get("note", ""),
+        predicts=predicts,
     )
 
 

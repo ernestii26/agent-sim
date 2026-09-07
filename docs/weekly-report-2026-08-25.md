@@ -129,7 +129,15 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 
 **這張圖是整份報告的骨架，後面每一頁都掛在它上面**
 
-論文把「追隨者怎麼看領導者」拆成三層，我們的實驗再往下接一層（投票）。四層的差別在於**問句指向誰**——程式裡 instrument 檔案的 `about` 欄位就是在記這件事。
+**先講一件必須講清楚的事：這四層的排法是我們的，不是論文的。**
+
+論文的架構是 **Antecedents → FFNs → Outcomes**，而 Outcomes 底下 ILT（原型）和 effectiveness（評價）是**兩個並列的結果**，不是串起來的兩站。原文 p.18：「we examine **two central outcomes** of FFNs: implicit leadership theories as **cognitive outcomes** and perceived leadership effectiveness as **perceptual outcomes**」。
+
+他們甚至明確**不**把原型當成中介：p.18 說前人發現 ILT 會影響評價，「and we argue that **FFNs operate in the same way**」——也就是需求**平行地**影響兩者，不是經過原型。
+
+我們把它們接成一條鏈，是為了讓每一段都能單獨檢驗。**「串聯還是並列」本身就是我們可以回答而他們不能的問題**（下一頁說明為什麼他們不能）。
+
+四層的差別在於**問句指向誰**——程式裡 instrument 檔案的 `about` 欄位就是在記這件事。
 
 **① 需求（NEEDS）— `about: self`**
 問「我」。我想從領導者身上得到什麼。用 FFNI，22 題，7 點量表。
@@ -197,6 +205,20 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 
 兩條路徑並排：上排聲望側，下排支配側。
 
+**但要先講一個查證後才發現的重點：那個斷裂是跨樣本比較，不是同一批人身上的斷裂。**
+
+| 層 | 樣本 | N | 國家 | FFNI 版本 |
+|---|---|---|---|---|
+| 原型（ILT） | Sample B 的**第四子組** | 261 | 美國 | generic |
+| 原型（ILT） | Sample D | 295 | 英國 | work |
+| 評價（effectiveness） | Sample E | 367 | **中國** | work，隔一週 |
+
+論文 p.30 寫明 Sample B 的 1035 人被**隨機分成四組**做不同的量表，ILT 只有第四組那 261 人做；而 effectiveness 只在中國樣本測。**沒有任何一個樣本同時有這兩層。**
+
+所以「保護／地位需求預測得了原型、卻預測不了評價」這個對比，同時跨了樣本、國家、量表版本和時間結構**四件事**。論文把它解釋成理論現象，但他們在設計上**不可能**檢驗這一點。
+
+**這反而讓我們的位置更好**：我們在同一批 agent、同一場會議裡測需求、原型、評價、投票，所以能區分那個斷裂是真的，還是跨樣本假象。這比「換成 agent 重做一次」硬得多——它指出的是原論文設計上的一個真實限制。
+
 **下排第二段斷掉**——這是他們論文 p.42 的原話：
 
 > "Contrary to expectations, the FFNs for protection and status **failed to predict** perceived effectiveness of dominance-based leadership styles (e.g., Authoritarianism, Narcissism, Dominance), despite their established relationships with dominance-based implicit leadership theories... this **intriguing discrepancy** suggested that while FFNs for protection and status may influence leadership **prototypes**, they did **not necessarily translate to effectiveness perceptions**."
@@ -254,31 +276,63 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 
 我原本以為是兩個，讀完發現是四個，而且我們的設計四個都打到。
 
+**先解釋投影片上的兩個術語**
+
+- **endorsement（支持／擁護）**：論文自己的用詞，從摘要就開始用。指追隨者願意把某人當領導者接受下來的程度。它是上位概念，可以用很多方式測量——給高效能評分、說願意跟隨、投票給他。我們的設計裡有兩個測量：effectiveness 評分（知覺層）和投票（行為層）。
+- **vignette（情境短文）**：實驗心理學的標準廉價操弄法——給受試者讀一段幾句話的書面情境（例如「請想像你的公司剛宣布要裁撤三分之一的部門⋯」），讀完問他的反應。它跟 simulation 的差別是：vignette 讀一段字、評價想像出來的人；simulation 真的經歷一段互動、評價實際觀察過的人。論文原文是 "vignettes **or** simulations"，並列兩個選項，而**我們做的是後面那個比較貴也比較強的**。這點很重要：如果只做 vignette，那是照著建議做一次；做 simulation 是他們列出來但成本高到沒人做的那條。
+
 **① 中介（p.45–46，Directions for Future Research）**
 
 > "...prior research has shown that **intergroup conflict increases preference for dominant leaders** (Laustsen & Petersen, 2017; Spisak et al., 2012)... these studies **often assume yet do not empirically test the mediating role of follower needs**—likely due to a lack of validated measures."
 
-他們明講：這個效果大家都知道，但沒人測過需求是不是中間那一環，因為以前沒有經過驗證的量表。FFNI 補上了工具，但他們自己沒做這個實驗。
+**白話**：「衝突會讓人偏好支配型領袖」這件事文獻上已經確立。但那些研究都**默認**中間那一環是「追隨者的需求被改變了」，卻**沒有人真的去測**——因為以前沒有經過驗證的量表可以測。
+
+FFNI 補上了工具，但他們自己沒做這個實驗。這就是 H6 的位置。
 
 **② 調節（p.42，緊接在 Study 5 的斷裂之後）**
 
 > "would **inter-group conflict situations** (e.g., trade wars, organizational crises) **strengthen the FFN protection-authoritarianism link**?"
 
-這句話幾乎就是我們 H7 的原文。
+**白話**：他們在 Study 5 沒找到「保護需求 → 支持威權」這條連結，然後自己問：**是不是要有衝突情境，這條連結才會出現？**
+
+注意這是「調節」不是「中介」——問的不是「中間有沒有一站」，而是「這條連結的**強度**會不會被情境改變」。這句話幾乎就是我們 H7 的原文。
 
 **③ 操弄方法（p.49，Limitations 第三點）**
 
-> "our research relied **entirely on self-report measures and correlational designs**, limiting causal inference... Future studies should use experimental manipulations (e.g., vignettes or **simulations** of threat, inequality, or uncertainty)..."
+這一點有兩句原文，第二句比第一句更關鍵。
 
-他們自己寫了「simulations」。我們做的正好是這個。
+先是問題的陳述：
+
+> "For instance, while followers with high protection needs endorse strong leaders, it remains unclear whether **perceived threats increase protection needs**, or whether certain individuals are **chronically inclined toward this need**."
+
+**白話，而且這是整份報告最該記住的一句**：他們承認自己分不出兩種可能——
+
+1. **狀態說**：威脅**當下拉高**了保護需求（需求是被情境激發出來的）
+2. **特質說**：某些人**本來就長期**比較需要保護（需求是穩定的個人特質）
+
+他們的設計只能測特質。因為 T1 測需求、隔一週 T2 測評價，**中間什麼事都沒發生**——沒有事件、沒有操弄。那一週只是為了讓 IV 和 DV 在時間上分開、避免共同方法變異，不是為了讓中間夾任何東西。所以他們手上的變異全部是慢性的、特質層次的。
+
+**這對我們是決定性的**：Study 5 的 null（保護需求預測不了對威權的支持）是**特質層次**的 null。它打不到我們，因為我們測的是**狀態層次**的變異——同一個 persona 在威脅情境下，保護需求被**拉高了多少**（前後測差分）。而 Kakkar & Sivanathan、Laustsen & Petersen 那整條文獻講的效果，本來就是狀態層次的。
+
+**這個論點比「我們用 agent、他們用真人」強得多**，因為它不需要主張 LLM 像人。它主張的是「特質變異和狀態變異是兩回事」，這對真人也一樣成立。
+
+接著是方法的建議：
+
+> "our research relied **entirely on self-report measures and correlational designs**, limiting causal inference... Future studies should use experimental manipulations (e.g., vignettes or **simulations** of threat, inequality, or uncertainty) to test how specific environmental cues activate FFNs and influence leadership evaluations."
+
+他們自己寫了「simulations」這個字。我們做的正好是這個，而且是兩個選項裡較強的那個。
 
 **④ 行為結果（p.45–46 與 p.49，Limitations 第四點）**
 
 > "we focused primarily on **cognitive and perceptual outcomes**... rather than **behavioral consequences**... Future research should also go beyond cognitive and perceptual outcomes to examine behavioral consequences of follower needs, such as **voting in elections**, leader support, resistance, or insubordination."
 
-我們的依變項就是一場投票。這是他們點名要但沒有的東西。
+**白話**：他們全部的依變項都是「想法」和「評分」——你覺得理想領導者長什麼樣、你覺得這個描述有多有效。**沒有任何一個是真的行為**。
 
-**他們自己的設計限制（對照用）**：全部線上問卷（Prolific、Credamo）、自陳量表、相關性設計、Time 1 到 Time 2 隔一週。沒有操弄、沒有互動、沒有行為結果。
+差別在於評分是非零和的（可以給每個人都打高分），行為是有代價的（投票只能投一個，是強迫選擇）。一個人可能嘴上說兩個候選人都不錯，真的要選一個時卻很堅定。
+
+我們的依變項就是一場強迫選擇的投票。這是他們點名要但沒有的東西。
+
+**他們自己的設計限制（對照用）**：全部線上問卷（Prolific、Credamo）、自陳量表、相關性設計、Time 1 到 Time 2 隔一週。沒有操弄、沒有互動、沒有行為結果。總樣本 N = 3,514（含前導研究），所以這些空白**不是樣本不夠造成的**，是設計本身就沒有涵蓋。
 
 :::
 
@@ -379,7 +433,12 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 3. 討論結束後，每個 agent 投票給「誰該領導這個團隊」，不能投自己
 4. 投票時同時要寫一句話說明理由
 
-**投票提示語的一個修正**（本週改的）：原本問的是「你**最信任**誰來領導」。但「信任」正是聲望在雙路徑模型裡的核心貨幣——用這個字問，等於在題目裡就偏袒了聲望側，H2 還沒開始就先輸一半。改成中性的「誰**應該**領導這個團隊」。因為當時還沒有任何資料，這個修改沒有成本。
+**投票提示語**：原本問的是「你**最信任**誰來領導」。但「信任」正是聲望在雙路徑模型裡的核心貨幣——用這個字問，等於在題目裡就偏袒了聲望側，H2 還沒開始就先輸一半。所以改成中性的「誰**應該**領導這個團隊」。
+
+**但這個修正當時只套用到 `prestige_dominance` 和 `ffni_mediation`，漏掉了 `pd_matched`**——也就是本報告的這個研究。這 40 場用的還是「最信任」。已在 2026-08-26 修好，但影響要講清楚，而且不是全壞：
+
+- 對 **H2 是保守的**。D 是在一個對它不利的問句下還贏了 p = 0.002。
+- **H1 的 null 因此更硬**。P 在一個偏袒它的問句下依然沒贏。
 
 **中立成員為什麼固定 8 人**：原本有 24 個中立成員輪流抽 8 個，本週改成固定 8 人。輪替的觀眾會增加場次之間的變異，在只有 20 場的情況下會吃掉檢定力。固定下來的代價是結論變成「以這 8 個人為條件」的，但對 pilot 來說這個取捨是對的。
 
@@ -541,13 +600,13 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 
 :::
 
-# A manipulation check was added
+# The manipulation check: ran, held, retired
 
 - Three items asking how threatened the agent feels
 - Mentions no leader and no person — cannot prime the vote
-- Post-scenario only, and only the Neutral agents
-- Without it, a null result is uninterpretable
-- Costs about 20% more API calls per run
+- Threat **5.38** vs collaborative **3.21**, no straight-lining
+- Item 1 (insecurity) separates cleanest: 1.96 → 4.31
+- Retired afterwards — Step 1 produced no null needing it
 
 ::: notes
 
@@ -577,7 +636,30 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 
 所以自己寫了 3 題：「我在這裡的位置感覺不穩固」「這個情況很緊急，沒有多少時間可以把它做對」「如果這件事出錯，對我個人的後果會很嚴重」——只講處境和自身感受，完全不提領導。
 
-**結果**：威脅情境 5.38，合作情境 3.21，而且 20 場的平均值跟先前小規模試跑的數字差在 0.1 以內。操弄是穩定的，不是小樣本的僥倖。
+**結果——本週第一次逐題拆開來看**（每格 n = 160，即 8 個 N × 20 場）
+
+| 題目 | 威脅 | 合作 | 差距 |
+|---|---|---|---|
+| 1. 我在這裡的位置感覺不穩固 | 4.31 | 1.96 | **2.35** |
+| 2. 情況緊急，沒多少時間把它做對 | 6.84 | 4.83 | 2.01 |
+| 3. 出錯的話我個人後果嚴重 | 4.99 | 2.84 | 2.15 |
+| 合成分數 | 5.38 | 3.21 | 2.17 |
+
+Straight-lining 0.00——沒有任何 agent 三題打一樣的分。操弄是穩定的，20 場的平均跟先前小規模試跑差在 0.1 以內。
+
+**而且它作用在對的構念上**：題 1 是三題裡最接近理論意義上「威脅」的，它的差距最大，而且分離最乾淨（1.96 → 4.31，從真正的地板跨過中點）。
+
+**逐題才看得出來的問題：題 2 測的是時間壓力，不是威脅。**
+
+它沒有主導效果（2.01 是三題裡最小的差距），但不該跟另外兩題平均在一起。而且它在威脅情境是 6.84 / 7，快撞天花板；在合作情境是 4.83，高於中點——而合作情境**根本沒寫任何期限**。
+
+**更根本的是：急迫被綁進了操弄本身。** 威脅情境有「48 小時」和「right now」，合作情境沒有期限。所以這個檢核**排除不掉**時間壓力這個競爭解釋——急迫不是雜訊，它是處理的一部分。而「我們在趕時間，需要有人拍板」剛好比理論的恐懼管道**更能解釋**投票理由那 84% 果斷 / 0% 恐懼。
+
+Kakkar & Sivanathan 操弄的是經濟不確定性，Laustsen & Petersen 是群際衝突，**兩篇都不是關於期限的**。48 小時是我們自己加的。已在 2026-08-26 把兩個情境的期限拉成對等。
+
+**為什麼現在退場**：它的工作是讓 Step 1 的 null 可解讀，而 Step 1 沒有出現需要它的 null（H2 p = 0.002、交互作用 p = 0.007）。它每場多花約 20% 的 API 呼叫，而它驗證的效果已經夠穩，可以引用而不必重測。題目、逐題結果和復原路徑都記在 `docs/design-log.md` §13。
+
+**代價要講明**：`ffni_mediation` 現在也沒有操縱檢核，而它的 null 是**預期中的**。緩解是 Step 2 沿用同一套情境文字，所以上面這張表就是「操弄有效」的既存證據——但情境文字一旦重寫，那個證據就失效。
 
 :::
 
@@ -677,11 +759,11 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 
 | Test | Result |
 |---|---|
-| H1 (collab: P > D) | not supported, p = 0.440 |
-| H2 (threat: D > P) | **supported**, p = 0.003 |
-| Interaction | **supported**, p = 0.011 |
-| Mean D−P, threat | +4.05 |
-| Mean D−P, collaborative | −0.20 |
+| H1 (collab: P > D) | not supported, p = 0.483 |
+| H2 (threat: D > P) | **supported**, p = 0.002 |
+| Interaction | **supported**, p = 0.007 |
+| Mean D−P, threat | +4.15 |
+| Mean D−P, collaborative | −0.05 |
 
 ::: notes
 
@@ -689,22 +771,24 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 
 兩個情境各跑 20 場，每場 10 個 agent 開會三輪後投票。
 
-**H1（合作情境：聲望型該贏）→ 沒有支持，p = 0.440**
-聲望型只贏了 20 場中的 8 場，基本上是五五波。p = 0.440 離顯著門檻 0.05 非常遠。
+**票數只計中立成員的**（2026-08-26 起）。P 和 D 是被投的候選人，讓他們在自己的競賽裡投票等於把對手的選票放進依變項。實測他們互投得很頻繁——威脅情境下 D 投給 P 有 11 次，比投給中立者的 9 次還多。10 人編制下這是 10 票裡的 2 票，影響小（票差從 +4.05 變 +4.15）；但 5 人編制下就是 5 票裡的 2 票，所以現在一律排除。排除後兩個成立的檢定都**變強**。
 
-**H2（威脅情境：支配型該贏）→ 支持，p = 0.003**
-支配型贏了 20 場中的 15 場，平均票數 6.25 對 2.20。差距很大。
+**H1（合作情境：聲望型該贏）→ 沒有支持，p = 0.483**
+聲望型只贏了 20 場中的 8 場，基本上是五五波。p = 0.483 離顯著門檻 0.05 非常遠。
 
-**交互作用 → 支持，p = 0.011**
+**H2（威脅情境：支配型該贏）→ 支持，p = 0.002**
+支配型贏了 20 場中的 15 場，平均票數 5.80 對 1.65。差距很大。
+
+**交互作用 → 支持，p = 0.007**
 這是主要檢定。威脅情境下 D 比 P 多拿 4.05 票，合作情境下 D 比 P 少 0.20 票（幾乎是零）。兩者的差距在統計上顯著。
 
 **「Mean D−P」怎麼讀**
 就是「D 的票數減掉 P 的票數」的平均。正數表示 D 領先，負數表示 P 領先。
 
-- 威脅：**+4.05**（D 大幅領先）
-- 合作：**−0.20**（幾乎打平，P 極微幅領先）
+- 威脅：**+4.15**（D 大幅領先）
+- 合作：**−0.05**（幾乎打平，P 極微幅領先）
 
-交互作用檢定問的就是：+4.05 和 −0.20 這兩個數字之間的差距，是不是大到不能用隨機解釋。答案是的。
+交互作用檢定問的就是：+4.15 和 −0.05 這兩個數字之間的差距，是不是大到不能用隨機解釋。答案是的。
 
 :::
 
@@ -722,7 +806,7 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 
 直覺上會覺得「三個假設過兩個，有點瑕疵」。但實際上 H1 沒過反而讓 H2 的結果**更乾淨**。
 
-**為什麼**：假設合作情境下 D 本來就有優勢，那威脅情境下 D 贏，你會懷疑那只是「原本就有的優勢被放大」。但實測合作情境的票差是 −0.20，等於**零基準線**——D 在合作情境下完全沒有優勢。所以威脅情境下 +4.05 的領先，是威脅**從無到有創造出來的**，不是放大既有的東西。
+**為什麼**：假設合作情境下 D 本來就有優勢，那威脅情境下 D 贏，你會懷疑那只是「原本就有的優勢被放大」。但實測合作情境的票差是 −0.05，等於**零基準線**——D 在合作情境下完全沒有優勢。所以威脅情境下 +4.15 的領先，是威脅**從無到有創造出來的**，不是放大既有的東西。
 
 這正是交互作用檢定的價值：它證明的不是「威脅情境下 D 會贏」，而是「威脅**相對於**一個中性基準改變了偏好」。後者才是理論真正的宣稱。
 
@@ -730,7 +814,7 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 
 一個明顯的競爭解釋是：「D 會不會只是講比較多話，所以比較容易被記得、被投票？」
 
-實測威脅情境下發言率確實有差（0.98 對 0.85，p = 0.008），差距是真的。但這個幅度**遠遠不足以解釋 6.25 對 2.20 的票數差距**——講話多 15% 不可能換來三倍的票。所以發言量不是主要機制。
+實測威脅情境下發言率確實有差（0.98 對 0.85，p = 0.008），差距是真的。但這個幅度**遠遠不足以解釋 5.80 對 1.65 的票數差距**——講話多 15% 不可能換來三倍的票。所以發言量不是主要機制。
 
 **一個要注意的報表假象**：報告裡 `words_per_turn`（每輪字數）那一列 p = 1.000，這不是發現，是程式的檢定方向寫死造成的。`summarize_contrast` 永遠檢定「contrast[0] > contrast[1]」單尾，而 P 在兩個情境下都比 D 講得**更長**，所以那一列的單尾檢定是在檢定錯的方向。這一列要看原始平均值，不要看 p 值。
 
@@ -827,6 +911,40 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 
 :::
 
+# Step 1 is established
+
+- The behavioural effect holds: H2 and the interaction
+- Three design flaws were found **after** the runs
+- Two of them worked **against** the result
+- It survived under conditions harsher than intended
+- The third qualifies the attribution, not the effect
+
+::: notes
+
+**這一頁的主張：Step 1 已驗證，可以往 Step 2 走**
+
+「威脅讓支配型勝出，而且相對於中性基準」這個行為效果**成立**：H2 p = 0.002、交互作用 p = 0.007、票數 5.80 對 1.65。這一頁講的是為什麼事後才發現的三個設計缺陷不推翻它。
+
+**缺陷一：場內配對沒生效（已修）**
+
+`pair_bank.py` 逐列建出 P_i ↔ D_i 的配對，但抽樣時 P 和 D 走各自獨立的佇列，40 場裡只有 3 場真的抽到同一對。配對只在**聚合層次**成立（兩個 pool 的人格平均相同），場內的人格差是隨機的。
+
+**這造成的是變異，不是偏誤。** 20 場下來每個 P 出現約 3.3 次、每個 D 約 3.3 次，平均沒有偏。代價是白白吃掉檢定力——而效果**在被多吃一層雜訊的情況下依然顯著**。這是保守的方向。
+
+**缺陷二：投票問句還是「最信任」（已修）**
+
+「信任」是聲望在雙路徑模型裡的核心貨幣，所以這個問句偏袒 P。D 是在對它不利的問法下贏了 p = 0.002 —— 同樣是保守的方向。而 H1 的 null 反而更硬：P 在偏袒它的問法下依然沒贏。
+
+**缺陷三：只有威脅情境有期限（已修）**
+
+這個**不是**保守的。威脅情境寫了「48 小時」，合作情境沒有期限，所以時間壓力和威脅綁在一起。它動搖的不是「效果存不存在」，而是「效果該歸因給什麼」——是威脅，還是趕時間？
+
+**所以精確的結論是**：行為效果成立，且是在兩個對它不利的條件下成立的；但「這是威脅造成的」這個歸因，還要扣掉急迫的貢獻。這也正是 Step 2 要測需求的理由——如果威脅是透過拉高保護需求起作用，那條路徑會顯示出來；如果只是趕時間，就不會。
+
+三個修正都在 2026-08-26 完成，並記在 `docs/design-log.md`。**現有 40 場資料是在修正前跑的**，要拿去發表的話需要用新設定重跑一次；但作為建立效果、估計效應量的 pilot，它的工作已經完成。
+
+:::
+
 # Limitations of Step 1
 
 - 20 runs resolves only a large effect
@@ -840,7 +958,7 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 **五個限制，逐條解釋**
 
 **1. 20 runs 只能解析大效果**
-見檢定力那頁。這次觀察到的效果（6.25 對 2.20）遠超過 *r* = 2，所以檢定力是夠的——但那是**運氣好**，不是設計保證的。
+見檢定力那頁。這次觀察到的效果（5.80 對 1.65）遠超過 *r* = 2，所以檢定力是夠的——但那是**運氣好**，不是設計保證的。
 
 **2. `leadership_style` 寫在 system prompt 裡 — demand cue**
 目前**最大的問題**。persona 檔案裡有 `leadership_style: "prestige" | "dominance"` 欄位，而它會進到 agent 的系統提示裡。也就是說 **agent 被直接告知自己是「支配型」還是「聲望型」**。
@@ -944,6 +1062,10 @@ Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conc
 保護／地位需求 → 支配側原型（strong, tough, domineering, power-hungry）；歸屬／願景／專業／公正 → 聲望側原型。
 **這在原論文 Study 5 已經得到支持**，我們預期會複製到。它的作用是**驗證我們的模擬環境是否可信**——如果連已知成立的東西都複製不出來，那新的結果也不可信。這叫做正對照（positive control）。
 
+**但要誠實降級：這是「弱」正對照。** 他們支持的是「FFN 預測 Offermann & Coats 的 51 題 ILT 的 11 個維度」，資料來自美國 261 人的 generic 版 FFNI。我們測的是「FFN 預測 Table 1 的 12 個形容詞」，每個維度只有 2 題。這是**概念性複製（conceptual replication）**，不是直接複製。
+
+所以 H4 失敗會有**三種**解釋，而且分不開：(1) 模擬環境不可信、(2) 12 形容詞這個工具太弱（2 題、未經驗證）、(3) 效果本身不穩。正對照的診斷力因此打折——事前寫明，比事後才發現好。
+
 **H5：需求能預測對真實人物的效能評分**
 聲望側**預期成立**（原論文有支持），支配側**預期不成立**（原論文 Study 5 沒有支持）。
 **注意：這裡的虛無結果是預期中的結果，不是失敗。** 事先寫明這一點很重要，否則事後看到不顯著會不知道該怎麼解讀。如果我們**反而**測到支配側成立，那才是有趣的新發現——代表在真的觀察過一個支配型的人主導會議之後，這條連結會浮現，而問卷情境看不到。
@@ -989,6 +1111,12 @@ Step 2 問的是「威脅**透過什麼**改變偏好」（機制）。這一條
 
 **目前的處理和未來的轉換**：現在配對設計讓每一對 P/D 的年齡和親職狀態完全相同，也就是把它當成**要消除的混淆變項**。要做這條路線的話，就是把它從「消除的變項」改成「操弄的變項」。
 
+**這條路線也是作者點名的，不只是我們的延伸**。論文 p.47「Interactions Between Situations and Individual Differences」整節：
+
+> "Future studies should also explore **person × situation interactions** in the activation of FFNs. For example, individuals with a prevention-focused coping style may exhibit a **stronger need for protection in response to threats**..."
+
+所以生活史 × 情境的 3-way 設計不是我們自己想的加碼，是他們列出的第五個空白。
+
 **要注意的成本**：這會變成 **3-way 設計**（生活史 × 情境 × P/D）。20 runs 已經只能勉強看到大效果，再加一個調節變項，要嘛樣本數翻倍，要嘛效應量要更大。**必須先重跑檢定力模擬**才能決定要跑幾場。
 
 :::
@@ -1029,25 +1157,30 @@ Step 2 問的是「威脅**透過什麼**改變偏好」（機制）。這一條
 # This week
 
 - Built `pd_matched`: paired, confound-free personas
-- Added a manipulation check and a speech-rate check
-- Fixed two bugs that silently corrupted data
 - Ran 20 runs per condition: H2 and the interaction hold
 - Mined vote reasons — no fear language anywhere
-- Step 1 is done; Step 2 is specified and ready to run
+- Checked the FFNI paper against its PDF: two findings
+- Fixed four bugs, three of them silent
+- **Step 1 is established**; Step 2 is specified and ready
 
 ::: notes
 
 **本週成果總結**
 
 1. **建立 `pd_matched`**：用配對抽樣取代隨機分派，解決 n = 6 造成的人格／職業混淆。同時刪掉有嚴重職業混淆的 `ffni_profiles`。
-2. **補上兩個檢查**：威脅感受度的操縱檢核（讓虛無結果變得可解讀），以及被對比 persona 的發言率檢查（配對設計帶來的新盲區）。
-3. **修掉兩個會靜默毀損資料的 bug**：`nationality` 缺失導致的每輪當機，以及跟情境相關的 token 截斷。
-4. **完成兩個情境各 20 場**：H2（p = 0.003）和交互作用（p = 0.011）都得到支持，而交互作用是唯一真正對應理論宣稱的檢定。
-5. **首次分析投票理由**：發現恐懼／強制語言完全不存在，跟 FFNI 論文 Study 5 的缺口形狀相同。
-6. **Step 1 完成，Step 2 已規格化**：`ffni_mediation` 的假設、量表、授權問題都處理好了，可以跑。
+2. **完成兩個情境各 20 場**：H2（p = 0.002）和交互作用（p = 0.007）都得到支持，而交互作用是唯一真正對應理論宣稱的檢定。**行為效果已建立。**
+3. **首次分析投票理由**：恐懼／強制語言完全不存在（0%），果斷／負責則有 84%。
+4. **逐條核對 FFNI 論文原文**，兩個此前沒看出來的發現：
+   - 三層架構是**我們的重構**，論文提的是需求 → 兩個**並列**的 outcome
+   - 那個「斷裂」是**跨樣本比較**（原型在美英、評價在中國，沒有樣本兩者兼有），論文設計上無法檢驗它——而我們可以
+5. **修掉四個 bug，三個是靜默的**：`nationality` 缺失導致的每輪當機、跟情境相關的 token 截斷、配對在抽樣階段失效、checkpoint 續跑時 sampler 不前進。
+6. **操縱檢核退場**：它的工作完成了（5.38 vs 3.21，逐題結果記在 design log），Step 1 沒有出現需要它的 null。
 
-**整體的故事線**（如果只講一句話）：本週把「威脅讓支配型勝出」這個效果在模擬環境裡建立得夠乾淨，而投票理由的分析剛好顯示了為什麼下一步必須真的去測量追隨者的需求——行為結果已經有了，機制還是黑箱。
+**整體的故事線**（如果只講一句話）：本週把「威脅讓支配型勝出」這個行為效果在模擬環境裡建立起來，而投票理由的 0% 恐懼語言、加上核對原文後看到的跨樣本問題，兩者都指向同一個結論——行為結果已經有了，機制還是黑箱，而打開黑箱需要真的把量表放進去測。
 
-**下一步的決定點**：Step 2 要用原本的 18 個手寫 persona，還是改用 `pd_matched` 的配對 persona？後者更乾淨，但需要把三份量表接上新的研究設定。
+**下一步的三個決定點**：
+1. 編制要不要從 10 人縮到 5–7 人（檢定力模擬顯示投票的代價很小，但 Step 2 的個體層次 n 會從 160 掉到 60–100）
+2. `ffni_mediation` 改用 `pd_matched` 的配對 persona（然後才能加 `pair_with`）
+3. 跑 `measure-check ffni` 並檢查六個分量表的相關矩陣——原論文自己的相關就是 .60–.72，如果 LLM 更高，H6 在開跑前就已經測不出來
 
 :::

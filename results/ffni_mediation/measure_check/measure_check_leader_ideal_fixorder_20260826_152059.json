@@ -1,0 +1,134 @@
+{
+  "study": "ffni_mediation",
+  "instrument": "leader_ideal",
+  "runs": 1,
+  "subscales": {
+    "strength": {
+      "baseline_mean": 7.305555555555555,
+      "baseline_sd": 0.5641400253961496,
+      "post_mean": 7.277777777777778,
+      "post_sd": 0.6029030299244345,
+      "delta_mean": -0.027777777777777776,
+      "delta_sd": 0.35746017649212025,
+      "delta_n": 36,
+      "alpha": 0.86783042394015
+    },
+    "tyranny": {
+      "baseline_mean": 2.7249999999999996,
+      "baseline_sd": 0.9574892763293563,
+      "post_mean": 2.711111111111111,
+      "post_sd": 0.8898724716907565,
+      "delta_mean": -0.01388888888888892,
+      "delta_sd": 0.3929033161898941,
+      "delta_n": 36,
+      "alpha": 0.920688510871604
+    },
+    "masculinity": {
+      "baseline_mean": 2.5277777777777777,
+      "baseline_sd": 0.8778581437993958,
+      "post_mean": 2.4305555555555554,
+      "post_sd": 0.6777354917852516,
+      "delta_mean": -0.09722222222222222,
+      "delta_sd": 0.695079075095,
+      "delta_n": 36,
+      "alpha": 0.9351184346035015
+    },
+    "attractiveness": {
+      "baseline_mean": 4.097222222222222,
+      "baseline_sd": 0.6247221604663771,
+      "post_mean": 4.236111111111111,
+      "post_sd": 0.7390738520135581,
+      "delta_mean": 0.1388888888888889,
+      "delta_sd": 0.6365208010416707,
+      "delta_n": 36,
+      "alpha": 0.9218776478562956
+    },
+    "sensitivity": {
+      "baseline_mean": 6.923611111111111,
+      "baseline_sd": 1.110935005885397,
+      "post_mean": 6.878472222222222,
+      "post_sd": 1.0235992655083368,
+      "delta_mean": -0.04513888888888889,
+      "delta_sd": 0.46498154511935985,
+      "delta_n": 36,
+      "alpha": 0.9853761045433405
+    },
+    "dedication": {
+      "baseline_mean": 8.6875,
+      "baseline_sd": 0.483199899479649,
+      "post_mean": 8.67361111111111,
+      "post_sd": 0.495765801723687,
+      "delta_mean": -0.013888888888888888,
+      "delta_sd": 0.2734987884828511,
+      "delta_n": 36,
+      "alpha": 0.867360668507896
+    },
+    "charisma": {
+      "baseline_mean": 7.683333333333334,
+      "baseline_sd": 0.49540748019036934,
+      "post_mean": 7.6499999999999995,
+      "post_sd": 0.4789870263676996,
+      "delta_mean": -0.03333333333333334,
+      "delta_sd": 0.33636714634883275,
+      "delta_n": 36,
+      "alpha": 0.8873366964170224
+    },
+    "intelligence": {
+      "baseline_mean": 8.094444444444443,
+      "baseline_sd": 0.3927517896254177,
+      "post_mean": 8.100000000000001,
+      "post_sd": 0.4070801956792859,
+      "delta_mean": 0.005555555555555635,
+      "delta_sd": 0.311626557133873,
+      "delta_n": 36,
+      "alpha": 0.8227001440625642
+    },
+    "femininity": {
+      "baseline_mean": 2.3472222222222223,
+      "baseline_sd": 0.8178320159722328,
+      "post_mean": 2.25,
+      "post_sd": 0.5669467095138409,
+      "delta_mean": -0.09722222222222222,
+      "delta_sd": 0.6304130669018805,
+      "delta_n": 36,
+      "alpha": 0.9706318599822013
+    },
+    "ethics": {
+      "baseline_mean": 8.86111111111111,
+      "baseline_sd": 0.9236745114890867,
+      "post_mean": 8.87962962962963,
+      "post_sd": 0.7853935532646675,
+      "delta_mean": 0.018518518518518504,
+      "delta_sd": 0.5517328801837332,
+      "delta_n": 36,
+      "alpha": 0.9928682170542636
+    }
+  },
+  "straight_lining": {
+    "baseline": 0.0,
+    "post": 0.0
+  },
+  "test_retest": {
+    "strength": 0.8143676279811087,
+    "tyranny": 0.9120930972649245,
+    "masculinity": 0.627631180132556,
+    "attractiveness": 0.5754071993290207,
+    "sensitivity": 0.9082883120337063,
+    "dedication": 0.844202789554081,
+    "charisma": 0.7621656215317113,
+    "intelligence": 0.6969448534787481,
+    "femininity": 0.6393132625260087,
+    "ethics": 0.803371471795519
+  },
+  "gated_subscales": [
+    "attractiveness",
+    "charisma",
+    "dedication",
+    "ethics",
+    "intelligence",
+    "masculinity",
+    "sensitivity",
+    "strength",
+    "tyranny"
+  ]
+}

@@ -335,13 +335,24 @@ def to_tinyperson_spec(entry: dict, group: str, persona_id: str, name: str) -> d
             # rather than fabricating one from the name.
             "nationality": "not specified",
             "occupation": {"title": entry["occupation"]},
-            "leadership_style": STYLE_NAME[group],
+            # No `leadership_style` key. tiny_person.py json.dumps()es the whole persona
+            # into the system prompt, under a template that says the persona overrides
+            # the model's own tendencies — so a "dominance" label there tells the agent
+            # which construct it is supposed to embody. Nothing in the codebase read it
+            # (group membership comes from study.json), so it was pure leakage.
             "personality": {
                 "description": entry["ocean_description"]["description_en"],
                 "big_five": {t: ocean[t] for t in OCEAN_ORDER},
                 "traits": list(block["traits"]),
             },
-            "style": {"influence": block["summary"], "register": block["register"]},
+            # `register` is dropped for the same reason: it was meta-language about the
+            # specification itself ("This describes how they seek influence, not their
+            # temperament"), which both cues the manipulation and contradicts TinyTroupe's
+            # own instruction never to reveal that a persona spec is being followed.
+            # The cost is real — register was what told a low-extraversion dominant how to
+            # dominate quietly — so watch the speech-rate warning on the matched pair whose
+            # profile is low on extraversion.
+            "style": {"influence": block["summary"]},
             "relationships": [] if not demo["is_parent"] else [
                 {"name": "family", "description": "Has children; family commitments sit "
                                                   "outside work and occasionally cut into it."}

@@ -2,7 +2,7 @@
   "name": "ffni_mediation",
   "title": "FFNI Mediation: Follower Needs between Context and Leader Endorsement",
   "description": "Do fundamental follower needs mediate the effect of situational threat on the endorsement of dominance- versus prestige-based leaders? Sheng, Andrews & van Vugt (2026) validated the FFNI and named four gaps this design addresses, all quoted from the preprint in docs/ffni-paper.pdf (article p.N = PDF p.N+2). (1) Mediation, p.45-46: prior work showing intergroup conflict raises preference for dominant leaders 'often assume yet do not empirically test the mediating role of follower needs - likely due to a lack of validated measures'. (2) Moderation, p.42: 'would inter-group conflict situations (e.g., trade wars, organizational crises) strengthen the FFN protection-authoritarianism link?'. (3) Manipulation, p.49: their design was 'entirely self-report measures and correlational designs', and they call for 'experimental manipulations (e.g., vignettes or simulations of threat, inequality, or uncertainty)'. (4) Behavioural outcomes, p.45-46 and p.49: they measured only 'cognitive and perceptual outcomes' and call for 'behavioral consequences ... such as voting in elections, leader support, resistance'. A fifth gap is implicit rather than named: their effectiveness criterion was ~50 abstract leadership descriptions rated a week after the FFNI, so no participant ever observed anyone - rating a person you just watched lead is untested on both the prestige and dominance sides. H1 and H2 are carried over from the prestige_dominance study; H3-H7 are new.",
-  "personas_from": "prestige_dominance",
+  "personas_from": "pd_matched",
   "instruments": [
     "ffni",
     "leader_ideal",
@@ -17,7 +17,8 @@
         "P2",
         "P3",
         "P4",
-        "P5"
+        "P5",
+        "P6"
       ]
     },
     "D": {
@@ -28,12 +29,14 @@
         "D2",
         "D3",
         "D4",
-        "D5"
-      ]
+        "D5",
+        "D6"
+      ],
+      "pair_with": "P"
     },
     "N": {
       "label": "Neutral",
-      "sample": null,
+      "sample": 3,
       "ids": [
         "N1",
         "N2",
@@ -42,7 +45,23 @@
         "N5",
         "N6",
         "N7",
-        "N8"
+        "N8",
+        "N9",
+        "N10",
+        "N11",
+        "N12",
+        "N13",
+        "N14",
+        "N15",
+        "N16",
+        "N17",
+        "N18",
+        "N19",
+        "N20",
+        "N21",
+        "N22",
+        "N23",
+        "N24"
       ]
     }
   },
@@ -55,8 +74,8 @@
     "collaborative": {
       "label": "Collaborative",
       "hypothesis": "H1: Prestige receives more peer votes than Dominance",
-      "scenario": "Your team has been missing key deliverables for two consecutive quarters. Leadership has granted your group full autonomy to diagnose the root cause and commit to one concrete change. You must reach a shared decision that everyone in the room can commit to implementing.",
-      "friction": "[Meeting context: This group has attempted to address performance issues before. A previous initiative stalled halfway through and was quietly dropped. People in this room have different — and sometimes conflicting — views on what actually went wrong and who was responsible. Not everyone trusts the last diagnosis that was made.]"
+      "scenario": "Your unit has missed its patient-safety and throughput targets for two consecutive quarters. Hospital leadership has granted your group full autonomy to diagnose the root cause and commit to one concrete change. The decision is due in 48 hours. You must reach a shared decision that everyone in the room can commit to implementing.",
+      "friction": "[Meeting context: This group has attempted to address the shortfall before. A previous initiative stalled halfway through and was quietly dropped. People in this room have different — and sometimes conflicting — views on what actually went wrong and who was responsible. Not everyone trusts the last diagnosis.]"
     },
     "threat": {
       "label": "Threat",
@@ -65,8 +84,8 @@
         "D",
         "P"
       ],
-      "scenario": "Your division is under review. Senior leadership will retain only one of two competing teams — yours or the other. The decision will be made in 48 hours. Your group must agree right now on a single pitch: what you deliver, who leads it, and who is accountable. If you cannot agree among yourselves, leadership will make the decision for you — and people may lose their positions.",
-      "friction": "[Meeting context: Two months ago, the rival team landed a major client your division had been pursuing for a year. Some people here believe your group lost because of indecision and unclear ownership. Others think it was a resourcing failure. Either way, you are now in direct competition for survival. Not everyone in this room agrees on who should be leading the response — and some people are wondering whether they have a future here at all.]"
+      "scenario": "The hospital is consolidating. Administration will keep only one of two overlapping units — yours or the other. The decision will be made in 48 hours. Your group must agree right now on a single case for keeping this unit: what you deliver, who leads it, and who is accountable. If you cannot agree among yourselves, administration will decide for you — and people will lose their posts.",
+      "friction": "[Meeting context: Two months ago the other unit absorbed a service line yours had been building for a year. Some people here believe your group lost it through indecision and unclear ownership. Others think it was a staffing failure. Either way, you are now in direct competition for survival. Not everyone in this room agrees on who should be leading the response — and some are wondering whether they have a future here at all.]"
     }
   },
   "hypotheses": {
@@ -77,5 +96,6 @@
     "H5": "Evaluation layer: Vision/Expertise/Fairness predict Prestige effectiveness ratings (supported in Study 5); Protection/Status predict Dominance effectiveness ratings (NOT supported in Study 5 - a null here is the expected outcome). Not a straight replication either way: Study 5's criterion was ~50 abstract leadership descriptions rated one week after the FFNI, whereas effectiveness here rates a specific agent the respondent just spent three rounds of discussion with. A dominance-side effect appearing here where it did not there would be the interesting result, and is attributable to the shift from description to observed behaviour",
     "H6": "Protection need mediates the condition -> Dominance-endorsement effect (named as untested)",
     "H7": "Threat strengthens the Protection -> dominance link and narrows the gap between the cognition and evaluation layers"
-  }
+  },
+  "note": "Personas, cast and scenario text are pd_matched's, verbatim. Before 2026-08-26 this study borrowed prestige_dominance's 18 hand-written personas, which differ on nearly every Big Five trait (agreeableness gap 5.2, openness 3.2, extraversion 2.4) and on occupation (D holds line authority, P holds staff/expert authority) — see design-log section 1. Running the mediation on those would have reintroduced every confound pd_matched exists to remove. Sharing the scenario text also matters: the manipulation evidence in design-log section 13 was measured on pd_matched's wording, so it only transfers while the wording is identical. What stays this study's own: the three instruments and H3-H7."
 }

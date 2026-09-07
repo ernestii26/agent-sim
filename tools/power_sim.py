@@ -6,9 +6,10 @@
 Recorded output (at reps=3000) lives in docs/design-log.md — read that first, and only re-run this
 when the design changes (cast size, number of voters, runs per condition).
 
-The vote is a forced choice among 10 candidates, so a run yields two small counts.
-That is a coarse dependent variable and the question is what it can resolve at the
-20 runs config.ini asks for. Agents are modelled as picking a candidate with
+The vote is a forced choice, so a run yields two small counts. That is a coarse
+dependent variable and the question is what it can resolve at the runs config.ini asks
+for. Only the electorate counts: the two candidates stand, so they do not vote
+(design-log section 16), which at a cast of 5 leaves three ballots per run. Agents are modelled as picking a candidate with
 probability proportional to a weight; D's weight r is the effect size, r = 1 the null.
 
 # ponytail: weighted random choice, not a model of deliberation. It gives the null
@@ -28,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from stats import paired_ttest_onesided  # noqa: E402
 
-N_NEUTRAL = 8  # cast is 1 P + 1 D + 8 N; every agent votes, nobody votes for themselves
+N_NEUTRAL = 3  # cast is 1 P + 1 D + 3 N, and only the neutrals' ballots count
 
 
 def one_run(r: float, rng: random.Random) -> tuple[int, int]:

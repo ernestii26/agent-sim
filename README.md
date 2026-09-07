@@ -25,8 +25,14 @@ python3 run.py measure-check ffni_mediation                # is the rating scale
 python3 run.py run           ffni_mediation collaborative
 python3 run.py run           ffni_mediation threat --runs 20 --rounds 3
 python3 run.py report        ffni_mediation threat         # re-report, no API calls
-python3 run.py mediate       ffni_mediation --need protection --group D
+python3 run.py mediate       ffni_mediation --need protection --group D   # H6
+python3 run.py layers        ffni_mediation                              # H3, H4, H5, H7
 ```
+
+`mediate` and `layers` read both conditions' checkpoints, because every hypothesis they
+cover is a claim about the difference between conditions. `report` renders one condition
+and cannot see across them. `layers` bootstraps over runs rather than respondents — three
+neutrals in a room watched one discussion between them.
 
 Run `measure-check` before paying for a study that uses instruments. It administers the
 self-report scale twice per persona (no discussion, no votes) and fails loudly if the agents
@@ -99,7 +105,7 @@ from `seeds.json` or from disk fails the check.
 
 | Path | Role |
 |---|---|
-| `run.py` | CLI: `list` / `validate` / `run` / `report` |
+| `run.py` | CLI: `list` / `validate` / `measure-check` / `run` / `report` / `mediate` / `layers` |
 | `src/study.py` | Loads and validates `study.json` |
 | `src/instrument.py` | Loads a rating scale from `instruments/*.json`; subscale scoring |
 | `src/config.py` | `config.ini` → `RunConfig` |

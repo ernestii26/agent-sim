@@ -22,6 +22,10 @@ class Group:
     label: str
     ids: tuple[str, ...]
     sample: int | None  # None = every member participates in every run
+    # Draw the same positions as another sampled group, so ids line up by index.
+    # For bank-paired personas (P_i and D_i built from one row) this keeps the
+    # matched pair together in the same run instead of drawing them independently.
+    pair_with: str | None = None
 
 
 @dataclass(frozen=True)
@@ -43,6 +47,8 @@ class Study:
     groups: dict[str, Group]
     conditions: dict[str, Condition]
     vote_prompt: str
+    # Seeds the cast samplers, so run i draws the same positions in every condition.
+    sampler_seed: int = 0
     instruments: tuple["Instrument", ...] = ()
     personas_from: str | None = None  # borrow another study's personas instead of copying them
 
@@ -118,7 +124,27 @@ def load_study(name: str) -> Study:
             raise SystemExit(f"{path}: group '{key}' has no ids")
         if sample is not None and not 1 <= sample <= len(ids):
             raise SystemExit(f"{path}: group '{key}' samples {sample} of {len(ids)} ids")
-        groups[key] = Group(key=key, label=raw.get("label", key), ids=ids, sample=sample)
+        groups[key] = Group(
+            key=key,
+            label=raw.get("label", key),
+            ids=ids,
+            sample=sample,
+            pair_with=raw.get("pair_with"),
+        )
+
+    for group in groups.values():
+        if group.pair_with is None:
+            continue
+        source = groups.get(group.pair_with)
+        if source is None:
+            raise SystemExit(f"{path}: group '{group.key}' pairs with unknown group '{group.pair_with}'")
+        if source.pair_with is not None:
+            raise SystemExit(f"{path}: group '{group.key}' pairs with '{source.key}', which is itself paired")
+        if len(source.ids) != len(group.ids) or source.sample != group.sample:
+            raise SystemExit(
+                f"{path}: paired groups '{group.key}' and '{source.key}' must have the same "
+                f"number of ids and the same sample size"
+            )
 
     seen: set[str] = set()
     for group in groups.values():
@@ -178,8 +204,9 @@ def load_study(name: str) -> Study:
         groups=groups,
         conditions=conditions,
         vote_prompt=spec.get(
-            "vote_prompt", "Based on what you observed, who do you most trust to lead this team?"
+            "vote_prompt", "Based on what you observed, who should lead this team?"
         ),
+        sampler_seed=spec.get("sampler_seed", 0),
         instruments=tuple(instruments),
         personas_from=personas_from,
     )

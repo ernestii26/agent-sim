@@ -1,0 +1,87 @@
+{
+  "study": "ffni_mediation",
+  "instrument": "ffni",
+  "runs": 1,
+  "subscales": {
+    "protection": {
+      "baseline_mean": 5.722222222222222,
+      "baseline_sd": 0.6621873326273038,
+      "post_mean": 5.5,
+      "post_sd": 0.9505637425083225,
+      "delta_mean": -0.2222222222222222,
+      "delta_sd": 1.0102647774890108,
+      "delta_n": 36,
+      "alpha": 0.9288084464555052
+    },
+    "affiliation": {
+      "baseline_mean": 5.743055555555555,
+      "baseline_sd": 1.318123816955523,
+      "post_mean": 5.625,
+      "post_sd": 1.40089257261219,
+      "delta_mean": -0.11805555555555555,
+      "delta_sd": 0.5460445792604139,
+      "delta_n": 36,
+      "alpha": 0.987124218460045
+    },
+    "status": {
+      "baseline_mean": 2.5069444444444446,
+      "baseline_sd": 0.7734110695740543,
+      "post_mean": 2.4791666666666665,
+      "post_sd": 0.625,
+      "delta_mean": -0.027777777777777776,
+      "delta_sd": 0.4503085362035432,
+      "delta_n": 36,
+      "alpha": 0.9429195345108772
+    },
+    "vision": {
+      "baseline_mean": 5.981481481481482,
+      "baseline_sd": 0.5098673618024527,
+      "post_mean": 5.648148148148149,
+      "post_sd": 0.7343907719984454,
+      "delta_mean": -0.3333333333333334,
+      "delta_sd": 0.7642820056281479,
+      "delta_n": 36,
+      "alpha": 0.9189280868385347
+    },
+    "expertise": {
+      "baseline_mean": 5.907407407407407,
+      "baseline_sd": 0.754293998137399,
+      "post_mean": 5.694444444444445,
+      "post_sd": 0.806225774829855,
+      "delta_mean": -0.21296296296296305,
+      "delta_sd": 0.6023908860046325,
+      "delta_n": 36,
+      "alpha": 0.9331990080595164
+    },
+    "fairness": {
+      "baseline_mean": 6.736111111111111,
+      "baseline_sd": 0.7790663928346829,
+      "post_mean": 6.666666666666667,
+      "post_sd": 0.7837638128197258,
+      "delta_mean": -0.06944444444444445,
+      "delta_sd": 0.3024371901209472,
+      "delta_n": 36,
+      "alpha": 0.9892121608368748
+    }
+  },
+  "straight_lining": {
+    "baseline": 0.0,
+    "post": 0.0
+  },
+  "test_retest": {
+    "protection": 0.2553244287407524,
+    "affiliation": 0.9211193747985691,
+    "status": 0.8130340365516519,
+    "vision": 0.28731768114265666,
+    "expertise": 0.7038650272013172,
+    "fairness": 0.9251182589275865
+  },
+  "gated_subscales": [
+    "affiliation",
+    "expertise",
+    "fairness",
+    "protection",
+    "status",
+    "vision"
+  ]
+}
