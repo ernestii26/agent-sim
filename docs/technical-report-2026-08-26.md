@@ -3,7 +3,8 @@
 **日期**：2026-08-26 執行，2026-09-01 撰寫
 **研究**：`studies/ffni_mediation`
 **資料**：`results/ffni_mediation/`，每條件 40 場，共 80 場
-**程式版本**：commit `0067e63`（本報告所有數字可由該版本重現）
+**程式版本**：commit `0067e63`（數字皆可重現；§11.9 的探索性中介是例外——可重算但
+倉庫中沒有對應腳本，§12 亦未列出指令）
 
 本報告記錄 Step 2 的完整技術細節：每個假設的估計式、公式、對應的程式路徑、以及實際結果。
 設計決策的來龍去脈記在 `docs/design-log.md` §13–§29，本報告只在必要時引用。
@@ -19,7 +20,7 @@
 ```
 
 Sheng, Andrews & van Vugt (2026, *J. Applied Psychology* 111(6), 768–801) 開發並驗證了
-Fundamental Follower Needs Inventory (FFNI)，並在 p.45–46 明確指出：先前顯示群體衝突提高
+Fundamental Follower Needs Inventory (FFNI)，並在 p.795 明確指出：先前顯示群體衝突提高
 支配型領導偏好的研究「假設了追隨者需求的中介角色，卻沒有實證檢驗它——很可能是因為缺乏
 經過驗證的測量工具」。
 
@@ -28,7 +29,7 @@ Fundamental Follower Needs Inventory (FFNI)，並在 p.45–46 明確指出：�
 | | 論文 | 本研究 |
 |---|---|---|
 | 情境 | 觀察（相關研究） | **操弄**（隨機分派到兩個情境） |
-| 需求 | 單次橫斷測量 | **人內前後測** |
+| 需求 | 兩個時點，相隔一週，中間無事件（Sample E） | **人內前後測，中間夾一個被操弄的事件** |
 | 結果 | 認知／知覺評分 | **行為**（實際投票） |
 
 ---
@@ -49,8 +50,10 @@ hospital administrator / social worker）。
 
 **配對構造**：P_i 與 D_i 由**同一筆人格庫資料**產生，因此 Big Five、職業、年齡層、
 父母身分完全相同，唯一差異是 style block。這消除了人格與職業的混淆
-（design-log §3）。`pair_bank.py:150-158` 有斷言驗證這個配對，任何破壞配對的修改都會
-在產生階段失敗，而不是在 1,600 次 API 呼叫之後。
+（design-log §3）。`pair_bank.py:163-171` 有斷言比對 P 組與 D 組的 OCEAN、職業、年齡層、父母身分的
+**排序後多重集合**，任何破壞組間平衡的修改都會在產生階段失敗，而不是在 1,600 次 API
+呼叫之後。注意它擋的是組間平衡，**不是逐一索引的配對**——後者由建構迴圈保證，置換
+哪一列餵給哪個 D 索引仍會通過該斷言。
 
 **操弄的載體**（persona spec 裡實際帶有的差異）：
 
@@ -158,14 +161,23 @@ RUNS = 40   ROUNDS = 3
 | `leader_ideal` | 45（10 維度） | prototype | 1–10 | baseline, post | N |
 | `effectiveness` | 1（每個目標） | each_candidate | 1–7 | post | N |
 
-- **`ffni`**：Sheng et al. 原始 22 題逐字重現，CC BY-NC-ND 4.0，不得改寫。
+- **`ffni`**：Sheng et al. 原始 22 題逐字重現（Table 5, p.779；2026-09-07 逐題核對，
+  修正 4 處縮寫與 1 處 toward/towards）。授權標示 CC BY-NC-ND 4.0 取自預印本，
+  **published 版全文查無此授權**，各頁均為 APA 全權保留——視為未經查證，但不得改寫
+  仍是安全的讀法。
   六個分量表：protection(4)、affiliation(4)、status(4)、vision(3)、expertise(3)、
   fairness(4)。
-- **`leader_ideal`**：ILT 的**重建**（§19）。論文用 Offermann & Coats (2018) 的 46 題
-  加 femininity 與 ethics 共 51 題；該工具在此不可得，因此以 Offermann, Kennedy & Wirtz
-  (1994) 的 41 特質八因素版（經 Bhatia et al. 2022 附錄逐字重現）加上論文註 13 引述的
-  femininity 與 ethics 題目重建，涵蓋論文 11 個維度中的 10 個（缺 creativity）。
-  **這是已知的效度限制**，見 §9.2。
+- **`leader_ideal`**：ILT 的**重建**，而且是**與論文所用工具差距很大的重建**。論文用
+  Offermann & Coats (2018) 的 46 題加 femininity 與 ethics 共 51 題。收集本研究資料時
+  該工具不可得，因此以 Offermann, Kennedy & Wirtz (1994) 的八因素版（經 Bhatia et al.
+  2022 附錄轉載，該附錄列出 **40** 個特質而其正文稱 41，且措辭未經原文核對）加上論文
+  註 13 的 femininity 與 ethics 題目重建。
+
+  **2026-09-07 取得 2018 原文後的逐題比對**：本研究施測的 45 個特質中，**有 17 個不存在
+  於論文使用的工具裡**；共有的 28 個裡有三個歸屬不同——`bold` 屬 charisma、`attractive`
+  屬 masculinity、`clever` 屬 creativity。這不是「題數較少的同一份量表」，而是不同的
+  工具。正確的 51 題已建於 `instruments/leader_ideal_2018.json`（尚未接上，接上需重跑
+  原型層）。後果見 §9 與 design log §31 C3。
 - **`effectiveness`**：單題，「Think about how this person behaved in the meeting you
   just had. Rate how effective they would be as your own leader.」每位中立者對每位
   **候選人**評分（§21 起不再評其他中立者——那 6 次呼叫沒有任何分析讀取）。
@@ -269,7 +281,7 @@ $$
 
 $p$ 以常態近似 $t$ 分布的尾機率；$\nu$ 遠大於 30 時足夠。
 
-用 Welch 而非配對，因為兩個條件的 run 之間沒有配對關係（cast 相同但討論獨立）。
+用 Welch 而非配對，是保守的選擇：兩個條件的 run *i* **確實抽到同一組 cast**（§2.2，實測 40/40 場成員完全相同），但討論、量表作答與投票都是獨立產生的，配對能買到的變異縮減有限，而 Welch 不需要假設兩組變異數相等。
 
 ### 5.5 Cronbach's α
 
@@ -324,7 +336,7 @@ $$
 的主張（protection 應**特別地**連到支配側），若用雙變量算，H4 為真與為假會給出相同的
 結果型態——**該檢定不可能失敗，因而不提供任何資訊**。此缺陷於 §23 修正，H5 與 H7 同時修正。
 
-註：ΔR² 是**唯一變異**，共線性會壓縮它。論文自己的頭條增量是 .02–.06，而同一批 β 是
+註：ΔR² 是**唯一變異**，共線性會壓縮它。論文自己的顯著增量落在 .01–.06，而同一批 β 是
 .19–.32。把 .03 讀作「效果很小」會連同論文的結果一起否定。
 
 ### 5.7 Bootstrap 信賴區間
@@ -336,14 +348,14 @@ $$
 
 $$
 \text{CI}_{95} = \left[\hat{\theta}^{(\lfloor 0.025B \rfloor)},\;
-                        \hat{\theta}^{(\lceil 0.975B \rceil)}\right]
+                        \hat{\theta}^{(\lfloor 0.975B \rfloor)}\right]
 $$
 
 其中 $\hat{\theta}^{(1)} \le \cdots \le \hat{\theta}^{(B)}$ 為排序後的重抽估計值。
 
 **為什麼重抽 run 而非受試者**：同一場的 3 個中立者觀看同一段討論，不是獨立觀察。
-把他們當成 3 筆獨立資料會低估不確定性。模擬顯示忽略此聚類使偽陽性率上升約 2 個百分點
-（ICC 由 0 至 .25 時，12% → 14%）。§26 起 `summarize_mediation` 與
+把他們當成 3 筆獨立資料會低估不確定性。模擬顯示忽略此聚類使偽陽性率上升約 2 個百分點（ICC 由 0 至 .25 時，12% → 14%）——
+該組數字是在**未置中**的估計式上量的，其中 12% 的底是條件混淆而非聚類。§26 起 `summarize_mediation` 與
 `summarize_layer_moderation` 都改為重抽 run。
 
 ---
@@ -387,8 +399,8 @@ H4 為陽性對照（論文有效果），H5 支配側為陰性對照（論文�
 
 論文採用增量而非雙變量的理由，其正文自己說明了：需求之間高度相關，Study 5 的討論寫
 「Despite strong correlations among these needs ($r$ ranged from .60 to .72; see Table 8),
-hierarchical regression confirmed their incremental contributions」。Table 8（p.783）的
-完整相關矩陣範圍更寬（最低 .21，最高 .87）。
+hierarchical regression confirmed their incremental contributions」。Table 8（p.783）的完整相關矩陣範圍更寬，且該引句只涵蓋部分需求與部分樣本；
+全表最低達 .08（Sample E T2 的 status–fairness）。
 
 **三個不同的部分**：
 
@@ -417,13 +429,15 @@ other FFNs」。本研究的支配側 null 因此是與 Model 2 對照，而非�
 
 **兩個不同的部分**：
 
-1. **效標的性質完全不同**。論文的效標是 **13 個具體領導風格的描述**，受試者評「若這些人
-   是我的領導者會多有效」（1–7）。支配側是 Authoritarianism、Narcissism、Dominance
-   三個分開的風格；聲望側是 Benevolence、Team-building、Vision communication、
-   High-expectation、Competence、Intellectual stimulation、Moral character、Virtue。
-   **沒有任何受試者觀察過任何人。**
-   本研究的效標是**單一題目**，評「剛剛一起開完三輪會的這個具體的人」。
-   因此本研究的「對支配型的有效性」對應論文的三個支配側風格之聚合，而非任何單一欄位。
+1. **刺激材料的性質完全不同**（效標問句本身相同，見 design log §30）。論文讓受試者評
+   **12 份量表、57 題**改寫成的領導者描述，每份量表的 4–6 題平均成一個分數，
+   Table 3 因 Authoritarianism 出現兩次而有 13 列。支配側是 Authoritarianism、
+   Narcissism、Dominance 三份分開的量表；聲望側是 Benevolence、Team-building、
+   Vision communication、High-expectation、Competence、Intellectual stimulation、
+   Moral character、Virtue，**另有 Safety**——而 Safety 正是 `protection` 強烈成立的
+   那一欄（.43\*\*\*/.20\*\*\*）。**沒有任何受試者觀察過任何人。**
+   本研究是**一個被觀察的具體對象、被評一次**。因此本研究的「對支配型的有效性」把論文
+   分開的三份支配側量表壓成一個數字，也把 Safety 與 Authoritarianism 的區別壓掉了。
 2. **時間間隔**。論文 Sample E 在 Time 1 施測 FFNI，**一週後**的 Time 2 施測有效性；
    本研究兩者在同一場會議後相隔數分鐘。
 
@@ -555,7 +569,7 @@ $T$ 與 $C$ 分別為威脅與協作條件的受試者集合；信賴區間以�
 
 ```
 protection → strength
-status     → tyranny, masculinity, attractiveness      (attractiveness = 1994 年的 well-groomed)
+status     → tyranny, masculinity, attractiveness      (attractiveness 是 1994 年的名稱，2018 改名 well-groomed)
 vision     → sensitivity, dedication, charisma
 expertise  → sensitivity, charisma, intelligence
 fairness   → dedication, intelligence, ethics
@@ -812,12 +826,14 @@ $$
 
 拆解此差異的來源：
 
-| | 威脅 − 協作 | 95% CI |
-|---|---|---|
-| **認知層** | **−0.305** | **[−0.520, −0.085]** 排除 0 |
-| 評價層 | +0.178 | [−0.083, +0.442] |
+| | 協作 | 威脅 | 差 | 95% CI |
+|---|---|---|---|---|
+| **認知層** | +0.052 | −0.251 | **−0.303** | **[−0.520, −0.085]** 排除 0 |
+| 評價層 | −0.078 | +0.086 | +0.164 | [−0.083, +0.442] |
 
-驅動落差的是認知層：威脅使 protection → 原型的關聯**更負**。
+驅動落差的是認知層：威脅使 protection → 原型的關聯**更負**。兩個差相減
+（−0.303 − 0.164 = −0.467）與表中的落差差一致。點估計取自 checkpoint 的確定性重算；
+早期版本此處誤植 bootstrap 平均（−0.305 / +0.178），使算術不閉合。
 
 **本研究不將此列為結論**，理由：(i) 五個需求做了五次檢定，α = .05 下期望 0.25 個
 假陽性；(ii) 合併後兩層皆為 null，此為「差的差」，容易是雜訊；(iii) 每條件僅 120 人
@@ -1162,7 +1178,34 @@ path b 在條件內以 40 場中的 120 位受試者估計。bootstrap 重抽 ru
 （§19）。已知兩個缺陷：來源附錄列出 40 個特質而其正文稱 41，可能遺漏一個；
 所有措辭未經 1994 或 2018 原文核對。`strength` 僅 2 題，而 §9.3 顯示這正是問題所在。
 
-### 11.6 投票理由與機制的關係
+### 11.6 自變項從未被檢核
+
+**沒有任何研究對 P/D 的操弄做過操縱檢核。** `pd_matched` 的 `instruments` 是空的，
+`ffni_mediation` 只有 ffni、leader_ideal、effectiveness 三份，全部問的是需求、原型或
+對某人的評價，**沒有一份問「你覺得這個人有多支配／多有聲望」**。design log §13 的
+操縱檢核測的是**威脅情境**（位置不安穩、時間緊迫、後果嚴重），不是領導風格，而且它
+已於 §13 退場。
+
+`tools/sample_bank.py` 的 `STYLE_BLOCKS` 是為本研究撰寫的，沒有引用任何已發表的操弄
+材料或量表（本報告亦未宣稱有）。構念定義（Cheng et al. 2013；Henrich & Gil-White
+2001）說 dominance 是「透過恐懼與強制」取得影響力，而文字只寫到「讓異議代價高昂」；
+§11.6 記錄的投票理由掃描顯示恐懼／強制語言為 **0%**。
+
+支持操弄有效的唯一證據是**行為的**：支配型 claim 領導權的比率在 `gpt-4.1` 上是
+0.17–0.25，聲望型是 0.00（§9 的診斷同一批資料）。那證明兩組行為不同，**不證明**它們
+是雙路徑模型意義下的支配型與聲望型。
+
+補救最直接的是把 Cheng, Tracy & Henrich 的 Dominance-Prestige Scale 當成
+`about: each_candidate` 的操縱檢核，讓中立者在討論後對兩位候選人各評一次。結構與
+`effectiveness` 相同，每場多 6 次呼叫。
+
+### 11.7 §13 的操縱證據早於 deadline 修正
+
+§13 的威脅操縱檢核（5.38 vs 3.21）是在 `pd_matched` 的**舊協作情境文字**下收集的，
+當時只有威脅條件有 48 小時期限。§2.3 引用該修正時未註明操縱證據位於修正之前。
+§13 論證該證據仍可轉移；此處記錄的是那個論證尚未被新資料檢驗。
+
+### 11.8 投票理由與機制的關係
 
 `tools/vote_reason_scan.py` 對 Step 1 的分析顯示：恐懼／強制語言在投票理由中
 **完全不存在**（0%），而果斷／負責的措辭占 84%（D 票）。但該比率在協作條件是 82%，
@@ -1173,7 +1216,7 @@ path b 在條件內以 40 場中的 120 位受試者估計。bootstrap 重抽 ru
 能力語言——若為真，則投票理由與自陳量表皆非通往機制的可靠窗口，而那是本研究
 唯一擁有的機制資料。
 
-### 11.7 未預註的探索性發現
+### 11.9 未預註的探索性發現
 
 以下**不是**預註假設，是在「還有什麼可能」的探索中得出，且在找到它之前檢視了
 4 個行為指標，區間未針對此搜尋做校正。**應視為下一個研究的假設，不是本研究的結論。**
