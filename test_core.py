@@ -20,8 +20,8 @@ sys.path.insert(0, str(PROJECT_DIR / "src"))
 
 from analysis import (  # noqa: E402
     group_metrics, need_outcome_links, persona_metrics, straight_lining, summarize_contrast,
-    summarize_layer_moderation, summarize_mediation, summarize_needs,
-    summarize_validation, weak_subscales,
+    prototype_by_dimension, summarize_layer_moderation, summarize_mediation,
+    summarize_needs, summarize_validation, weak_subscales,
 )
 from discussion import (  # noqa: E402
     APIQuotaExhausted, AgentTransport, _administer, _clone_agent, rated_by,
@@ -33,7 +33,8 @@ from persona_store import Participant  # noqa: E402
 from pipeline import BalancedSampler  # noqa: E402
 from run_record import RunRecord  # noqa: E402
 from stats import (  # noqa: E402
-    cronbach_alpha, icc_one_way, paired_ttest_onesided, partial_betas, slope,
+    cronbach_alpha, icc_one_way, paired_ttest_onesided, partial_betas,
+    relative_weights, slope,
 )
 from study import list_studies, load_study  # noqa: E402
 
@@ -1054,6 +1055,84 @@ def test_answers_from_another_version_of_a_scale_are_refused() -> None:
 
     # A checkpoint with no fingerprint and no foreign ids still scores.
     assert RunRecord.from_dict({**ok.to_dict(), "instruments": {}}).needs("post", ideals)
+
+
+def test_per_dimension_h4_sees_what_a_composite_hides() -> None:
+    """The paper fits each prototype dimension separately; need_outcome_links averages a
+    need's mapped dimensions into one composite first. A need that reaches one mapped
+    dimension and opposes another averages to nothing, and the composite cannot say so."""
+    study = load_study("ffni_mediation")
+    needs, ideals = study.self_report, study.prototype
+    up, down = ideals.predicts["status"][0], ideals.predicts["status"][2]
+
+    rng = random.Random(5)
+    records = []
+    for run_no in range(1, 21):
+        post, protos = {}, {}
+        for pid in ("N1", "N2", "N3"):
+            level = rng.uniform(2.0, 6.0)
+            for name, texts in needs.subscales.items():
+                v = level if name == "status" else rng.uniform(2.0, 6.0)
+                post.setdefault(pid, {}).update(
+                    {f"{name}_{i}": v for i in range(1, len(texts) + 1)})
+            for dim, texts in ideals.subscales.items():
+                # status pushes one mapped dimension up and another exactly as far down
+                # Noise on purpose: a perfect fit makes R2 exactly 1, where Johnson's
+                # orthogonal approximation overshoots by a few percent.
+                base = {up: 5 + level + rng.gauss(0, 0.6),
+                        down: 5 - level + rng.gauss(0, 0.6)}.get(dim, rng.uniform(3, 7))
+                protos.setdefault(pid, {}).update(
+                    {f"{dim}_{i}": base for i in range(1, len(texts) + 1)})
+        records.append(RunRecord.from_dict({
+            "run_no": run_no, "condition": "threat",
+            "members": {"N": ["N1", "N2", "N3"]}, "transcript": [], "votes": [],
+            # Both timings: prototype_by_dimension defaults to baseline (the paper's
+            # condition), need_outcome_links reads post.
+            "measures": {"baseline": {needs.key: post, ideals.key: protos},
+                         "post": {needs.key: post, ideals.key: protos}},
+            "instruments": {needs.key: needs.fingerprint, ideals.key: ideals.fingerprint},
+        }))
+
+    per_dim = prototype_by_dimension(records, needs, ideals)
+    b_up = per_dim["dimensions"][up]["needs"]["status"]["beta"]
+    b_down = per_dim["dimensions"][down]["needs"]["status"]["beta"]
+    assert b_up > 0.8 and b_down < -0.8, (b_up, b_down)
+
+    # The composite averages them away.
+    links = need_outcome_links(study, records, needs, ideals=ideals)
+    assert abs(links["needs"]["status"]["cognition"]["beta"]) < 0.3
+
+    # Relative weights sum to the model R2, which delta R2 does not.
+    cell = per_dim["dimensions"][up]
+    # Every cell carries all four of Table 13's columns.
+    assert set(cell["needs"]["status"]) == {
+        "r", "beta", "delta_r2", "relative_weight", "relative_weight_pct"}
+
+
+def test_relative_weights_assign_the_shared_variance_that_delta_r2_drops() -> None:
+    """Two predictors that share most of their variance each own almost none of it, so
+    their delta R2 sums to a fraction of the model's. Johnson's weights split the shared
+    part instead and sum to R2 — which is why the paper reports both columns, and why a
+    delta R2 of .03 among six needs correlating .60-.72 is not a small result."""
+    rng = random.Random(3)
+    common = [rng.gauss(0, 1) for _ in range(400)]
+    x1 = [c + rng.gauss(0, 0.4) for c in common]
+    x2 = [c + rng.gauss(0, 0.4) for c in common]
+    y = [a + b + rng.gauss(0, 1.0) for a, b in zip(x1, x2)]
+    X = [[a, b] for a, b in zip(x1, x2)]
+
+    assert slope(x1, x2)[1] > 0.8, "the predictors have to be collinear for this to bite"
+    _, deltas, r2, _ = partial_betas(X, y)
+    weights, rw_r2, n = relative_weights(X, y)
+
+    assert n == 400 and abs(rw_r2 - r2) < 1e-9
+    assert sum(deltas) < 0.25 * r2, (sum(deltas), r2)      # most of R2 is unassigned
+    assert abs(sum(weights) - r2) / r2 < 0.03, (sum(weights), r2)
+    # Both predictors matter equally by construction, and the weights say so.
+    assert abs(weights[0] - weights[1]) < 0.1 * r2
+
+    # Singular predictors have no unique split and must not get a fabricated one.
+    assert math.isnan(relative_weights([[v, v] for v in x1], y)[1])
 
 
 if __name__ == "__main__":

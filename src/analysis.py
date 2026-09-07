@@ -12,7 +12,8 @@ from typing import Any
 from instrument import BASELINE, POST, Instrument
 from run_record import RunRecord
 from stats import (
-    cronbach_alpha, icc_one_way, mean, paired_ttest_onesided, partial_betas, slope, std,
+    cronbach_alpha, icc_one_way, mean, paired_ttest_onesided, partial_betas,
+    relative_weights, slope, std,
 )
 from study import Condition, Study
 
@@ -273,6 +274,63 @@ def weak_subscales(summary: dict[str, Any], threshold: float = 0.60) -> dict[str
         if math.isnan(alpha) or alpha <= threshold:
             weak[name] = alpha
     return weak
+
+
+def prototype_by_dimension(
+    records: list[RunRecord],
+    needs: Instrument,
+    ideals: Instrument,
+    *,
+    timing: str = BASELINE,
+) -> dict[str, Any]:
+    """H4 in the shape Sheng et al. report it: one regression per prototype dimension.
+
+    Their Table 13 fits each of the eleven ILT dimensions separately on all six needs and
+    reports, per cell, the bivariate correlation, the standardised beta, the incremental
+    R2, and Johnson's relative weight. `need_outcome_links` instead averages the
+    dimensions a need is mapped to into one composite and fits one regression per need,
+    which cannot show that a need reaches one of its mapped dimensions and not another —
+    `status` is scored as the mean of tyranny, masculinity and well-groomed, so three
+    separate results in the paper become one number here.
+
+    Defaults to BASELINE because that is the condition the paper measured in: needs and
+    prototypes at one sitting with nothing between them.
+    """
+    names = list(needs.subscales)
+    design: list[list[float]] = []
+    outcomes: dict[str, list[float]] = {d: [] for d in ideals.subscales}
+    for record in records:
+        need_scores = record.needs(timing, needs)
+        ideal_scores = record.needs(timing, ideals)
+        for pid, scores in need_scores.items():
+            design.append([scores.get(n, float("nan")) for n in names])
+            mine = ideal_scores.get(pid, {})
+            for dim in ideals.subscales:
+                outcomes[dim].append(mine.get(dim, float("nan")))
+
+    predicted = {d: [n for n, dims in ideals.predicts.items() if d in dims]
+                 for d in ideals.subscales}
+    out: dict[str, Any] = {"needs": names, "timing": timing, "dimensions": {}}
+    for dim, y in outcomes.items():
+        betas, deltas, r2, n = partial_betas(design, y)
+        weights, rw_r2, _ = relative_weights(design, y)
+        out["dimensions"][dim] = {
+            "model_r2": r2,
+            "n": n,
+            "predicted_by": predicted[dim],
+            "needs": {
+                name: {
+                    "r": slope([row[i] for row in design], y)[1],
+                    "beta": betas[i] if betas else float("nan"),
+                    "delta_r2": deltas[i] if deltas else float("nan"),
+                    "relative_weight": weights[i] if weights else float("nan"),
+                    "relative_weight_pct": (weights[i] / rw_r2 * 100)
+                    if weights and rw_r2 == rw_r2 and rw_r2 else float("nan"),
+                }
+                for i, name in enumerate(names)
+            },
+        }
+    return out
 
 
 def rater_agreement(records: list[RunRecord], instrument: Instrument) -> dict[str, Any]:

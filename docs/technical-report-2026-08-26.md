@@ -526,17 +526,22 @@ hierarchical regression confirmed their incremental contributions」。Table 8�
 
 **三個不同的部分**：
 
-1. **結果變項的聚合方式**。論文對 **11 個 ILT 維度各自**配適一個迴歸（Table 13 有 11 個
-   criterion 區塊）。本研究把 `predicts` 映射到的維度**先平均成一個複合分數**再配適，
-   每個需求一個迴歸。因此本研究的 `status` 是 tyranny、masculinity、attractiveness 的
-   平均，而論文是三個分開報告。這使本研究無法看出某個需求只在其中一個維度上有效果，
-   §9.2 的逐維度分解即是為了補回這一點。
-2. **未做 relative weights analysis**。論文同時報 Johnson 相對權重及其 bootstrap 區間；
-   本研究只用 $\Delta R^2$，因為它已足以回答假設，而相對權重是為一個沒有分析會讀取的
-   數字增加機制。
-3. **不確定性的來源**。論文以迴歸的解析標準誤與 relative weights 的 bootstrap
-   （10,000 次，重抽受試者）報告；本研究以重抽 **run** 的 percentile bootstrap（§5.7），
-   因為同一場的三位受試者不獨立。
+1. ~~**結果變項的聚合方式**~~ **已對齊（2026-09-07）**。論文對 **11 個 ILT 維度各自**
+   配適一個迴歸（Table 13 有 11 個 criterion 區塊）。`need_outcome_links` 把 `predicts`
+   映射到的維度**先平均成複合分數**再配適，因此三個分開的結果被壓成一個數字。
+   `analysis.prototype_by_dimension` 現在照論文的形狀配適，`run.py layers` 會印出。
+
+   **這不是形式問題**：`status` 的複合 β 是 −0.160（被報成顯著反向），拆開後
+   `tyranny` 是 **+0.094**（論文的方向）、`attractiveness` 是 −0.120、`masculinity` 近零。
+   **平均三個彼此矛盾的維度，產生了一個誰都不描述的數字。** 見 design log §34。
+2. ~~**未做 relative weights analysis**~~ **已補（2026-09-07）**。`stats.relative_weights`
+   實作 Johnson (2000)，即 Table 13 的第二欄。與 $\Delta R^2$ 不同，權重**加總等於模型
+   $R^2$**，共享變異按比例分配而非丟棄。六個需求相關 .60–.72 時這很要緊：模擬顯示
+   $\Delta R^2$ 只加到 $R^2$ 的四分之一以下。只報 $\Delta R^2$ 正是讓 .03 看起來微不足道
+   的原因，而那是論文的頭條。
+3. **不確定性的來源——刻意不對齊**。論文以迴歸的解析標準誤與重抽**受試者**的 bootstrap
+   報告；本研究重抽 **run**（§5.7），因為同一場的三位受試者觀看同一段討論、並不獨立。
+   在這一項向論文看齊會**低估**不確定性，而不是重現它的方法。
 
 **工具亦不同**：論文用 Offermann & Coats (2018) 的 51 題（46 題正式量表 + femininity 2 題
 + ethics 3 題），10 點量尺，$\alpha$ 為 .76–.92；本研究用 45 題的重建版（§4.1、§11.5），

@@ -24,7 +24,8 @@ sys.path.insert(0, str(_PROJECT_DIR / "src"))
 os.chdir(_PROJECT_DIR)  # TinyTroupe reads config.ini from the CWD
 
 from analysis import (  # noqa: E402
-    need_outcome_links, rater_agreement, summarize_contrast, summarize_layer_moderation,
+    need_outcome_links, prototype_by_dimension, rater_agreement, summarize_contrast,
+    summarize_layer_moderation,
     summarize_measure_check, summarize_mediation, summarize_needs, summarize_validation,
 )
 from config import RunConfig  # noqa: E402
@@ -32,8 +33,8 @@ from instrument import BASELINE  # noqa: E402
 from pipeline import load_records, run_condition, run_measure_check  # noqa: E402
 from render import (  # noqa: E402
     plot_contrast, render_contrast, render_layer_moderation, render_layers,
-    render_mediation, render_measure_check, render_needs, render_rater_agreement,
-    render_validation, save_summary,
+    render_mediation, render_measure_check, render_needs, render_prototype_by_dimension,
+    render_rater_agreement, render_validation, save_summary,
 )
 from runtime import setup_file_logging  # noqa: E402
 from study import Study, list_studies, load_study  # noqa: E402
@@ -263,6 +264,15 @@ def cmd_layers(args: argparse.Namespace) -> None:
         contrast=contrast, need=args.need, outcome_group=args.group,
     )
     render_layer_moderation(study, out)
+
+    # The same layer in the source paper's own shape: one regression per dimension,
+    # which is what shows a need reaching one of its mapped dimensions and not another.
+    if study.prototype is not None:
+        pooled = [r for records in by_condition.values() for r in records]
+        by_dim = prototype_by_dimension(pooled, needs, study.prototype)
+        render_prototype_by_dimension(study, by_dim)
+        out["prototype_by_dimension"] = by_dim
+
     save_summary(out, Path(config.output_dir) / study.name, "layers",
                  provenance=_provenance(config, study))
 

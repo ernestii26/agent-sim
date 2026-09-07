@@ -153,3 +153,53 @@ def icc_one_way(cells: list[list[float]]) -> tuple[float, float, int, int]:
     if msb == 0:
         return float("nan"), float("nan"), n, k
     return (msb - msw) / (msb + (k - 1) * msw), (msb - msw) / msb, n, k
+
+
+def relative_weights(predictors: list[list[float]], outcome: list[float]) -> tuple[list[float], float, int]:
+    """Johnson (2000) relative weights: partition R2 among correlated predictors.
+
+    delta R2 reports only what a predictor owns outright, so with correlated predictors
+    the weights leave most of R2 unassigned — six needs correlating .60-.72 can share
+    two thirds of the explained variance and each be credited a few percent. Relative
+    weights instead split the shared part in proportion, so the weights sum to R2. This
+    is the second column Sheng et al. report beside the hierarchical increments in their
+    Table 13.
+
+    The method: build the orthogonal counterparts of the predictors from the eigen
+    decomposition of their correlation matrix, regress the outcome on those, and carry
+    the squared coefficients back through the squared transformation.
+
+    Returns (weights, R2, n). Weights are in R2 units; divide by R2 for percentages.
+    """
+    import numpy as np
+
+    x = np.asarray(predictors, dtype=float)
+    y = np.asarray(outcome, dtype=float)
+    if x.ndim != 2 or x.shape[0] != y.shape[0] or x.size == 0:
+        return [], float("nan"), 0
+    keep = np.isfinite(x).all(axis=1) & np.isfinite(y)
+    x, y = x[keep], y[keep]
+    n, k = x.shape
+    if n <= k + 1:
+        return [float("nan")] * k, float("nan"), int(n)
+
+    sd = x.std(axis=0)
+    if (sd == 0).any() or y.std() == 0:
+        return [float("nan")] * k, float("nan"), int(n)
+    z = (x - x.mean(axis=0)) / sd
+    yz = (y - y.mean()) / y.std()
+
+    corr = z.T @ z / (n - 1)
+    values, vectors = np.linalg.eigh(corr)
+    if (values <= 1e-10).any():          # singular predictors have no unique split
+        return [float("nan")] * k, float("nan"), int(n)
+
+    # Lambda: coefficients of the predictors on their orthogonal counterparts.
+    lam = vectors @ np.diag(np.sqrt(values)) @ vectors.T
+    ortho = z @ np.linalg.inv(lam)
+    beta = np.linalg.lstsq(ortho, yz, rcond=None)[0]
+    weights = (lam ** 2) @ (beta ** 2)
+
+    resid = yz - z @ np.linalg.lstsq(z, yz, rcond=None)[0]
+    r2 = float(1.0 - resid @ resid / (yz @ yz))
+    return [float(w) for w in weights], r2, int(n)

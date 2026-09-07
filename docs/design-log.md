@@ -2300,3 +2300,65 @@ from the paper's prose and its framing sections, which group needs and speak in 
 terms, rather than from its tables and its situation-to-need mappings, which are
 specific. Four of seven hypotheses named the wrong needs or the wrong layer. The tables
 were available the whole time.
+
+---
+
+## 34. H4 in the source paper's own shape (2026-09-07)
+
+Section 6 of the technical report listed three ways this study's H4 differs from Table
+13's method. Two are now closed and the third is a deliberate deviation.
+
+### Closed: one regression per dimension
+
+Sheng et al. fit **each of the eleven ILT dimensions separately** on all six needs — Table
+13 has eleven criterion blocks. `need_outcome_links` instead averages the dimensions a
+need is mapped to into a single composite and fits one regression per need. That cannot
+show a need reaching one of its mapped dimensions and opposing another; three of the
+paper's results become one number.
+
+`analysis.prototype_by_dimension` fits the paper's way and `run.py layers` prints it. On
+the collected baseline data, scored with the 1994 instrument it was collected against:
+
+| dimension | R2 | need | beta | delta R2 | RW% |
+|---|---|---|---|---|---|
+| strength | .103 | protection | **−0.159** | .019 | 17.7 |
+| **tyranny** | .279 | status | **+0.094** | .007 | 4.9 |
+| **masculinity** | .094 | status | −0.016 | .000 | 4.0 |
+| **attractiveness** | .114 | status | **−0.120** | .011 | 10.5 |
+| charisma | .198 | vision | +0.199 | .024 | 19.4 |
+| | | expertise | +0.201 | .029 | 20.1 |
+| intelligence | .131 | fairness | −0.353 | .068 | 36.5 |
+
+**The composite was hiding a sign reversal inside `status`.** Its beta on the averaged
+composite is −0.160, reported as a significant reversal. Split out, `tyranny` is
+**+0.094** — the paper's direction — while `attractiveness` is −0.120 and `masculinity`
+is flat. Averaging three dimensions that disagree produced a number that describes none
+of them.
+
+`vision` and `expertise` both reach `charisma` at about +0.20 with relative weights near
+20%, which is the paper's direction too, and the composite dilutes that as well.
+
+### Closed: relative weights
+
+`stats.relative_weights` implements Johnson (2000), the second column of Table 13.
+Unlike delta R2 the weights sum to the model's R2, so shared variance is split in
+proportion rather than dropped. With six needs correlating .60-.72 this matters: on
+simulated collinear predictors, delta R2 sums to under a quarter of R2 while the weights
+recover all of it. Reporting only delta R2 is what makes .03 look negligible when it is
+the paper's headline.
+
+### Not closed, on purpose: the resampling unit
+
+The paper bootstraps by resampling respondents. This study resamples runs, because three
+neutrals in one room watched one discussion and are not independent (section 26). Matching
+the paper here would understate the uncertainty rather than reproduce its method, so it
+stays as a documented deviation.
+
+### The caveat that limits all of the above
+
+These numbers are scored with the **1994 reconstruction**, because that is what the
+collected data was collected against, and section 31 C3 showed `bold` alone carries H4's
+apparent reversal in that version. Re-running with the 2018 instrument now wired in would
+change every row. What survives regardless is the methodological point: **a composite over
+a need's mapped dimensions can hide a sign reversal, and the paper's per-dimension layout
+is what exposes it.**

@@ -180,6 +180,32 @@ def render_layers(study: Study, links: dict[str, Any]) -> None:
     print("=" * 88)
 
 
+def render_prototype_by_dimension(study: Study, out: dict[str, Any]) -> None:
+    """H4 laid out the way the source paper reports it — one row per dimension per need."""
+    print()
+    print("=" * 88)
+    print(f"COGNITION LAYER BY DIMENSION — the shape of Sheng et al. Table 13 ({out['timing']})")
+    print("=" * 88)
+    print("  One regression per prototype dimension on all six needs. Only the cells the")
+    print("  paper gives a significant increment are shown; `predicts` is that list.")
+    print()
+    print(f"  {'dimension':<16}{'R2':>6}  {'need':<12}{'r':>7}{'beta':>8}{'dR2':>9}{'RW%':>7}")
+    print("  " + "-" * 70)
+    for dim, v in out["dimensions"].items():
+        if not v["predicted_by"]:
+            continue
+        for i, name in enumerate(v["predicted_by"]):
+            c = v["needs"][name]
+            head = f"  {dim:<16}{_fmt(v['model_r2'], 3):>6}" if i == 0 else " " * 24
+            print(f"{head}  {name:<12}{_fmt(c['r'], 2):>7}{_fmt(c['beta'], 3):>8}"
+                  f"{_fmt(c['delta_r2'], 4):>9}{_fmt(c['relative_weight_pct'], 1):>7}")
+    print()
+    print("  RW% is Johnson's relative weight as a share of the model R2. Unlike dR2 the")
+    print("  weights sum to R2, so a need that shares its variance with the others is not")
+    print("  written down as contributing nothing.")
+    print("=" * 88)
+
+
 def render_rater_agreement(study: Study, out: dict[str, Any]) -> None:
     """How far several observers of one performance agree — the reliability an
     each_candidate instrument has and measure-check cannot reach."""
