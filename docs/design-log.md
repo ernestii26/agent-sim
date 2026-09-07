@@ -1832,3 +1832,110 @@ way — richer biographies, explicit threat histories, or personas sampled to va
 security concerns directly — and re-measuring the baseline association before running any
 meeting at all. That is a study, not a fix, and it is cheap: the association is measured
 before any discussion happens, so it costs two survey calls per persona.
+
+---
+
+## 30. Hunting the real instruments: what is obtainable and what is not (2026-09-02)
+
+Two of this study's three instruments are not the ones the source paper used. This
+section records what was found looking for the originals, so the next attempt does not
+repeat the search. **Nothing was changed** — `leader_ideal.json` and
+`effectiveness.json` are untouched.
+
+### The ILT: not obtainable
+
+Sheng et al. used Offermann & Coats (2018), 51 items (their 46-item nine-factor scale
+plus the femininity and ethics items Sheng et al. added, per their footnote 13).
+
+| route | outcome |
+|---|---|
+| ScienceDirect (`S1048984317304988`) | paywalled |
+| academia.edu, ResearchGate | HTTP 403, login wall |
+| Sheng et al.'s own Appendix (p.801) | an **overview table of measures only** — names, item counts and sources, no items |
+| Sheng et al.'s data statement (p.775) | "All data, analysis code, and survey materials are available upon request from the author team" — not deposited |
+| the preregistration (`aspredicted.org/vt3x-j9vb`) | HTTP 403 |
+| Bhatia et al. (2022) Appendix A | **the 1994 version**, which is what section 19 already reconstructed from |
+
+Bhatia et al.'s Appendix A was re-read and confirmed verbatim: Sensitivity (8),
+Dedication (4), Tyranny (10), Charisma (5), Attractiveness (4), Masculinity (2),
+Intelligence (5), Strength (2) — **40 traits, eight factors**, matching section 19's
+note that the appendix lists 40 where the body text says 41. Our `leader_ideal.json`
+is exactly this plus femininity (2) and ethics (3) = 45.
+
+**One unverified lead, recorded as a lead and not as a fact.** A search-engine summary
+of the 2018 abstract and citing works described the nine-factor structure as including
+**Strength = forceful, bold, powerful, strong** — four items rather than 1994's two.
+If true it matters a great deal: section 29 traced H4's entire reversal to `bold`
+(protection to `strong` is −0.02, to `bold` is −0.29), and three more items would
+dilute exactly that. **This came from a generated summary, not from the article, and
+must not be used until the article itself is read.** The obvious route is institutional
+access to *The Leadership Quarterly* 29(4), 513–522.
+
+### The effectiveness criterion: our version is not an instrument at all
+
+Sheng et al.'s Appendix (p.801) lists "Leadership Effectiveness" as **twelve published
+scales, 57 items**:
+
+| construct | items | source |
+|---|---|---|
+| Authoritarianism | 5 | B.-S. Cheng et al. (2004, 2014) |
+| Benevolence | 5 | B.-S. Cheng et al. (2004, 2014) |
+| Moral Character | 6 | B.-S. Cheng et al. (2004, 2014) |
+| Team-Building | 5 | X.-H. Wang & Howell (2010) |
+| Vision Communication | 4 | X.-H. Wang & Howell (2010) |
+| High-Expectation | 5 | X.-H. Wang & Howell (2010) |
+| Intellectual Stimulation | 4 | X.-H. Wang & Howell (2010) |
+| Dominance | 4 | Bai et al. (2020) |
+| Competence | 4 | Bai et al. (2020) |
+| Virtue | 6 | Bai et al. (2020) |
+| Safety | 3 | X. W. Hu et al. (2025) |
+| Narcissism | 6 | Back et al. (2013) |
+
+Ours is **one self-written item** — "This person would be effective as my leader." — on
+a 1–7 scale. Its `citation` field claims only the response format, and its `license`
+field is empty. The technical report's §6.5 said the criteria "differ"; that
+understated it. The paper's dominance side is three separate scales
+(Authoritarianism, Dominance, Narcissism) and its null is specific to them, while
+`protection → Safety` is **.43\*\*\*/.20\*\*\*** — strongly supported. A single item
+cannot separate "wants protection" from "rates an authoritarian effective", so what we
+replicated is a null about a construct we collapsed.
+
+**Found so far**, verbatim, from Leckelt et al.'s NARQ-S validation:
+
+    Narcissism — Back et al. (2013), NARQ-S, 6 items, 1 (do not agree at all) to 6 (completely agree)
+      1. I react annoyed if another person steals the show from me.   [Rivalry]
+      2. I deserve to be seen as a great personality.                 [Admiration]
+      3. I want my rivals to fail.                                    [Rivalry]
+      4. Being a very special person gives me a lot of strength.      [Admiration]
+      5. I manage to be the center of attention with my outstanding
+         contributions.                                               [Admiration]
+      6. Most people are somehow losers.                              [Rivalry]
+
+**Not yet found**: Bai et al.'s Status Attainment Scale (15 items covering
+virtue–admiration, dominance–fear, competence–respect) — the article's body gives
+example items only and points to supplementary materials; Cheng et al.'s paternalistic
+leadership scale; Wang & Howell's transformational scales; Hu et al.'s safety scale.
+
+**A rewording problem that applies to all twelve.** These are self-report or
+other-report trait scales in the first person ("I want my rivals to fail"). Sheng et al.
+administered them as **descriptions of hypothetical leaders** to be rated for
+effectiveness — "We will now present approximately 50 leadership descriptions… indicate
+your perceptions of its effectiveness". Any replacement instrument here has to make the
+same transformation, and our design adds a further one: the target is a specific agent
+the respondent just watched, not a description. That is the study's intended
+contribution (section 2 of the study note), but it means even a faithful item set is
+not administered the way the paper administered it.
+
+### To replace, when the instruments are in hand
+
+1. **`effectiveness.json`** — highest value and lowest risk. The dominance side needs at
+   minimum Authoritarianism (5), Dominance (4) and Narcissism (6); the prestige side
+   Competence (4), Benevolence (5) and Intellectual Stimulation (4). That is 28 items
+   against the current 1. Cost: item count does not change call count — `_administer`
+   sends a whole battery per call — so this is output tokens only, and it would let H5
+   be reported per construct instead of collapsed.
+2. **`leader_ideal.json`** — replace the 1994 reconstruction with the 2018 items,
+   which also settles whether `strength` has two items or four and therefore whether
+   section 29's diagnosis survives.
+3. Re-run `measure-check` after either change. Both gates are per-subscale now, so a
+   weak new subscale will be caught before a study is paid for.
