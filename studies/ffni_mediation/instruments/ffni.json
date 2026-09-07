@@ -20,19 +20,19 @@
   ],
   "citation": "Sheng, X., Andrews, W., & van Vugt, M. (2026). The psychology of following: Conceptualizing and validating the Fundamental Follower Needs Inventory. Journal of Applied Psychology, 111(6), 768-801. https://doi.org/10.1037/apl0001347",
   "license": "The Fundamental Follower Needs Inventory (c) 2026 by Xiaotian Sheng, Wendy Andrews & Mark van Vugt is licensed under CC BY-NC-ND 4.0. Items are reproduced verbatim from Table 4 of the article. NoDerivatives: do not reword, abridge, or translate these items.",
-  "note": "Full 22-item administration, work-domain instructions (\"the leaders in your workplace\").",
+  "note": "Full 22-item administration, work-domain instructions (\"the leaders in your workplace\"). Item wording checked against the article's own item table (p.779) on 2026-09-02: five items differed only in contractions and one in toward/towards, now corrected to match verbatim.",
   "subscales": {
     "protection": [
       "I wish to have a leader who positions themselves between my group and an outside threat.",
       "I am motivated to follow a leader who stands up for me against outsiders.",
       "Having a leader who takes care of my security is valuable to me.",
-      "It's important for me to have a leader who protects the group from any harm."
+      "It is important for me to have a leader who protects the group from any harm."
     ],
     "affiliation": [
       "I wish to have a leader who creates a good group atmosphere.",
       "I am motivated to follow a leader who creates a sense of camaraderie.",
       "Having a leader who can bring the group together is valuable to me.",
-      "It's important for me to have a leader who makes me feel part of the group."
+      "It is important for me to have a leader who makes me feel part of the group."
     ],
     "status": [
       "I need a leader who improves my standing.",
@@ -43,18 +43,18 @@
     "vision": [
       "I wish to have a leader who sets clear goals.",
       "I am motivated to follow a leader who has a clear vision.",
-      "Having a leader who moves the group towards a shared direction is valuable to me."
+      "Having a leader who moves the group toward a shared direction is valuable to me."
     ],
     "expertise": [
       "I need a leader who enables me to learn from them.",
       "Having a leader who is a good teacher is valuable to me.",
-      "It's important for me to have a leader who offers advice."
+      "It is important for me to have a leader who offers advice."
     ],
     "fairness": [
       "I need a leader who ensures that procedures are free of bias.",
       "I wish to have a leader who carefully listens to both parties when mediating a conflict.",
       "Having a leader who makes fair and balanced decisions is valuable to me.",
-      "It's important for me to have a leader who manages within-group conflicts in a just way."
+      "It is important for me to have a leader who manages within-group conflicts in a just way."
     ]
   }
 }
