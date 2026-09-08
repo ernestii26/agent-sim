@@ -1196,30 +1196,34 @@ def test_hidden_facts_are_dealt_once_each_and_independently_of_group() -> None:
     assert abs(counts["P1"] - counts["D1"]) < 0.15 * max(counts.values()), counts
 
 
-def test_hidden_fact_detection_needs_a_real_echo_not_shared_vocabulary() -> None:
-    fact = "A mudslide just occurred, covering the driveway to North Hill."
-    record = RunRecord(
-        run_no=1, condition="threat", members_by_group={},
-        transcript=[{"spoke": True, "text": "Careful — a mudslide just occurred, "
-                                            "covering the driveway to North Hill."}],
-        votes=[], task={"shares": {"P1": [fact], "D1": ["The bridge is still passable."]}},
-    )
-    assert record.hidden_facts_raised() == (1, 2)
+def test_pooling_is_unscored_until_the_judge_has_run() -> None:
+    """None and zero are different answers and must never be conflated.
 
-    # Naming the place is not the same as contributing the fact.
-    quiet = RunRecord(
-        run_no=1, condition="threat", members_by_group={},
-        transcript=[{"spoke": True, "text": "I think North Hill is the safest option."}],
-        votes=[], task={"shares": {"P1": [fact]}},
-    )
-    assert quiet.hidden_facts_raised() == (0, 1)
+    Verbatim matching was tried here first and scored 0 of 4 on a run whose transcript
+    contained at least two of the facts in paraphrase, so the number now comes from
+    tools/score_pooling.py and this only reads it back.
+    """
+    facts = ["The bridge washed out in the last hour.", "The dam releases water tonight."]
+    dealt = {"shares": {"P1": [facts[0]], "D1": [facts[1]], "N1": []}}
+
+    unscored = RunRecord(run_no=1, condition="threat", members_by_group={},
+                         transcript=[], votes=[], task=dict(dealt))
+    assert unscored.hidden_facts_raised() is None, "unscored must not read as zero raised"
+
+    scored = RunRecord(run_no=1, condition="threat", members_by_group={}, transcript=[],
+                       votes=[], task={**dealt, "raised": {facts[0]: True, facts[1]: False}})
+    assert scored.hidden_facts_raised() == (1, 2)
+
+    none_raised = RunRecord(run_no=1, condition="threat", members_by_group={}, transcript=[],
+                            votes=[], task={**dealt, "raised": {f: False for f in facts}})
+    assert none_raised.hidden_facts_raised() == (0, 2), "a real zero must still be reportable"
 
 
 def test_correct_rate_is_none_for_runs_collected_before_tasks_existed() -> None:
     legacy = RunRecord(run_no=1, condition="threat", members_by_group={},
                        transcript=[], votes=[])
     assert legacy.correct_rate() is None, "a task-less run must not score as zero"
-    assert legacy.hidden_facts_raised() == (0, 0)
+    assert legacy.hidden_facts_raised() is None
 
 
 def test_old_checkpoints_cannot_be_topped_up_after_the_scenarios_changed(tmp_path) -> None:

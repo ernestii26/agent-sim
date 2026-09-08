@@ -456,9 +456,14 @@ def render_task_performance(study: Study, out: dict[str, Any]) -> None:
         print(f"             {study.label_of(group):<24}: {_fmt(value, 3)}")
     print(f"  Consensus  every member gave one answer     : {_fmt(out['unanimous'], 3)}")
     print(f"             ...and it was the right one      : {_fmt(out['unanimously_correct'], 3)}")
-    print(f"  Pooling    private facts said out loud      : {_fmt(out['pooling'], 3)}")
+    if out["pooling"] is None:
+        print("  Pooling    not scored yet                     : run tools/score_pooling.py")
+    else:
+        print(f"  Pooling    private facts that reached others : {_fmt(out['pooling'], 3)}"
+              f"   ({out['pooling_runs']} of {out['runs']} runs scored)")
     print()
     print("  Pooling is the mechanism: an endorsement effect that leaves it unchanged is")
-    print("  not working through what the group knew. Accuracy is a floor -- the detector")
-    print("  only counts a fact as raised when its wording survives into the transcript.")
+    print("  not working through what the group knew. It is judged in substance by")
+    print("  tools/score_pooling.py, offline -- verbatim matching scored 0 of 4 on a run")
+    print("  whose transcript carried at least two of the facts in paraphrase.")
     print("=" * 74)

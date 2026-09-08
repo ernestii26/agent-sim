@@ -1,0 +1,483 @@
+{
+  "study": "ffni_mediation",
+  "condition": "collaborative",
+  "hypothesis": "H1: Prestige receives more peer votes than Dominance",
+  "contrast": [
+    "P",
+    "D"
+  ],
+  "runs": 1,
+  "per_run": [
+    {
+      "run_no": 1,
+      "P": 1.0,
+      "D": 2.0
+    }
+  ],
+  "wins": 0,
+  "electorate": [
+    "N"
+  ],
+  "candidate_votes": {
+    "P": 1,
+    "D": 1
+  },
+  "metrics": {
+    "votes": {
+      "P": {
+        "mean": 1.0,
+        "sd": 0.0
+      },
+      "D": {
+        "mean": 2.0,
+        "sd": 0.0
+      },
+      "t": NaN,
+      "p": NaN,
+      "values": {
+        "P": [
+          1.0
+        ],
+        "D": [
+          2.0
+        ]
+      }
+    },
+    "speech_rate": {
+      "P": {
+        "mean": 1.0,
+        "sd": 0.0
+      },
+      "D": {
+        "mean": 1.0,
+        "sd": 0.0
+      },
+      "t": NaN,
+      "p": NaN,
+      "values": {
+        "P": [
+          1.0
+        ],
+        "D": [
+          1.0
+        ]
+      }
+    },
+    "words_per_turn": {
+      "P": {
+        "mean": 22.0,
+        "sd": 0.0
+      },
+      "D": {
+        "mean": 22.333333333333332,
+        "sd": 0.0
+      },
+      "t": NaN,
+      "p": NaN,
+      "values": {
+        "P": [
+          22.0
+        ],
+        "D": [
+          22.333333333333332
+        ]
+      }
+    }
+  },
+  "personas": {
+    "D4": {
+      "turns": 3.0,
+      "speech_rate": 1.0,
+      "mean_words": 22.333333333333332
+    },
+    "N13": {
+      "turns": 3.0,
+      "speech_rate": 1.0,
+      "mean_words": 21.333333333333332
+    },
+    "N14": {
+      "turns": 3.0,
+      "speech_rate": 1.0,
+      "mean_words": 26.333333333333332
+    },
+    "N2": {
+      "turns": 3.0,
+      "speech_rate": 1.0,
+      "mean_words": 29.666666666666668
+    },
+    "P4": {
+      "turns": 3.0,
+      "speech_rate": 1.0,
+      "mean_words": 22.0
+    }
+  },
+  "supported": false,
+  "task_performance": {
+    "runs": 1,
+    "accuracy": 0.4,
+    "accuracy_by_group": {
+      "D": 0.0,
+      "N": 0.3333333333333333,
+      "P": 1.0
+    },
+    "unanimous": 0.0,
+    "unanimously_correct": 0.0,
+    "pooling": 0.0,
+    "tasks": [
+      "weather_sensor_deployment"
+    ]
+  },
+  "needs": {
+    "study": "ffni_mediation",
+    "instrument": "ffni",
+    "runs": 1,
+    "subscales": {
+      "protection": {
+        "baseline_mean": 5.583333333333333,
+        "baseline_sd": 0.3818813079129867,
+        "post_mean": 5.666666666666667,
+        "post_sd": 0.28867513459481287,
+        "delta_mean": 0.08333333333333333,
+        "delta_sd": 0.14433756729740646,
+        "delta_n": 3,
+        "alpha": 0.7619047619047619
+      },
+      "affiliation": {
+        "baseline_mean": 6.083333333333333,
+        "baseline_sd": 0.8036375634160796,
+        "post_mean": 5.583333333333333,
+        "post_sd": 0.3818813079129867,
+        "delta_mean": -0.5,
+        "delta_sd": 0.5,
+        "delta_n": 3,
+        "alpha": 0.903225806451613
+      },
+      "status": {
+        "baseline_mean": 4.333333333333333,
+        "baseline_sd": 0.3818813079129867,
+        "post_mean": 3.5833333333333335,
+        "post_sd": 0.3818813079129867,
+        "delta_mean": -0.75,
+        "delta_sd": 0.0,
+        "delta_n": 3,
+        "alpha": 0.5714285714285713
+      },
+      "vision": {
+        "baseline_mean": 5.777777777777778,
+        "baseline_sd": 0.5091750772173155,
+        "post_mean": 5.666666666666667,
+        "post_sd": 0.3333333333333335,
+        "delta_mean": -0.11111111111111101,
+        "delta_sd": 0.1924500897298751,
+        "delta_n": 3,
+        "alpha": 0.4285714285714284
+      },
+      "expertise": {
+        "baseline_mean": 5.888888888888889,
+        "baseline_sd": 0.1924500897298751,
+        "post_mean": 5.222222222222222,
+        "post_sd": 0.1924500897298751,
+        "delta_mean": -0.666666666666667,
+        "delta_sd": 0.0,
+        "delta_n": 3,
+        "alpha": -3.0
+      },
+      "fairness": {
+        "baseline_mean": 6.5,
+        "baseline_sd": 0.25,
+        "post_mean": 6.583333333333333,
+        "post_sd": 0.5204164998665333,
+        "delta_mean": 0.08333333333333333,
+        "delta_sd": 0.6291528696058959,
+        "delta_n": 3,
+        "alpha": -1.7777777777777786
+      }
+    },
+    "straight_lining": {
+      "baseline": 0.0,
+      "post": 0.0
+    }
+  },
+  "layers": {
+    "contrast": [
+      "P",
+      "D"
+    ],
+    "needs": {
+      "protection": {
+        "cognition": {
+          "slope": -1.166666666666667,
+          "r": -0.9707253433941508,
+          "n": 3,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 3
+        },
+        "evaluation_a": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 3,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 3
+        },
+        "evaluation_b": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 1,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 1
+        },
+        "layer_gap": NaN
+      },
+      "affiliation": {
+        "cognition": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 0,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 0
+        },
+        "evaluation_a": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 3,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 3
+        },
+        "evaluation_b": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 1,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 1
+        },
+        "layer_gap": NaN
+      },
+      "status": {
+        "cognition": {
+          "slope": -0.22619047619047553,
+          "r": -0.9958705948858223,
+          "n": 3,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 3
+        },
+        "evaluation_a": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 3,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 3
+        },
+        "evaluation_b": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 1,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 1
+        },
+        "layer_gap": NaN
+      },
+      "vision": {
+        "cognition": {
+          "slope": 0.7499999999999986,
+          "r": 0.47031708100177155,
+          "n": 3,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 3
+        },
+        "evaluation_a": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 3,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 3
+        },
+        "evaluation_b": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 1,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 1
+        },
+        "layer_gap": NaN
+      },
+      "expertise": {
+        "cognition": {
+          "slope": -1.833333333333335,
+          "r": -0.9538209664765319,
+          "n": 3,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 3
+        },
+        "evaluation_a": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 3,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 3
+        },
+        "evaluation_b": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 1,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 1
+        },
+        "layer_gap": NaN
+      },
+      "fairness": {
+        "cognition": {
+          "slope": 0.11965811965811979,
+          "r": 0.15958626340564347,
+          "n": 3,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 3
+        },
+        "evaluation_a": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 3,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 3
+        },
+        "evaluation_b": {
+          "slope": NaN,
+          "r": NaN,
+          "n": 1,
+          "beta": NaN,
+          "delta_r2": NaN,
+          "model_r2": NaN,
+          "partial_n": 1
+        },
+        "layer_gap": NaN
+      }
+    }
+  },
+  "rater_agreement": {
+    "instrument": "effectiveness",
+    "icc_single": NaN,
+    "icc_average": NaN,
+    "cells": 1,
+    "raters_per_cell": 3,
+    "ratings": 3,
+    "per_target": {
+      "D4": {
+        "n": 1,
+        "mean": 6.0,
+        "sd": 0.0
+      },
+      "P4": {
+        "n": 3,
+        "mean": 5.0,
+        "sd": 0.0
+      }
+    }
+  },
+  "provenance": {
+    "written": "2026-09-08T10:40:32",
+    "discussion_model": "gpt-4o-mini",
+    "discussion_temperature": 0.7,
+    "vote_model": "gpt-4o-mini",
+    "vote_temperature": 0.2,
+    "survey_model": "gpt-4o-mini",
+    "survey_temperature": 0.0,
+    "rounds": 3,
+    "instruments": {
+      "ffni": "2f96d61bc0a8",
+      "leader_ideal": "718fb2bf5c31",
+      "effectiveness": "1e2e10a57d3c"
+    },
+    "scenario_pools": {
+      "collaborative": [
+        "toma_butera_2009",
+        "baker_2010",
+        "schulz_hardt_mojzisch_2012",
+        "graetz_et_al_1998",
+        "Stasser_Stewart_1992",
+        "Laboratory Theft Deduction",
+        "lunch_group_decision",
+        "scientists_animal_base_decision",
+        "choosing_base_camp",
+        "community_banquet_venue_decision",
+        "research_station_site_selection",
+        "the_lead_investor_decision",
+        "weather_sensor_deployment",
+        "Choosing the Safe Offsite Venue",
+        "Find the Missing Prototype",
+        "choosing_the_safe_field_station",
+        "island_research_base_choice",
+        "archaeological_dig_site",
+        "last_minute_move",
+        "The Elusive Bird Sighting",
+        "power_outage_island",
+        "company_acquisition_decision",
+        "Emergency Event Relocation"
+      ],
+      "threat": [
+        "evacuation_west_city",
+        "evacuation_north_hill",
+        "evacuation_east_town",
+        "critical_hospital_transfer",
+        "emergency_supply_drop",
+        "evacuate_park_dilemma",
+        "city_storm_shelter_decision",
+        "meteor_shower_shelter",
+        "emergency_transportation_decision",
+        "Antarctic Storm Safe Haven",
+        "select_emergency_shelter",
+        "manuscript_flood_shelter",
+        "Rescue the Lost Researchers",
+        "Safe Shelter Selection",
+        "critical_vaccine_route",
+        "Critical Sample Transfer",
+        "Safe Haven After the Spill",
+        "the_safe_shelter",
+        "emergency_warehouse_selection",
+        "storm_recovery_clinic_site_selection",
+        "emergency_aircraft_landing_site",
+        "emergency_hospital_transfer",
+        "Space Evacuation Decision",
+        "safe_haven_decision",
+        "Safe Lab Choice After Earthquake",
+        "emergency_evacuation_center_choice",
+        "emergency_supply_distribution",
+        "mountain_storm_shelter",
+        "emergency_drone_delivery",
+        "Missing Medicine Delivery"
+      ]
+    }
+  }
+}

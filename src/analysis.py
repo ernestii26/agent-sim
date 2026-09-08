@@ -872,8 +872,9 @@ def summarize_task_performance(records: list) -> dict[str, Any]:
 
     answers = [a for r in scored for a in r.answers]
     groups = sorted({a["group"] for a in answers})
-    raised = [r.hidden_facts_raised() for r in scored]
-    dealt = sum(total for _, total in raised)
+    # Only runs the judge has scored contribute; unscored runs are absent, not zero.
+    judged = [x for x in (r.hidden_facts_raised() for r in scored) if x is not None]
+    dealt = sum(total for _, total in judged)
 
     return {
         "runs": len(scored),
@@ -890,6 +891,7 @@ def summarize_task_performance(records: list) -> dict[str, Any]:
                 for r in scored
             ]
         ),
-        "pooling": (sum(n for n, _ in raised) / dealt) if dealt else None,
+        "pooling": (sum(n for n, _ in judged) / dealt) if dealt else None,
+        "pooling_runs": len(judged),
         "tasks": sorted({r.task.get("name", "") for r in scored}),
     }

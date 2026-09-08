@@ -506,7 +506,19 @@ def _administer(
     ).strip()
 
     for attempt in (1, 2):
-        parsed = _extract_json(ask(participant.agent, prompt))
+        # The retry must not repeat the prompt verbatim. TinyTroupe suppresses an action
+        # too similar to the agent's previous one, replacing it with DONE -- and rating a
+        # second candidate right after the first is exactly that case, so the identical
+        # re-ask was guaranteed to be suppressed again. Seen on gpt-4o-mini, where five of
+        # six second ratings came back empty; gpt-4.1 answered 480/480, which is why it
+        # never surfaced before.
+        retry_note = (
+            ""
+            if attempt == 1
+            else "\n\nYour previous reply could not be read. Send the JSON object again, "
+                 "on its own, even if your ratings are the same as before."
+        )
+        parsed = _extract_json(ask(participant.agent, prompt + retry_note))
         responses: dict[str, Any] = {}
         for item_id, _, _ in items:
             value = parsed.get(item_id)

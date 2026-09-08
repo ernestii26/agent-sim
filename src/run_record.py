@@ -7,7 +7,6 @@ tolerance for pre-instrument checkpoints (no "measures" key) lives — see `resp
 """
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -70,20 +69,26 @@ class RunRecord:
             return None
         return sum(1 for a in rows if a["correct"]) / len(rows)
 
-    def hidden_facts_raised(self) -> tuple[int, int]:
-        """(facts that surfaced in the transcript, facts dealt out).
+    def hidden_facts_raised(self) -> tuple[int, int] | None:
+        """(private facts that reached the group, facts dealt out), or None if unscored.
 
-        A fact counts as raised when a substantial run of its words appears in something
-        someone said. Deliberately crude: it is a floor on pooling, not a transcript
-        parser, and the comparison across conditions is what carries the meaning.
+        Scored offline by tools/score_pooling.py, not here. The obvious cheap version --
+        looking for the fact's wording in the transcript -- was tried and does not work:
+        agents paraphrase, so a run where one agent said "we also need to consider the dam
+        release" and another said "it's just washed out" scored 0 of 4 when the true
+        answer was at least 2. A detector that reports zero when the answer is two is not
+        a conservative estimate, it is a wrong one.
+
+        None means "not scored yet" and must never be read as zero.
         """
         shares = self.task.get("shares") or {}
-        facts = [fact for held in shares.values() for fact in held]
-        if not facts:
-            return (0, 0)
-        spoken = " ".join(t["text"] for t in self.transcript if t.get("spoke")).lower()
-        raised = sum(1 for fact in facts if _echoes(fact, spoken))
-        return (raised, len(facts))
+        dealt = sum(len(held) for held in shares.values())
+        if not dealt:
+            return None
+        raised = self.task.get("raised")
+        if raised is None:
+            return None
+        return (sum(1 for value in raised.values() if value), dealt)
 
     # -- discussion -------------------------------------------------------- #
 
@@ -164,17 +169,3 @@ class RunRecord:
             for rater, by_target in self.responses(POST, instrument).items()
         }
 
-
-def _echoes(fact: str, spoken: str) -> bool:
-    """True when any 5-word run of `fact` reappears in `spoken`.
-
-    Five is long enough that ordinary shared vocabulary ("the supply truck") does not
-    trigger it, and short enough to survive an agent paraphrasing the rest of the
-    sentence around the part that matters.
-    """
-    words = [w for w in re.findall(r"[a-z0-9]+", fact.lower()) if w]
-    if len(words) < 5:
-        return " ".join(words) in spoken
-    return any(
-        " ".join(words[i:i + 5]) in spoken for i in range(len(words) - 4)
-    )
