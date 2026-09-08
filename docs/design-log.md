@@ -2470,9 +2470,27 @@ single-item scale the check cannot distinguish any rating from any other.
 gpt-4.1 answered 480/480 in the real Step 2 data and never showed this. The reason is
 that `last_remembered_action(ignore_done=True)` walks back past DONE to the previous
 real action: a model that emits THINK before TALK is compared against its own THINK,
-type differs, similarity is 0. gpt-4.1 emits a THINK; gpt-4o-mini follows our prompt
-("Respond with one TALK action followed by DONE") literally and emits none. **The weaker
-model failed because it obeyed the instruction more exactly.**
+type differs, similarity is 0.
+
+The THINK is not something a model invents. TinyTroupe prepends its own system prompt
+(`agent/prompts/tiny_person.v2.mustache`, the template `tiny_person.py:267` actually
+loads -- there is an unused v1 beside it) and that prompt mandates it:
+
+    line  77:  If asked something, reply with TALK (after THINK).
+    line  99:  Always THINK before TALK; THINK is a separate action, never nested
+               inside TALK.
+    line 180:  All reasoning must be explicit via THINK actions.
+
+Our `_administer` prompt is only the stimulus appended after all of that. So gpt-4.1
+follows a mandatory framework rule and gpt-4o-mini does not — **an instruction-following
+failure in the weaker model, not over-obedience to ours.** (An earlier version of this
+section said the opposite, on the strength of our own prompt saying "Respond with one
+TALK action followed by DONE" and without checking what the framework had already told
+the agent.)
+
+The practical consequence is worse than it first looks: the guard's behaviour depends on
+whether a model complies with an instruction it was never our decision to give, so
+"gpt-4.1 passes" was never evidence that the measurement path was sound.
 
 **The first fix was aimed at the wrong layer.** The retry re-sent a byte-identical
 prompt, so I differentiated the prompt — but the similarity is computed on the *reply*,
@@ -2498,5 +2516,6 @@ first attempt, ratings genuinely varied (5, 6, 6, 5, 5, 6)**, zero suppressions,
 other instrument complete. Before: 1/6.
 
 This is the second defect found by running the cheap model rather than trusting that
-gpt-4.1 passing means the code is right. gpt-4.1 was hiding it by accident, and nothing
-in the design guaranteed it would keep doing so.
+gpt-4.1 passing means the code is right. gpt-4.1 was hiding it by accident -- by
+complying with a framework instruction that has nothing to do with measurement -- and
+nothing in the design guaranteed it would keep doing so.
