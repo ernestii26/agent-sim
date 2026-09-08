@@ -1249,3 +1249,35 @@ def test_old_checkpoints_cannot_be_topped_up_after_the_scenarios_changed(tmp_pat
             assert "cannot be mixed" in str(exc)
         else:
             raise AssertionError("a foreign checkpoint was accepted")
+
+
+def test_measurement_calls_switch_off_the_repetition_guard_and_put_it_back() -> None:
+    """A rating battery is not a conversation, and the guard cannot tell them apart.
+
+    TinyTroupe discards an action whose content is too similar to the agent's last
+    non-DONE one, replacing it with a silent DONE -- judged on the CHARACTER SET of the
+    raw reply. {"effectiveness_1": 5} against {"effectiveness_1": 2} scores 0.913 against
+    a 0.85 threshold, so two maximally different ratings read as a repetition. Rating a
+    second candidate right after the first hit this every time: five of six second
+    ratings came back null on gpt-4o-mini before the guard was lifted, six of six
+    complete after.
+    """
+    class FakeAgent:
+        def __init__(self) -> None:
+            self.enable_basic_action_repetition_prevention = True
+            self.guard_while_acting: bool | None = None
+
+        def listen_and_act(self, prompt, return_actions=False, communication_display=True):
+            self.guard_while_acting = self.enable_basic_action_repetition_prevention
+            return [{"action": {"type": "TALK", "content": "{}"}}]
+
+    measured = FakeAgent()
+    AgentTransport(measurement=True).actions(measured, "rate this person")
+    assert measured.guard_while_acting is False, "the guard must be off while rating"
+    assert measured.enable_basic_action_repetition_prevention is True, "and restored after"
+
+    # The meeting keeps it: there, repeating yourself really is bad behaviour.
+    talking = FakeAgent()
+    AgentTransport().actions(talking, "say something")
+    assert talking.guard_while_acting is True
+    assert talking.enable_basic_action_repetition_prevention is True

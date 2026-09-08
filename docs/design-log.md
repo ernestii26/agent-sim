@@ -2443,3 +2443,60 @@ Also: the tasks were written for four agents and this study runs five, so the
 conversion rewrites the headcount phrases in 17 of the 53 descriptions and drops the
 payment and clock promises we cannot keep ($1/$2 rewards, "the chat will take at most
 15 minutes"). Nothing else about the prose changes.
+
+## 36. The framework was deleting ratings before we saw them (2026-09-08)
+
+A one-run-per-condition smoke test on gpt-4o-mini, meant only to check that drawn
+scenarios did not break the pipeline, found a measurement defect that had been there
+the whole time.
+
+Five of six effectiveness ratings came back null, and only for the *second* candidate
+each rater scored. Not the Dominance persona specifically — the second one, whoever it
+was. TinyTroupe discards an action whose content is too similar to the agent's last
+non-DONE action and replaces it with a silent DONE (`MAX_ACTION_SIMILARITY = 0.85`).
+The agent answered; the framework deleted the answer before `_administer` could parse it,
+and a missing rating was recorded.
+
+**The similarity is Jaccard over the CHARACTER SET of the raw reply.** Measured:
+
+    {"effectiveness_1": 5}  vs  {"effectiveness_1": 5}   ->  1.000
+    {"effectiveness_1": 5}  vs  {"effectiveness_1": 6}   ->  0.913
+    {"effectiveness_1": 5}  vs  {"effectiveness_1": 2}   ->  0.913
+
+Two maximally different ratings score 0.913 against a 0.85 threshold, because the JSON
+scaffolding is nearly all of the characters and the answer is one of them. For a
+single-item scale the check cannot distinguish any rating from any other.
+
+gpt-4.1 answered 480/480 in the real Step 2 data and never showed this. The reason is
+that `last_remembered_action(ignore_done=True)` walks back past DONE to the previous
+real action: a model that emits THINK before TALK is compared against its own THINK,
+type differs, similarity is 0. gpt-4.1 emits a THINK; gpt-4o-mini follows our prompt
+("Respond with one TALK action followed by DONE") literally and emits none. **The weaker
+model failed because it obeyed the instruction more exactly.**
+
+**The first fix was aimed at the wrong layer.** The retry re-sent a byte-identical
+prompt, so I differentiated the prompt — but the similarity is computed on the *reply*,
+and the reply is the same short JSON however the question is phrased. That change is
+kept, because it helps the ordinary case where a model wraps its JSON in prose, but it
+does nothing here.
+
+**The real fix.** `AgentTransport(measurement=True)` turns the guard off for the call
+and restores it afterwards; `run_survey`, `run_vote` and `run_poll` use it, and
+`run_discussion` does not. The guard exists to stop an agent being repetitive in
+conversation, which is a real thing to prevent in a meeting. A rating battery is not a
+conversation: two people giving the same score is the data, and suppressing it destroys
+the measurement rather than improving it.
+
+Changing the prompt to make replies look different — asking for the target's name
+inside the JSON, say — would also have worked, by diluting the shared characters. It
+was rejected: it is a workaround that depends on the payload staying long, and it means
+editing an instrument we have otherwise kept verbatim from the source paper in order to
+dodge a framework quirk.
+
+Re-run on gpt-4o-mini after the fix: **6/6 effectiveness ratings complete, all on the
+first attempt, ratings genuinely varied (5, 6, 6, 5, 5, 6)**, zero suppressions, every
+other instrument complete. Before: 1/6.
+
+This is the second defect found by running the cheap model rather than trusting that
+gpt-4.1 passing means the code is right. gpt-4.1 was hiding it by accident, and nothing
+in the design guaranteed it would keep doing so.

@@ -42,19 +42,36 @@ class AgentTransport:
     up into a spurious APIQuotaExhausted abort.
     """
 
-    def __init__(self, retries: int = 3) -> None:
+    def __init__(self, retries: int = 3, *, measurement: bool = False) -> None:
         self.retries = retries
         self.consecutive_failures = 0
+        # A rating battery is not a conversation. TinyTroupe discards an action whose
+        # content is too similar to the agent's last non-DONE one and replaces it with a
+        # silent DONE -- and it measures that on the CHARACTER SET of the raw reply, so
+        # {"effectiveness_1": 5} against {"effectiveness_1": 2} scores 0.913 and trips the
+        # 0.85 threshold even though the two ratings could not differ more. Rating a second
+        # candidate right after the first is exactly that case: five of six second ratings
+        # came back null on gpt-4o-mini. The guard belongs in the meeting, where repeating
+        # yourself is bad behaviour, and nowhere near a measurement, where two people
+        # giving the same answer is the data.
+        self.measurement = measurement
 
     def actions(self, agent: Any, prompt: str) -> list[dict[str, Any]]:
         errors = _api_error_types()
         for attempt in range(1, self.retries + 1):
             try:
-                result = agent.listen_and_act(
-                    prompt,
-                    return_actions=True,
-                    communication_display=False,
-                )
+                guard = getattr(agent, "enable_basic_action_repetition_prevention", None)
+                if self.measurement:
+                    agent.enable_basic_action_repetition_prevention = False
+                try:
+                    result = agent.listen_and_act(
+                        prompt,
+                        return_actions=True,
+                        communication_display=False,
+                    )
+                finally:
+                    if self.measurement and guard is not None:
+                        agent.enable_basic_action_repetition_prevention = guard
                 self.consecutive_failures = 0
                 return result or []
             except errors as exc:
@@ -292,7 +309,7 @@ def run_vote(
 
     by_name = {p.name: p for p in participants}
     votes: list[dict[str, Any]] = []
-    ask = AgentTransport()
+    ask = AgentTransport(measurement=True)
 
     for participant in participants:
         candidates = [p.name for p in participants if p.name != participant.name]
@@ -353,7 +370,7 @@ def run_poll(
     configure_tinytroupe_runtime(model)
 
     answers: list[dict[str, Any]] = []
-    ask = AgentTransport()
+    ask = AgentTransport(measurement=True)
     options = list(task.options)
 
     for participant in participants:
@@ -432,7 +449,7 @@ def run_survey(
         p for p in participants if not instrument.targets or p.group in instrument.targets
     ]
     results: dict[str, Any] = {}
-    ask = AgentTransport()
+    ask = AgentTransport(measurement=True)
 
     for participant in respondents:
         if instrument.about == ABOUT_EACH_CANDIDATE:
@@ -506,12 +523,10 @@ def _administer(
     ).strip()
 
     for attempt in (1, 2):
-        # The retry must not repeat the prompt verbatim. TinyTroupe suppresses an action
-        # too similar to the agent's previous one, replacing it with DONE -- and rating a
-        # second candidate right after the first is exactly that case, so the identical
-        # re-ask was guaranteed to be suppressed again. Seen on gpt-4o-mini, where five of
-        # six second ratings came back empty; gpt-4.1 answered 480/480, which is why it
-        # never surfaced before.
+        # A retry that re-sends the prompt byte for byte invites the same unusable reply.
+        # This is not what fixes the repetition guard -- that is disabled for measurement
+        # transports, see AgentTransport -- but it helps the ordinary case where the model
+        # simply wrapped its JSON in prose the first time.
         retry_note = (
             ""
             if attempt == 1

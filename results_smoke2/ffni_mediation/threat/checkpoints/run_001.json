@@ -1,0 +1,855 @@
+{
+  "run_no": 1,
+  "condition": "threat",
+  "members": {
+    "P": [
+      "P4"
+    ],
+    "D": [
+      "D4"
+    ],
+    "N": [
+      "N13",
+      "N14",
+      "N2"
+    ]
+  },
+  "transcript": [
+    {
+      "round": 1,
+      "name": "Quinn Doherty",
+      "persona_id": "N13",
+      "group": "N",
+      "spoke": true,
+      "word_count": 26,
+      "text": "I think we should seriously consider Blue Lake Cabin. It has supplies, which we need, and we know it’s accessible right now. Let's not overthink it."
+    },
+    {
+      "round": 1,
+      "name": "Dev Raman",
+      "persona_id": "N2",
+      "group": "N",
+      "spoke": true,
+      "word_count": 21,
+      "text": "Given the new information, Blue Lake Cabin isn't accessible anymore. We should consider the other options carefully, especially Red Cliff Lodge."
+    },
+    {
+      "round": 1,
+      "name": "Olga Ivanova",
+      "persona_id": "D4",
+      "group": "D",
+      "spoke": true,
+      "word_count": 31,
+      "text": "Let's be clear. If Blue Lake Cabin is not accessible anymore, we can't waste time on it. Red Cliff Lodge might be risky given the storm. We need to choose wisely."
+    },
+    {
+      "round": 1,
+      "name": "Rania Khoury",
+      "persona_id": "N14",
+      "group": "N",
+      "spoke": true,
+      "word_count": 27,
+      "text": "I think we need to focus on the safety of our options. Blue Lake Cabin may not be accessible anymore, so we should prioritize our choices accordingly."
+    },
+    {
+      "round": 1,
+      "name": "Pia Kowalski",
+      "persona_id": "P4",
+      "group": "P",
+      "spoke": true,
+      "word_count": 35,
+      "text": "I agree with the need to focus on safety. If Blue Lake Cabin isn't an option anymore, we should seriously weigh the risks of Red Cliff Lodge. We can't afford to take unnecessary chances here."
+    },
+    {
+      "round": 2,
+      "name": "Rania Khoury",
+      "persona_id": "N14",
+      "group": "N",
+      "spoke": true,
+      "word_count": 28,
+      "text": "I think we should really consider the risks involved with Red Cliff Lodge. Just because it has solid walls doesn't mean it's the safest choice in this storm."
+    },
+    {
+      "round": 2,
+      "name": "Pia Kowalski",
+      "persona_id": "P4",
+      "group": "P",
+      "spoke": true,
+      "word_count": 25,
+      "text": "I hear the concerns about Red Cliff Lodge. Just because it's sturdy doesn’t mean it’s the safest choice. We need to consider all risks carefully."
+    },
+    {
+      "round": 2,
+      "name": "Dev Raman",
+      "persona_id": "N2",
+      "group": "N",
+      "spoke": true,
+      "word_count": 29,
+      "text": "We really need to think this through. Red Cliff Lodge might not be the safest choice, especially if the storm hits hard. We ought to weigh our options carefully."
+    },
+    {
+      "round": 2,
+      "name": "Olga Ivanova",
+      "persona_id": "D4",
+      "group": "D",
+      "spoke": true,
+      "word_count": 26,
+      "text": "We can't keep going in circles. Let's be clear: if Red Cliff Lodge is risky, we need a solid plan. We have to choose carefully now."
+    },
+    {
+      "round": 2,
+      "name": "Quinn Doherty",
+      "persona_id": "N13",
+      "group": "N",
+      "spoke": true,
+      "word_count": 24,
+      "text": "We really need to think about the risks of Red Cliff Lodge. Just because it seems sturdy doesn’t mean it’s safe in this storm."
+    },
+    {
+      "round": 3,
+      "name": "Pia Kowalski",
+      "persona_id": "P4",
+      "group": "P",
+      "spoke": true,
+      "word_count": 30,
+      "text": "I think we need to be clear about the risks with Red Cliff Lodge. Just because it’s sturdy doesn’t guarantee safety in this storm. We should weigh our options carefully."
+    },
+    {
+      "round": 3,
+      "name": "Dev Raman",
+      "persona_id": "N2",
+      "group": "N",
+      "spoke": true,
+      "word_count": 26,
+      "text": "It seems like we're all concerned about the risks with Red Cliff Lodge, but we need to make a decision quickly. Let's weigh our options carefully."
+    },
+    {
+      "round": 3,
+      "name": "Quinn Doherty",
+      "persona_id": "N13",
+      "group": "N",
+      "spoke": true,
+      "word_count": 24,
+      "text": "I think we need to make a decision soon. Let’s not keep going in circles. What do we all think about the risks involved?"
+    },
+    {
+      "round": 3,
+      "name": "Rania Khoury",
+      "persona_id": "N14",
+      "group": "N",
+      "spoke": true,
+      "word_count": 23,
+      "text": "I think we should also consider the implications of our choice. The storm's intensity could change everything. Safety should be our main priority."
+    },
+    {
+      "round": 3,
+      "name": "Olga Ivanova",
+      "persona_id": "D4",
+      "group": "D",
+      "spoke": true,
+      "word_count": 28,
+      "text": "Let's focus on what we know. If we can't trust Red Cliff Lodge, we need to decide quickly on a safer option. This isn't the time to hesitate."
+    }
+  ],
+  "votes": [
+    {
+      "voter_id": "P4",
+      "voter_group": "P",
+      "voted_for_name": "Olga Ivanova",
+      "voted_for_id": "D4",
+      "voted_for_group": "D",
+      "reason": "She emphasized the need for a solid plan and decisiveness, which is crucial in this situation."
+    },
+    {
+      "voter_id": "D4",
+      "voter_group": "D",
+      "voted_for_name": "Rania Khoury",
+      "voted_for_id": "N14",
+      "voted_for_group": "N",
+      "reason": "Rania consistently emphasized the importance of safety and carefully weighing our options, which is crucial in this situation."
+    },
+    {
+      "voter_id": "N13",
+      "voter_group": "N",
+      "voted_for_name": "Olga Ivanova",
+      "voted_for_id": "D4",
+      "voted_for_group": "D",
+      "reason": "She emphasized the need for a quick decision and focused on safety, which is crucial in this situation."
+    },
+    {
+      "voter_id": "N14",
+      "voter_group": "N",
+      "voted_for_name": "Olga Ivanova",
+      "voted_for_id": "D4",
+      "voted_for_group": "D",
+      "reason": "She emphasized the need to decide quickly on a safer option, showing leadership in a critical moment."
+    },
+    {
+      "voter_id": "N2",
+      "voter_group": "N",
+      "voted_for_name": "Olga Ivanova",
+      "voted_for_id": "D4",
+      "voted_for_group": "D",
+      "reason": "She emphasized the need for a solid plan and quick decision-making, which is crucial given our situation."
+    }
+  ],
+  "measures": {
+    "baseline": {
+      "ffni": {
+        "N13": {
+          "protection_1": 6,
+          "protection_2": 6,
+          "protection_3": 6,
+          "protection_4": 6,
+          "affiliation_1": 7,
+          "affiliation_2": 7,
+          "affiliation_3": 7,
+          "affiliation_4": 7,
+          "status_1": 5,
+          "status_2": 5,
+          "status_3": 4,
+          "status_4": 5,
+          "vision_1": 6,
+          "vision_2": 6,
+          "vision_3": 7,
+          "expertise_1": 6,
+          "expertise_2": 6,
+          "expertise_3": 5,
+          "fairness_1": 5,
+          "fairness_2": 7,
+          "fairness_3": 7,
+          "fairness_4": 6,
+          "_meta": {
+            "attempts": 1,
+            "answered": 22,
+            "complete": true
+          }
+        },
+        "N14": {
+          "protection_1": 6,
+          "protection_2": 5,
+          "protection_3": 6,
+          "protection_4": 7,
+          "affiliation_1": 6,
+          "affiliation_2": 5,
+          "affiliation_3": 5,
+          "affiliation_4": 6,
+          "status_1": 4,
+          "status_2": 5,
+          "status_3": 4,
+          "status_4": 4,
+          "vision_1": 5,
+          "vision_2": 6,
+          "vision_3": 6,
+          "expertise_1": 7,
+          "expertise_2": 5,
+          "expertise_3": 6,
+          "fairness_1": 7,
+          "fairness_2": 6,
+          "fairness_3": 6,
+          "fairness_4": 7,
+          "_meta": {
+            "attempts": 1,
+            "answered": 22,
+            "complete": true
+          }
+        },
+        "N2": {
+          "protection_1": 5,
+          "protection_2": 5,
+          "protection_3": 5,
+          "protection_4": 7,
+          "affiliation_1": 6,
+          "affiliation_2": 6,
+          "affiliation_3": 5,
+          "affiliation_4": 6,
+          "status_1": 3,
+          "status_2": 5,
+          "status_3": 4,
+          "status_4": 4,
+          "vision_1": 6,
+          "vision_2": 6,
+          "vision_3": 5,
+          "expertise_1": 6,
+          "expertise_2": 5,
+          "expertise_3": 6,
+          "fairness_1": 7,
+          "fairness_2": 7,
+          "fairness_3": 6,
+          "fairness_4": 7,
+          "_meta": {
+            "attempts": 1,
+            "answered": 22,
+            "complete": true
+          }
+        }
+      },
+      "leader_ideal": {
+        "N13": {
+          "sensitivity_1": 7,
+          "sensitivity_2": 8,
+          "sensitivity_3": 8,
+          "sensitivity_4": 8,
+          "sensitivity_5": 8,
+          "sensitivity_6": 7,
+          "sensitivity_7": 8,
+          "sensitivity_8": 7,
+          "dedication_1": 9,
+          "dedication_2": 9,
+          "dedication_3": 8,
+          "dedication_4": 8,
+          "dedication_5": 9,
+          "dedication_6": 9,
+          "dedication_7": 8,
+          "tyranny_1": 2,
+          "tyranny_2": 3,
+          "tyranny_3": 4,
+          "tyranny_4": 3,
+          "tyranny_5": 2,
+          "tyranny_6": 4,
+          "tyranny_7": 3,
+          "tyranny_8": 3,
+          "charisma_1": 8,
+          "charisma_2": 8,
+          "charisma_3": 8,
+          "charisma_4": 7,
+          "strength_1": 6,
+          "strength_2": 6,
+          "strength_3": 6,
+          "strength_4": 6,
+          "strength_5": 7,
+          "strength_6": 7,
+          "creativity_1": 8,
+          "creativity_2": 8,
+          "creativity_3": 7,
+          "creativity_4": 7,
+          "well_groomed_1": 6,
+          "well_groomed_2": 6,
+          "masculinity_1": 5,
+          "masculinity_2": 5,
+          "masculinity_3": 5,
+          "masculinity_4": 5,
+          "intelligence_1": 8,
+          "intelligence_2": 7,
+          "intelligence_3": 8,
+          "femininity_1": 5,
+          "femininity_2": 5,
+          "ethics_1": 10,
+          "ethics_2": 10,
+          "ethics_3": 9,
+          "_meta": {
+            "attempts": 1,
+            "answered": 51,
+            "complete": true
+          }
+        },
+        "N14": {
+          "sensitivity_1": 9,
+          "sensitivity_2": 8,
+          "sensitivity_3": 8,
+          "sensitivity_4": 8,
+          "sensitivity_5": 9,
+          "sensitivity_6": 8,
+          "sensitivity_7": 8,
+          "sensitivity_8": 7,
+          "dedication_1": 8,
+          "dedication_2": 7,
+          "dedication_3": 7,
+          "dedication_4": 7,
+          "dedication_5": 8,
+          "dedication_6": 7,
+          "dedication_7": 8,
+          "tyranny_1": 2,
+          "tyranny_2": 3,
+          "tyranny_3": 4,
+          "tyranny_4": 3,
+          "tyranny_5": 3,
+          "tyranny_6": 3,
+          "tyranny_7": 2,
+          "tyranny_8": 2,
+          "charisma_1": 7,
+          "charisma_2": 6,
+          "charisma_3": 6,
+          "charisma_4": 6,
+          "strength_1": 5,
+          "strength_2": 6,
+          "strength_3": 7,
+          "strength_4": 6,
+          "strength_5": 8,
+          "strength_6": 7,
+          "creativity_1": 5,
+          "creativity_2": 6,
+          "creativity_3": 5,
+          "creativity_4": 6,
+          "well_groomed_1": 7,
+          "well_groomed_2": 6,
+          "masculinity_1": 5,
+          "masculinity_2": 5,
+          "masculinity_3": 5,
+          "masculinity_4": 5,
+          "intelligence_1": 5,
+          "intelligence_2": 6,
+          "intelligence_3": 6,
+          "femininity_1": 5,
+          "femininity_2": 5,
+          "ethics_1": 9,
+          "ethics_2": 7,
+          "ethics_3": 8,
+          "_meta": {
+            "attempts": 1,
+            "answered": 51,
+            "complete": true
+          }
+        },
+        "N2": {
+          "sensitivity_1": 7,
+          "sensitivity_2": 5,
+          "sensitivity_3": 7,
+          "sensitivity_4": 7,
+          "sensitivity_5": 7,
+          "sensitivity_6": 6,
+          "sensitivity_7": 7,
+          "sensitivity_8": 7,
+          "dedication_1": 8,
+          "dedication_2": 7,
+          "dedication_3": 7,
+          "dedication_4": 7,
+          "dedication_5": 8,
+          "dedication_6": 8,
+          "dedication_7": 7,
+          "tyranny_1": 3,
+          "tyranny_2": 3,
+          "tyranny_3": 3,
+          "tyranny_4": 3,
+          "tyranny_5": 3,
+          "tyranny_6": 4,
+          "tyranny_7": 2,
+          "tyranny_8": 2,
+          "charisma_1": 8,
+          "charisma_2": 6,
+          "charisma_3": 7,
+          "charisma_4": 6,
+          "strength_1": 6,
+          "strength_2": 6,
+          "strength_3": 6,
+          "strength_4": 6,
+          "strength_5": 7,
+          "strength_6": 6,
+          "creativity_1": 5,
+          "creativity_2": 6,
+          "creativity_3": 6,
+          "creativity_4": 6,
+          "well_groomed_1": 6,
+          "well_groomed_2": 6,
+          "masculinity_1": 5,
+          "masculinity_2": 5,
+          "masculinity_3": 5,
+          "masculinity_4": 5,
+          "intelligence_1": 7,
+          "intelligence_2": 6,
+          "intelligence_3": 7,
+          "femininity_1": 4,
+          "femininity_2": 4,
+          "ethics_1": 8,
+          "ethics_2": 8,
+          "ethics_3": 8,
+          "_meta": {
+            "attempts": 1,
+            "answered": 51,
+            "complete": true
+          }
+        }
+      }
+    },
+    "post": {
+      "ffni": {
+        "N13": {
+          "protection_1": 5,
+          "protection_2": 5,
+          "protection_3": 4,
+          "protection_4": 5,
+          "affiliation_1": 7,
+          "affiliation_2": 7,
+          "affiliation_3": 7,
+          "affiliation_4": 7,
+          "status_1": 4,
+          "status_2": 5,
+          "status_3": 3,
+          "status_4": 4,
+          "vision_1": 6,
+          "vision_2": 6,
+          "vision_3": 6,
+          "expertise_1": 6,
+          "expertise_2": 6,
+          "expertise_3": 5,
+          "fairness_1": 5,
+          "fairness_2": 6,
+          "fairness_3": 6,
+          "fairness_4": 6,
+          "_meta": {
+            "attempts": 1,
+            "answered": 22,
+            "complete": true
+          }
+        },
+        "N14": {
+          "protection_1": 6,
+          "protection_2": 6,
+          "protection_3": 6,
+          "protection_4": 6,
+          "affiliation_1": 7,
+          "affiliation_2": 6,
+          "affiliation_3": 6,
+          "affiliation_4": 7,
+          "status_1": 3,
+          "status_2": 5,
+          "status_3": 3,
+          "status_4": 4,
+          "vision_1": 5,
+          "vision_2": 6,
+          "vision_3": 5,
+          "expertise_1": 6,
+          "expertise_2": 5,
+          "expertise_3": 5,
+          "fairness_1": 7,
+          "fairness_2": 7,
+          "fairness_3": 7,
+          "fairness_4": 6,
+          "_meta": {
+            "attempts": 1,
+            "answered": 22,
+            "complete": true
+          }
+        },
+        "N2": {
+          "protection_1": 6,
+          "protection_2": 5,
+          "protection_3": 5,
+          "protection_4": 6,
+          "affiliation_1": 5,
+          "affiliation_2": 6,
+          "affiliation_3": 6,
+          "affiliation_4": 5,
+          "status_1": 4,
+          "status_2": 4,
+          "status_3": 3,
+          "status_4": 4,
+          "vision_1": 6,
+          "vision_2": 5,
+          "vision_3": 6,
+          "expertise_1": 5,
+          "expertise_2": 6,
+          "expertise_3": 5,
+          "fairness_1": 7,
+          "fairness_2": 7,
+          "fairness_3": 6,
+          "fairness_4": 7,
+          "_meta": {
+            "attempts": 1,
+            "answered": 22,
+            "complete": true
+          }
+        }
+      },
+      "leader_ideal": {
+        "N13": {
+          "sensitivity_1": 7,
+          "sensitivity_2": 7,
+          "sensitivity_3": 8,
+          "sensitivity_4": 8,
+          "sensitivity_5": 8,
+          "sensitivity_6": 7,
+          "sensitivity_7": 8,
+          "sensitivity_8": 6,
+          "dedication_1": 6,
+          "dedication_2": 8,
+          "dedication_3": 8,
+          "dedication_4": 8,
+          "dedication_5": 9,
+          "dedication_6": 8,
+          "dedication_7": 7,
+          "tyranny_1": 2,
+          "tyranny_2": 3,
+          "tyranny_3": 2,
+          "tyranny_4": 2,
+          "tyranny_5": 2,
+          "tyranny_6": 3,
+          "tyranny_7": 3,
+          "tyranny_8": 2,
+          "charisma_1": 8,
+          "charisma_2": 6,
+          "charisma_3": 7,
+          "charisma_4": 7,
+          "strength_1": 5,
+          "strength_2": 7,
+          "strength_3": 6,
+          "strength_4": 6,
+          "strength_5": 6,
+          "strength_6": 6,
+          "creativity_1": 8,
+          "creativity_2": 8,
+          "creativity_3": 7,
+          "creativity_4": 7,
+          "well_groomed_1": 6,
+          "well_groomed_2": 5,
+          "masculinity_1": 5,
+          "masculinity_2": 5,
+          "masculinity_3": 5,
+          "masculinity_4": 5,
+          "intelligence_1": 7,
+          "intelligence_2": 7,
+          "intelligence_3": 8,
+          "femininity_1": 5,
+          "femininity_2": 5,
+          "ethics_1": 9,
+          "ethics_2": 9,
+          "ethics_3": 9,
+          "_meta": {
+            "attempts": 1,
+            "answered": 51,
+            "complete": true
+          }
+        },
+        "N14": {
+          "sensitivity_1": 7,
+          "sensitivity_2": 7,
+          "sensitivity_3": 7,
+          "sensitivity_4": 7,
+          "sensitivity_5": 6,
+          "sensitivity_6": 8,
+          "sensitivity_7": 7,
+          "sensitivity_8": 7,
+          "dedication_1": 8,
+          "dedication_2": 8,
+          "dedication_3": 8,
+          "dedication_4": 8,
+          "dedication_5": 9,
+          "dedication_6": 8,
+          "dedication_7": 9,
+          "tyranny_1": 2,
+          "tyranny_2": 3,
+          "tyranny_3": 4,
+          "tyranny_4": 2,
+          "tyranny_5": 3,
+          "tyranny_6": 3,
+          "tyranny_7": 2,
+          "tyranny_8": 2,
+          "charisma_1": 7,
+          "charisma_2": 6,
+          "charisma_3": 6,
+          "charisma_4": 6,
+          "strength_1": 4,
+          "strength_2": 5,
+          "strength_3": 6,
+          "strength_4": 6,
+          "strength_5": 8,
+          "strength_6": 7,
+          "creativity_1": 5,
+          "creativity_2": 7,
+          "creativity_3": 5,
+          "creativity_4": 6,
+          "well_groomed_1": 6,
+          "well_groomed_2": 6,
+          "masculinity_1": 5,
+          "masculinity_2": 5,
+          "masculinity_3": 5,
+          "masculinity_4": 5,
+          "intelligence_1": 6,
+          "intelligence_2": 6,
+          "intelligence_3": 6,
+          "femininity_1": 5,
+          "femininity_2": 5,
+          "ethics_1": 9,
+          "ethics_2": 7,
+          "ethics_3": 8,
+          "_meta": {
+            "attempts": 1,
+            "answered": 51,
+            "complete": true
+          }
+        },
+        "N2": {
+          "sensitivity_1": 7,
+          "sensitivity_2": 5,
+          "sensitivity_3": 7,
+          "sensitivity_4": 7,
+          "sensitivity_5": 7,
+          "sensitivity_6": 7,
+          "sensitivity_7": 7,
+          "sensitivity_8": 8,
+          "dedication_1": 8,
+          "dedication_2": 7,
+          "dedication_3": 8,
+          "dedication_4": 8,
+          "dedication_5": 8,
+          "dedication_6": 8,
+          "dedication_7": 7,
+          "tyranny_1": 2,
+          "tyranny_2": 3,
+          "tyranny_3": 3,
+          "tyranny_4": 3,
+          "tyranny_5": 3,
+          "tyranny_6": 4,
+          "tyranny_7": 2,
+          "tyranny_8": 2,
+          "charisma_1": 6,
+          "charisma_2": 6,
+          "charisma_3": 7,
+          "charisma_4": 6,
+          "strength_1": 6,
+          "strength_2": 6,
+          "strength_3": 6,
+          "strength_4": 6,
+          "strength_5": 7,
+          "strength_6": 6,
+          "creativity_1": 5,
+          "creativity_2": 6,
+          "creativity_3": 6,
+          "creativity_4": 6,
+          "well_groomed_1": 6,
+          "well_groomed_2": 6,
+          "masculinity_1": 5,
+          "masculinity_2": 5,
+          "masculinity_3": 5,
+          "masculinity_4": 5,
+          "intelligence_1": 7,
+          "intelligence_2": 6,
+          "intelligence_3": 7,
+          "femininity_1": 4,
+          "femininity_2": 4,
+          "ethics_1": 8,
+          "ethics_2": 8,
+          "ethics_3": 8,
+          "_meta": {
+            "attempts": 1,
+            "answered": 51,
+            "complete": true
+          }
+        }
+      },
+      "effectiveness": {
+        "N13": {
+          "P4": {
+            "effectiveness_1": 5,
+            "_meta": {
+              "attempts": 1,
+              "answered": 1,
+              "complete": true
+            }
+          },
+          "D4": {
+            "effectiveness_1": 6,
+            "_meta": {
+              "attempts": 1,
+              "answered": 1,
+              "complete": true
+            }
+          }
+        },
+        "N14": {
+          "P4": {
+            "effectiveness_1": 6,
+            "_meta": {
+              "attempts": 1,
+              "answered": 1,
+              "complete": true
+            }
+          },
+          "D4": {
+            "effectiveness_1": 5,
+            "_meta": {
+              "attempts": 1,
+              "answered": 1,
+              "complete": true
+            }
+          }
+        },
+        "N2": {
+          "P4": {
+            "effectiveness_1": 5,
+            "_meta": {
+              "attempts": 1,
+              "answered": 1,
+              "complete": true
+            }
+          },
+          "D4": {
+            "effectiveness_1": 6,
+            "_meta": {
+              "attempts": 1,
+              "answered": 1,
+              "complete": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "instruments": {
+    "ffni": "2f96d61bc0a8",
+    "leader_ideal": "718fb2bf5c31",
+    "effectiveness": "1e2e10a57d3c"
+  },
+  "task": {
+    "id": 52,
+    "name": "mountain_storm_shelter",
+    "options": [
+      "Blue Lake Cabin",
+      "Red Cliff Lodge",
+      "Green Valley Outpost"
+    ],
+    "correct": "Green Valley Outpost",
+    "shares": {
+      "N13": [
+        "A sign near the Blue Lake trailhead warns that an upstream dam release is set for tonight, which will further raise water levels and could worsen the bridge collapse situation."
+      ],
+      "D4": [
+        "A new weather alert (missed in earlier updates) says the storm will hit Red Cliff Lodge directly, with extreme, possibly structural-damaging winds expected at that elevation."
+      ],
+      "N2": [
+        "A hiker coming from Blue Lake reports the bridge washed out in the last hour and is now impassable."
+      ],
+      "N14": [
+        "Green Valley Outpost, though lacking supplies, is built partially underground and is rated for emergency use in extreme weather, per a maintenance record found in your group’s gear."
+      ],
+      "P4": []
+    }
+  },
+  "answers": [
+    {
+      "persona_id": "P4",
+      "group": "P",
+      "choice": "Red Cliff Lodge",
+      "correct": false,
+      "reason": "It seems to be the most structurally sound option available, despite the risks."
+    },
+    {
+      "persona_id": "D4",
+      "group": "D",
+      "choice": "Blue Lake Cabin",
+      "correct": false,
+      "reason": "It has the necessary supplies and is the safest option given the storm's risks."
+    },
+    {
+      "persona_id": "N13",
+      "group": "N",
+      "choice": "Red Cliff Lodge",
+      "correct": false,
+      "reason": "It seems to be the most structurally sound option despite the risks, and we need to prioritize safety in this storm."
+    },
+    {
+      "persona_id": "N14",
+      "group": "N",
+      "choice": "Green Valley Outpost",
+      "correct": true,
+      "reason": "It is designed for emergency use in extreme weather, providing the safest option given the storm's unpredictability."
+    },
+    {
+      "persona_id": "N2",
+      "group": "N",
+      "choice": "Red Cliff Lodge",
+      "correct": false,
+      "reason": "Despite the risks, it seems to be the only viable option left for safety given the circumstances."
+    }
+  ]
+}
