@@ -105,7 +105,7 @@ def run_condition(
     # Imported here, not at module scope: openai/tinytroupe are only needed to actually
     # run a simulation, so tools and tests can import this module without them installed.
     from discussion import (
-        APIQuotaExhausted, clone_participants, run_discussion, run_survey, run_vote,
+        APIQuotaExhausted, clone_participants, run_discussion, run_poll, run_survey, run_vote,
     )
     from persona_store import load_personas
 
@@ -123,6 +123,11 @@ def run_condition(
     )
 
     samplers = make_samplers(study)
+    # Tasks cycle the same way casts do, so 40 runs spread evenly over the pool instead
+    # of landing on whichever vignette repeated draws happened to favour.
+    task_sampler = (
+        BalancedSampler(len(condition.pool), study.sampler_seed) if condition.pool else None
+    )
     records: list[RunRecord] = []
 
     for run_no in range(1, runs + 1):
@@ -130,16 +135,33 @@ def run_condition(
         # number either way, or a resumed condition re-draws run 1's cast and loses
         # both the balanced cycle and the alignment with the other condition.
         cast = compose_run(study, pool, samplers)
+        # Same reason as the cast: advance once per run number whether or not the run is
+        # replayed from a checkpoint.
+        task = condition.pool[task_sampler.take(1)[0]] if task_sampler else None
         ckpt = ckpt_dir / f"run_{run_no:03d}.json"
         if ckpt.exists():
             progress(f"\nRun {run_no}/{runs}  [checkpoint]")
-            records.append(RunRecord.from_dict(json.loads(ckpt.read_text(encoding="utf-8"))))
+            replayed = RunRecord.from_dict(json.loads(ckpt.read_text(encoding="utf-8")))
+            _reject_foreign_scenario(replayed, condition, ckpt)
+            records.append(replayed)
             continue
 
         members: dict[str, list[str]] = {}
         for p in cast:
             members.setdefault(p.group, []).append(p.persona_id)
         progress(f"\nRun {run_no}/{runs}  ({members})")
+
+        scenario, friction = condition.scenario, condition.friction
+        shares: dict[str, list[str]] = {}
+        if task:
+            progress(f"  task {task.name}")
+            scenario = task.briefing()
+            # Shuffled before dealing: which agent holds which private fact must not
+            # track whether they are the Prestige or the Dominance persona, or the
+            # endorsement result would partly be measuring who was handed the answer.
+            holders = [p.persona_id for p in cast]
+            random.Random(f"{study.sampler_seed}:{condition.key}:{run_no}").shuffle(holders)
+            shares = task.shares(holders)
 
         try:
             # Baseline goes to a throwaway fork: the agents who actually discuss must never
@@ -156,10 +178,11 @@ def run_condition(
 
             transcript = run_discussion(
                 participants=cast,
-                scenario=condition.scenario,
-                friction=condition.friction,
+                scenario=scenario,
+                friction=friction,
                 rounds=rounds,
                 model=config.discussion,
+                private=shares,
                 on_progress=progress,
             )
 
@@ -185,6 +208,11 @@ def run_condition(
                 if with_votes
                 else []
             )
+
+            # After the vote, so committing to an answer cannot colour the endorsement.
+            answers = (
+                run_poll(participants=cast, task=task, model=config.vote) if task else []
+            )
         except APIQuotaExhausted as exc:
             progress(f"\n[FATAL] {exc}")
             progress(
@@ -204,6 +232,18 @@ def run_condition(
             # positional, so two versions of a scale can share them while asking
             # different questions; this is what lets a later report refuse to mix them.
             instruments={i.key: i.fingerprint for i in study.instruments},
+            task=(
+                {
+                    "id": task.id,
+                    "name": task.name,
+                    "options": list(task.options),
+                    "correct": task.correct,
+                    "shares": shares,
+                }
+                if task
+                else {}
+            ),
+            answers=answers,
         )
         records.append(record)
         ckpt.write_text(
@@ -211,6 +251,30 @@ def run_condition(
         )
 
     return records
+
+
+def _reject_foreign_scenario(record: RunRecord, condition: Condition, path: Path) -> None:
+    """Refuse to resume a run collected under a different scenario.
+
+    Checkpoints are replayed silently so an interrupted study can continue, which is the
+    right behaviour until the stimulus changes underneath them. A condition that now
+    draws hidden-profile tasks cannot be topped up with runs whose discussion was seeded
+    by a hand-written vignette: the two are different experiments sharing a directory,
+    and averaging them would hide that.
+    """
+    if not condition.pool:
+        return
+    known = {task.name for task in condition.pool}
+    name = record.task.get("name")
+    if name in known:
+        return
+    raise SystemExit(
+        f"{path}: this run was collected "
+        + (f"on task '{name}', which is not in condition '{condition.key}'s pool"
+           if name else "before scenarios were drawn from a task pool")
+        + ".\nIt cannot be mixed with runs from the current design. Move the old results "
+          "aside (results/<study>/ -> results/archive_<date>/) and start a fresh run."
+    )
 
 
 def load_records(output_dir: Path) -> list[RunRecord]:

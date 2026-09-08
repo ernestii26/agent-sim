@@ -46,7 +46,9 @@ def test_every_study_loads() -> None:
         study = load_study(name)
         assert study.conditions, f"{name}: no conditions"
         for condition in study.conditions.values():
-            assert condition.scenario.strip(), f"{name}/{condition.key}: empty scenario"
+            assert condition.scenario.strip() or condition.pool, (
+                f"{name}/{condition.key}: neither a scenario nor a task pool"
+            )
             for key in condition.contrast:
                 assert key in study.groups
         for group in study.groups.values():
@@ -301,11 +303,18 @@ def test_ffni_mediation_borrows_personas_instead_of_copying_them() -> None:
     assert (study.personas_dir / "P1.agent.json").exists()
     assert study.groups["D"].pair_with == "P"
     assert {k: g.ids for k, g in study.groups.items()} == {k: g.ids for k, g in matched.groups.items()}
-    # design-log section 13's manipulation evidence was measured on pd_matched's wording,
-    # so it only transfers while the wording stays identical.
+    # It borrows the personas and NOT the scenarios. design-log section 13's manipulation
+    # evidence was measured on pd_matched's hand-written wording; ffni_mediation now draws
+    # its tasks from HiddenBench instead, so that evidence does not transfer and the
+    # manipulation has to be re-checked against the drawn tasks. This assertion exists to
+    # make a silent drift back to shared wording fail loudly.
     for key, cond in study.conditions.items():
-        assert cond.scenario == matched.conditions[key].scenario, key
-        assert cond.friction == matched.conditions[key].friction, key
+        assert cond.pool, f"{key}: expected a drawn task pool"
+        assert cond.scenario != matched.conditions[key].scenario, key
+    # One friction for both conditions: the only thing that differs is which pool the run
+    # draws from. Two condition-specific frictions would put the manipulation back into
+    # prose we wrote, which is what drawing tasks is meant to remove.
+    assert len({c.friction for c in study.conditions.values()}) == 1
 
 
 def test_subscale_scores_drop_bad_ratings_rather_than_impute() -> None:
@@ -482,7 +491,7 @@ def test_run_record_round_trips_and_tolerates_pre_instrument_checkpoints() -> No
     data = _needs_record(1, protection=5, d_rating=4).to_dict()
     assert RunRecord.from_dict(data).to_dict() == data
     assert list(data) == ["run_no", "condition", "members", "transcript", "votes",
-                          "measures", "instruments"]
+                          "measures", "instruments", "task", "answers"]
 
     # A checkpoint written before instruments existed has no "measures" key at all.
     legacy = RunRecord.from_dict({"run_no": 7, "members": {"P": ["P1"]},
@@ -1141,3 +1150,98 @@ if __name__ == "__main__":
         test()
         print(f"  ok  {test.__name__}")
     print(f"\n{len(tests)} checks passed.")
+
+
+# -- drawn hidden-profile tasks ------------------------------------------------ #
+
+def test_drawn_task_pools_are_answerable_and_disjoint() -> None:
+    study = load_study("ffni_mediation")
+    pools = {k: c.pool for k, c in study.conditions.items()}
+    assert pools["threat"] and pools["collaborative"]
+
+    ids = [t.id for pool in pools.values() for t in pool]
+    assert len(ids) == len(set(ids)), "a task appears in both pools — the contrast leaks"
+
+    for key, pool in pools.items():
+        for task in pool:
+            assert task.correct in task.options, f"{key}/{task.name}"
+            assert len(task.options) >= 3, f"{key}/{task.name}: too few options to be a test"
+            assert task.hidden, f"{key}/{task.name}: nothing to distribute"
+            # A briefing that already contains the answer is not a hidden profile.
+            assert task.correct.lower() not in " ".join(task.shared).lower() or len(
+                task.hidden
+            ) >= 3, f"{key}/{task.name}"
+
+
+def test_hidden_facts_are_dealt_once_each_and_independently_of_group() -> None:
+    task = load_study("ffni_mediation").conditions["threat"].pool[0]
+    holders = ["P1", "D1", "N1", "N2", "N3"]
+
+    shares = task.shares(holders)
+    dealt = [fact for held in shares.values() for fact in held]
+    assert sorted(dealt) == sorted(task.hidden), "facts were dropped or duplicated"
+    assert set(shares) == set(holders), "everyone must appear, even holding nothing"
+    # Round-robin over the order given: the caller shuffles, this does not.
+    assert shares["P1"] == [task.hidden[0]]
+
+    # Over many shuffled deals, P must not systematically hold more than D — otherwise
+    # endorsement would partly measure who was handed the answer.
+    import random as _random
+    counts = {"P1": 0, "D1": 0}
+    for run_no in range(400):
+        order = list(holders)
+        _random.Random(f"seed:{run_no}").shuffle(order)
+        for pid in counts:
+            counts[pid] += len(task.shares(order)[pid])
+    assert abs(counts["P1"] - counts["D1"]) < 0.15 * max(counts.values()), counts
+
+
+def test_hidden_fact_detection_needs_a_real_echo_not_shared_vocabulary() -> None:
+    fact = "A mudslide just occurred, covering the driveway to North Hill."
+    record = RunRecord(
+        run_no=1, condition="threat", members_by_group={},
+        transcript=[{"spoke": True, "text": "Careful — a mudslide just occurred, "
+                                            "covering the driveway to North Hill."}],
+        votes=[], task={"shares": {"P1": [fact], "D1": ["The bridge is still passable."]}},
+    )
+    assert record.hidden_facts_raised() == (1, 2)
+
+    # Naming the place is not the same as contributing the fact.
+    quiet = RunRecord(
+        run_no=1, condition="threat", members_by_group={},
+        transcript=[{"spoke": True, "text": "I think North Hill is the safest option."}],
+        votes=[], task={"shares": {"P1": [fact]}},
+    )
+    assert quiet.hidden_facts_raised() == (0, 1)
+
+
+def test_correct_rate_is_none_for_runs_collected_before_tasks_existed() -> None:
+    legacy = RunRecord(run_no=1, condition="threat", members_by_group={},
+                       transcript=[], votes=[])
+    assert legacy.correct_rate() is None, "a task-less run must not score as zero"
+    assert legacy.hidden_facts_raised() == (0, 0)
+
+
+def test_old_checkpoints_cannot_be_topped_up_after_the_scenarios_changed(tmp_path) -> None:
+    """Runs seeded by the old hand-written vignette are a different experiment."""
+    from pipeline import _reject_foreign_scenario
+
+    study = load_study("ffni_mediation")
+    condition = study.conditions["threat"]
+    drawn = condition.pool[0]
+
+    ok = RunRecord(run_no=1, condition="threat", members_by_group={}, transcript=[],
+                   votes=[], task={"name": drawn.name})
+    _reject_foreign_scenario(ok, condition, tmp_path / "run_001.json")  # must not raise
+
+    for bad in (
+        RunRecord(run_no=1, condition="threat", members_by_group={}, transcript=[], votes=[]),
+        RunRecord(run_no=1, condition="threat", members_by_group={}, transcript=[],
+                  votes=[], task={"name": "some_task_from_another_pool"}),
+    ):
+        try:
+            _reject_foreign_scenario(bad, condition, tmp_path / "run_001.json")
+        except SystemExit as exc:
+            assert "cannot be mixed" in str(exc)
+        else:
+            raise AssertionError("a foreign checkpoint was accepted")

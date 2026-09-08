@@ -29,6 +29,40 @@ class Group:
 
 
 @dataclass(frozen=True)
+class Task:
+    """One hidden-profile task: the group can only answer it by pooling what it knows.
+
+    `shared` reaches everyone, `hidden` is split across the room, and `correct` is
+    reachable from the union but from no single share — which is what makes the answer
+    a measure of the discussion rather than of any one agent.
+    """
+    id: int
+    name: str
+    description: str
+    shared: tuple[str, ...]
+    hidden: tuple[str, ...]
+    options: tuple[str, ...]
+    correct: str
+
+    def briefing(self) -> str:
+        facts = "\n".join(f"- {fact}" for fact in self.shared)
+        return f"{self.description}\n\nWhat everyone here already knows:\n{facts}"
+
+    def shares(self, participant_ids: list[str]) -> dict[str, list[str]]:
+        """Deal the hidden facts round-robin over `participant_ids` in the order given.
+
+        The caller shuffles, so which agent holds which fact — and who holds none when
+        the facts run out — is independent of whether they are the Prestige or the
+        Dominance persona. Deal them by role and the endorsement result would just be
+        measuring who was handed the answer.
+        """
+        shares: dict[str, list[str]] = {pid: [] for pid in participant_ids}
+        for index, fact in enumerate(self.hidden):
+            shares[participant_ids[index % len(participant_ids)]].append(fact)
+        return shares
+
+
+@dataclass(frozen=True)
 class Condition:
     key: str
     label: str
@@ -36,6 +70,9 @@ class Condition:
     scenario: str
     friction: str
     contrast: tuple[str, str]
+    # Drawn per run instead of `scenario`, so the condition effect is an average over
+    # tasks rather than a property of one vignette we wrote.
+    pool: tuple[Task, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -107,6 +144,41 @@ def list_studies() -> list[str]:
     return sorted(d.name for d in STUDIES_DIR.iterdir() if (d / "study.json").exists())
 
 
+def _load_pools(directory: Path, filename: str | None) -> dict[str, tuple[Task, ...]]:
+    """Read the scenario pools a study draws its tasks from, if it declares any."""
+    if not filename:
+        return {}
+    path = directory / "scenarios" / filename
+    if not path.exists():
+        raise SystemExit(f"{path}: scenario file not found")
+    spec = json.loads(path.read_text(encoding="utf-8"))
+    pools: dict[str, tuple[Task, ...]] = {}
+    for key, raw_tasks in spec.get("pools", {}).items():
+        if not raw_tasks:
+            raise SystemExit(f"{path}: pool '{key}' is empty")
+        tasks = []
+        for raw in raw_tasks:
+            if raw["correct"] not in raw["options"]:
+                raise SystemExit(
+                    f"{path}: task '{raw['name']}' has a correct answer that is not an option"
+                )
+            if not raw["hidden"]:
+                raise SystemExit(f"{path}: task '{raw['name']}' has no hidden information")
+            tasks.append(
+                Task(
+                    id=raw["id"],
+                    name=raw["name"],
+                    description=raw["description"],
+                    shared=tuple(raw["shared"]),
+                    hidden=tuple(raw["hidden"]),
+                    options=tuple(raw["options"]),
+                    correct=raw["correct"],
+                )
+            )
+        pools[key] = tuple(tasks)
+    return pools
+
+
 def load_study(name: str) -> Study:
     directory = STUDIES_DIR / name
     path = directory / "study.json"
@@ -154,6 +226,7 @@ def load_study(name: str) -> Study:
         seen |= set(group.ids)
 
     default_contrast = tuple(spec["contrast"])
+    pools = _load_pools(directory, spec.get("scenarios"))
 
     conditions: dict[str, Condition] = {}
     for key, raw in spec["conditions"].items():
@@ -161,13 +234,22 @@ def load_study(name: str) -> Study:
         for group_key in contrast:
             if group_key not in groups:
                 raise SystemExit(f"{path}: condition '{key}' contrasts unknown group '{group_key}'")
+        pool_key = raw.get("pool")
+        if pool_key is not None and pool_key not in pools:
+            raise SystemExit(
+                f"{path}: condition '{key}' draws from unknown pool '{pool_key}' "
+                f"(have: {sorted(pools) or 'none — no \"scenarios\" file declared'})"
+            )
+        if pool_key is None and "scenario" not in raw:
+            raise SystemExit(f"{path}: condition '{key}' has neither 'scenario' nor 'pool'")
         conditions[key] = Condition(
             key=key,
             label=raw.get("label", key),
             hypothesis=raw.get("hypothesis", ""),
-            scenario=raw["scenario"],
+            scenario=raw.get("scenario", ""),
             friction=raw.get("friction", ""),
             contrast=contrast,  # type: ignore[arg-type]
+            pool=pools.get(pool_key, ()) if pool_key else (),
         )
     if not conditions:
         raise SystemExit(f"{path}: no conditions defined")

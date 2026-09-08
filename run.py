@@ -26,7 +26,8 @@ os.chdir(_PROJECT_DIR)  # TinyTroupe reads config.ini from the CWD
 from analysis import (  # noqa: E402
     need_outcome_links, prototype_by_dimension, rater_agreement, summarize_contrast,
     summarize_layer_moderation,
-    summarize_measure_check, summarize_mediation, summarize_needs, summarize_validation,
+    summarize_measure_check, summarize_mediation, summarize_needs,
+    summarize_task_performance, summarize_validation,
 )
 from config import RunConfig  # noqa: E402
 from instrument import BASELINE  # noqa: E402
@@ -34,7 +35,7 @@ from pipeline import load_records, run_condition, run_measure_check  # noqa: E40
 from render import (  # noqa: E402
     plot_contrast, render_contrast, render_layer_moderation, render_layers,
     render_mediation, render_measure_check, render_needs, render_prototype_by_dimension,
-    render_rater_agreement, render_validation, save_summary,
+    render_rater_agreement, render_task_performance, render_validation, save_summary,
 )
 from runtime import setup_file_logging  # noqa: E402
 from study import Study, list_studies, load_study  # noqa: E402
@@ -53,6 +54,13 @@ def _provenance(config: RunConfig, study: Study) -> dict[str, Any]:
         "survey_temperature": config.survey_temperature,
         "rounds": config.rounds,
         "instruments": {i.key: i.fingerprint for i in study.instruments},
+        # Which stimuli the run drew from. A summary that does not record this cannot be
+        # compared with one collected before the scenarios were swapped.
+        "scenario_pools": {
+            key: [t.name for t in condition.pool]
+            for key, condition in study.conditions.items()
+            if condition.pool
+        },
     }
 
 
@@ -139,6 +147,11 @@ def _report(study: Study, condition, records: list, out: Path,
         raise SystemExit("No completed runs to report.")
     summary = summarize_contrast(study, condition, records)
     render_contrast(study, condition, summary)
+
+    performance = summarize_task_performance(records)
+    if performance:
+        render_task_performance(study, performance)
+        summary["task_performance"] = performance
 
     needs = study.self_report
     if needs and any(r.measures for r in records):

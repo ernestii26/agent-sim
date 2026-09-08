@@ -12,6 +12,7 @@ from typing import Any
 from config import ModelSettings
 from instrument import ABOUT_EACH_CANDIDATE, ABOUT_PROTOTYPE, ABOUT_SELF, Instrument
 from persona_store import Participant
+from study import Task
 from runtime import actions_to_text, configure_tinytroupe_runtime, ensure_tinytroupe_imports
 
 _WORLD_COUNTER = count(1)
@@ -178,12 +179,17 @@ def run_discussion(
     friction: str,
     rounds: int,
     model: ModelSettings,
+    private: dict[str, list[str]] | None = None,
     on_progress: Any = None,
 ) -> list[dict[str, Any]]:
     """Run a multi-round discussion with optional silence.
 
     Each round, invitation order is independently shuffled to prevent position bias.
     Agents may respond with THINK+TALK+DONE (speaking) or just DONE (silence).
+
+    `private` maps persona id to facts only that agent knows. They are delivered before
+    the first round and never broadcast, which is what makes the room a hidden profile:
+    the answer exists in the union of what the group holds and in no single member.
 
     Returns a list of per-turn records:
         round, name, persona_id, group, spoke (bool), word_count (int), text (str)
@@ -202,6 +208,21 @@ def run_discussion(
     world.broadcast(f"Team meeting scenario:\n{scenario}")
     if friction:
         world.broadcast(friction)
+
+    for participant in participants:
+        facts = (private or {}).get(participant.persona_id)
+        if not facts:
+            continue
+        listing = "\n".join(f"- {fact}" for fact in facts)
+        # Said to one agent only. The instruction to share is deliberate: without it a
+        # null would be ambiguous between "leadership did not help pooling" and "nobody
+        # realised the facts were theirs alone to contribute".
+        participant.agent.listen(
+            "Only you know the following. No one else in the meeting has been told:\n"
+            f"{listing}\n\n"
+            "Others hold different pieces. Decide for yourself what to raise and when.",
+            communication_display=False,
+        )
 
     transcript: list[dict[str, Any]] = []
     transport = AgentTransport()
@@ -313,6 +334,61 @@ def run_vote(
         )
 
     return votes
+
+
+def run_poll(
+    *,
+    participants: list[Participant],
+    task: Task,
+    model: ModelSettings,
+) -> list[dict[str, Any]]:
+    """Ask each agent which option the group should take, and score it.
+
+    Separate from the leadership vote on purpose: this measures whether the discussion
+    reached the right answer, which is the one thing the endorsement result cannot say
+    on its own. A group can back a leader confidently and still decide wrongly.
+
+    Returns: persona_id, group, choice, correct (bool), reason
+    """
+    configure_tinytroupe_runtime(model)
+
+    answers: list[dict[str, Any]] = []
+    ask = AgentTransport()
+    options = list(task.options)
+
+    for participant in participants:
+        prompt = textwrap.dedent(
+            f"""
+            The discussion has ended. You must now commit to an answer.
+
+            Which option should the group take? Answer for yourself, even if
+            the group did not converge.
+            Options: {", ".join(options)}
+
+            Respond with one TALK action followed by DONE.
+            TALK must be strict JSON with no extra text:
+            {{
+              "choice": "<one option, copied exactly>",
+              "reason": "<one sentence saying what decided it>"
+            }}
+            """
+        ).strip()
+
+        parsed = _extract_json(ask(participant.agent, prompt))
+        choice = str(parsed.get("choice") or "").strip()
+        if choice not in options:
+            choice = _fuzzy_match_name(choice, options)
+        answers.append(
+            {
+                "persona_id": participant.persona_id,
+                "group": participant.group,
+                "choice": choice,
+                "correct": choice == task.correct,
+                "reason": str(parsed.get("reason", "")).strip() or "No reason provided.",
+            }
+        )
+
+    return answers
 
 
 def rated_by(

@@ -848,3 +848,48 @@ def summarize_layer_moderation(
     point["bootstrap_draws"] = len(draws)
     point["runs"] = {key: len(runs) for key, runs in per_condition.items()}
     return point
+
+
+def summarize_task_performance(records: list) -> dict[str, Any]:
+    """How well the group actually decided, and how much of the split information surfaced.
+
+    Only meaningful for studies that draw hidden-profile tasks; returns an empty dict for
+    the rest. Two numbers matter and they are different questions:
+
+      accuracy  -- share of committed answers that were right. The benchmark's own
+                   headline: multi-agent groups reach ~30% under distributed information
+                   where a single agent holding everything reaches ~81%.
+      pooling   -- share of privately held facts that were actually said out loud. This is
+                   the mechanism. An endorsement effect that does not move pooling is not
+                   working through information at all.
+
+    Reported per group as well, because the interesting question is not whether the room
+    was right but whether the endorsed leader's side was.
+    """
+    scored = [r for r in records if r.answers]
+    if not scored:
+        return {}
+
+    answers = [a for r in scored for a in r.answers]
+    groups = sorted({a["group"] for a in answers})
+    raised = [r.hidden_facts_raised() for r in scored]
+    dealt = sum(total for _, total in raised)
+
+    return {
+        "runs": len(scored),
+        "accuracy": mean([float(a["correct"]) for a in answers]),
+        "accuracy_by_group": {
+            g: mean([float(a["correct"]) for a in answers if a["group"] == g]) for g in groups
+        },
+        "unanimous": mean(
+            [float(len({a["choice"] for a in r.answers}) == 1) for r in scored]
+        ),
+        "unanimously_correct": mean(
+            [
+                float(len({a["choice"] for a in r.answers}) == 1 and r.answers[0]["correct"])
+                for r in scored
+            ]
+        ),
+        "pooling": (sum(n for n, _ in raised) / dealt) if dealt else None,
+        "tasks": sorted({r.task.get("name", "") for r in scored}),
+    }

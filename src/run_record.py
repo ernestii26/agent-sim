@@ -7,6 +7,7 @@ tolerance for pre-instrument checkpoints (no "measures" key) lives — see `resp
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -25,6 +26,11 @@ class RunRecord:
     # {instrument key: fingerprint} for the wording this run was collected with. Absent
     # in checkpoints written before 2026-09-07; the item-id check below covers those.
     instruments: dict[str, str] = field(default_factory=dict)
+    # The hidden-profile task this run drew, and who held which private fact. Empty for
+    # runs from a study whose conditions carry a fixed `scenario` instead of a pool.
+    task: dict[str, Any] = field(default_factory=dict)
+    # One committed answer per participant: persona_id, group, choice, correct, reason.
+    answers: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -35,6 +41,8 @@ class RunRecord:
             "votes": self.votes,
             "measures": self.measures,
             "instruments": self.instruments,
+            "task": self.task,
+            "answers": self.answers,
         }
 
     @classmethod
@@ -47,7 +55,35 @@ class RunRecord:
             votes=data.get("votes", []),
             measures=data.get("measures", {}),
             instruments=data.get("instruments", {}),
+            task=data.get("task", {}),
+            answers=data.get("answers", []),
         )
+
+    def correct_rate(self, group: str | None = None) -> float | None:
+        """Share of participants who committed to the task's correct answer.
+
+        None when the run carries no task, which is every run collected before scenarios
+        were drawn — callers must skip those rather than score them as zero.
+        """
+        rows = [a for a in self.answers if group is None or a["group"] == group]
+        if not rows:
+            return None
+        return sum(1 for a in rows if a["correct"]) / len(rows)
+
+    def hidden_facts_raised(self) -> tuple[int, int]:
+        """(facts that surfaced in the transcript, facts dealt out).
+
+        A fact counts as raised when a substantial run of its words appears in something
+        someone said. Deliberately crude: it is a floor on pooling, not a transcript
+        parser, and the comparison across conditions is what carries the meaning.
+        """
+        shares = self.task.get("shares") or {}
+        facts = [fact for held in shares.values() for fact in held]
+        if not facts:
+            return (0, 0)
+        spoken = " ".join(t["text"] for t in self.transcript if t.get("spoke")).lower()
+        raised = sum(1 for fact in facts if _echoes(fact, spoken))
+        return (raised, len(facts))
 
     # -- discussion -------------------------------------------------------- #
 
@@ -127,3 +163,18 @@ class RunRecord:
             }
             for rater, by_target in self.responses(POST, instrument).items()
         }
+
+
+def _echoes(fact: str, spoken: str) -> bool:
+    """True when any 5-word run of `fact` reappears in `spoken`.
+
+    Five is long enough that ordinary shared vocabulary ("the supply truck") does not
+    trigger it, and short enough to survive an agent paraphrasing the rest of the
+    sentence around the part that matters.
+    """
+    words = [w for w in re.findall(r"[a-z0-9]+", fact.lower()) if w]
+    if len(words) < 5:
+        return " ".join(words) in spoken
+    return any(
+        " ".join(words[i:i + 5]) in spoken for i in range(len(words) - 4)
+    )

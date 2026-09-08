@@ -440,3 +440,25 @@ def plot_contrast(
     plt.close()
     print(f"Chart saved -> {path}")
     return path
+
+
+def render_task_performance(study: Study, out: dict[str, Any]) -> None:
+    """Whether the room actually decided well, and whether the split facts surfaced."""
+    if not out:
+        return
+    print()
+    print("=" * 74)
+    print("TASK PERFORMANCE — hidden-profile accuracy and information pooling")
+    print("=" * 74)
+    print(f"  {out['runs']} runs over {len(out['tasks'])} distinct tasks")
+    print(f"  Accuracy   share of answers that were right : {_fmt(out['accuracy'], 3)}")
+    for group, value in out["accuracy_by_group"].items():
+        print(f"             {study.label_of(group):<24}: {_fmt(value, 3)}")
+    print(f"  Consensus  every member gave one answer     : {_fmt(out['unanimous'], 3)}")
+    print(f"             ...and it was the right one      : {_fmt(out['unanimously_correct'], 3)}")
+    print(f"  Pooling    private facts said out loud      : {_fmt(out['pooling'], 3)}")
+    print()
+    print("  Pooling is the mechanism: an endorsement effect that leaves it unchanged is")
+    print("  not working through what the group knew. Accuracy is a floor -- the detector")
+    print("  only counts a fact as raised when its wording survives into the transcript.")
+    print("=" * 74)

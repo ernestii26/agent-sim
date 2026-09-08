@@ -2362,3 +2362,84 @@ apparent reversal in that version. Re-running with the 2018 instrument now wired
 change every row. What survives regardless is the methodological point: **a composite over
 a need's mapped dimensions can hide a sign reversal, and the paper's per-dimension layout
 is what exposes it.**
+
+## 35. The scenarios now come from HiddenBench (2026-09-08)
+
+Both conditions used to run on a hospital vignette I wrote. That was the weakest
+joint in the design and it took a direct question to see it: *does threat have to be
+uncontrollable?* The honest answer is no — the paper's trigger for the protection need
+is external danger and urgency (p.771: "wars, pandemics, or other types of immediate
+threats"), not helplessness. Churchill is its own counterexample; you want a strong
+leader in a war precisely because action still matters. Fully uncontrollable threat
+should flatten both sides, not favour dominance.
+
+But answering that exposed the larger problem. The entire H1/H2 contrast rested on two
+paragraphs written by the person who wanted the hypothesis to be true. Any effect could
+have been a property of that prose.
+
+**What replaced it.** HiddenBench (Li, Naito & Shirado, arXiv:2505.11556; MIT) is 65
+hidden-profile tasks — facts split across members so the right answer exists in the
+union and in no single share. `tools/fetch_hiddenbench.py` downloads them, classifies
+them, and writes `studies/ffni_mediation/scenarios/hiddenbench.json`. Conditions now
+name a pool instead of carrying prose, and each run draws one task through the same
+`BalancedSampler` the casts use, so 40 runs spread evenly over the pool.
+
+**The classification rule, fixed before looking at any result.**
+
+- **threat** (30 tasks) — human lives or bodily safety at immediate risk, decision
+  time-critical: evacuations, casualties, life-saving transport.
+- **routine** (23 tasks) — a wrong answer costs money, convenience, or a research
+  result. Nobody is in danger.
+- **neither** (12 tasks) — only property or data at stake: ransomware, a datacenter, a
+  stolen painting. Deciding case by case which way those lean is exactly the
+  experimenter degree of freedom this change exists to remove, so they are in no pool.
+
+`choosing_the_safe_field_station` reads as threat from its name and is routine on its
+text: urgent, but nobody can be hurt. The rule beat the name.
+
+**Three things changed as consequences, not choices.**
+
+1. *One friction block for both conditions.* Keeping the two condition-specific ones
+   would have put the manipulation straight back into prose we wrote. The only thing
+   that now differs between conditions is which pool the run drew from.
+2. *H2 became exploratory.* The dominance-under-threat literature the paper cites
+   (Laustsen & Petersen; Spisak et al.) is about **intergroup** conflict — a rival group,
+   contested status. The threat pool is environmental: floods, storms, evacuations. That
+   still triggers protection under the paper's own definition, but there is no outgroup
+   and no status dimension, and some evidence points the other way, with impersonal
+   disaster favouring competence — the prestige side. A null here does **not** replicate
+   a null in the paper. Said in advance, not after seeing the number.
+3. *H3 got sharper.* The old threat was intergroup and defensive, so arguing it moved
+   protection but not status took a paragraph. Immediate physical danger with no rival
+   group and nothing to win touches no status dimension at all.
+
+**What the change bought.** Two dependent variables the vote alone could never give:
+
+- **accuracy** — every task has a correct answer, so endorsement can finally be scored
+  against whether the group *decided well*. A room can back a leader confidently and be
+  wrong. The benchmark's own headline is that multi-agent groups reach ~30% under
+  distributed information where a single agent holding everything reaches ~81%, so
+  there is room to move.
+- **pooling** — the share of privately held facts that were actually said out loud,
+  counted by 5-gram echo in the transcript. This is the mechanism: an endorsement effect
+  that leaves pooling unchanged is not working through information at all. It is a floor,
+  not a parser.
+
+**Two hazards handled.** Hidden facts are dealt round-robin over a *shuffled* cast, so
+who holds which fact is independent of being the Prestige or the Dominance persona —
+deal by role and the endorsement result would partly measure who was handed the answer.
+And `_reject_foreign_scenario` refuses to replay a checkpoint collected under the old
+vignette, the same protection the instrument fingerprints already give: the 80 existing
+`results/ffni_mediation/` runs are a different experiment and must be archived, not
+topped up.
+
+**What this costs.** The manipulation evidence in section 13 was measured on
+pd_matched's wording and does **not** transfer. The manipulation has to be re-checked
+against the drawn tasks before the numbers mean anything. `test_core.py` now asserts
+that ffni_mediation's scenarios *differ* from pd_matched's, so a silent drift back to
+shared wording fails loudly.
+
+Also: the tasks were written for four agents and this study runs five, so the
+conversion rewrites the headcount phrases in 17 of the 53 descriptions and drops the
+payment and clock promises we cannot keep ($1/$2 rewards, "the chat will take at most
+15 minutes"). Nothing else about the prose changes.
