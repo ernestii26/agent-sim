@@ -11,6 +11,8 @@ config.ini
 # Final summaries and charts (results/<study>/<condition>/*.json|png) stay tracked.
 results/**/checkpoints/
 results/**/logs/
+# Throwaway output from cheap-model smoke runs: results_smoke, results_smoke2, ...
+results_*/
 
 # Agent worktrees
 .claude/worktrees/
