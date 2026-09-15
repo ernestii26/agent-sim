@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import json
 import random
+import re
 import textwrap
 import time
 from itertools import count
@@ -391,19 +392,24 @@ def run_poll(
             """
         ).strip()
 
-        parsed = _extract_json(ask(participant.agent, prompt))
-        choice = str(parsed.get("choice") or "").strip()
-        if choice not in options:
-            choice = _fuzzy_match_name(choice, options)
+        raw = ask(participant.agent, prompt)
+        parsed = _extract_json(raw)
+        reply = str(parsed.get("choice") or "").strip()
+        choice = _resolve_option(reply, options)
         answers.append(
             {
                 "persona_id": participant.persona_id,
                 "group": participant.group,
                 "choice": choice,
-                "correct": choice == task.correct,
+                # None when the reply matched no option: unanswered, never guessed.
+                "correct": (choice == task.correct) if choice is not None else None,
+                "reply": reply,
                 "reason": str(parsed.get("reason", "")).strip() or "No reason provided.",
             }
         )
+        if choice is None:
+            print(f"  [warn] {participant.persona_id} gave an unmatchable answer "
+                  f"{reply!r}; recorded as unanswered")
 
     return answers
 
@@ -550,6 +556,36 @@ def _administer(
             responses["_meta"] = {"attempts": attempt, "answered": answered, "complete": False}
             return responses
     return {}
+
+
+def _resolve_option(reply: str, options: list[str]) -> str | None:
+    """Which option the reply names, or None when it names none of them.
+
+    Deliberately NOT _fuzzy_match_name, which matches on a candidate's first word and
+    falls back to random.choice. Eighteen of the fifty-three drawn tasks have options
+    sharing a first word -- "Hospital A/B/C", "Site A/B/C", "Candidate A/B/C" -- so that
+    helper would post every near-miss to whichever option happens to be listed first,
+    and invent an answer outright when nothing matched. Both failures land straight in
+    the accuracy figure, which is the one number the hidden-profile tasks were adopted
+    to provide.
+
+    An unmatchable reply is missing data and is recorded as such, the same rule the
+    rating scales already follow: never imputed, so a parse failure reads as missing
+    rather than as a fabricated decision.
+    """
+    if reply in options:
+        return reply
+    squashed = re.sub(r"[^a-z0-9]+", " ", reply.lower()).strip()
+    if not squashed:
+        return None
+    # Whole-option containment, both directions, and only when exactly one option hits:
+    # ambiguity here is the failure mode, so two matches must not silently pick one.
+    hits = []
+    for option in options:
+        target = re.sub(r"[^a-z0-9]+", " ", option.lower()).strip()
+        if target and (target in squashed or squashed in target):
+            hits.append(option)
+    return hits[0] if len(hits) == 1 else None
 
 
 def _fuzzy_match_name(raw: str, candidates: list[str]) -> str:

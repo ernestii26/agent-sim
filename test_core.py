@@ -1144,14 +1144,6 @@ def test_relative_weights_assign_the_shared_variance_that_delta_r2_drops() -> No
     assert math.isnan(relative_weights([[v, v] for v in x1], y)[1])
 
 
-if __name__ == "__main__":
-    tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
-    for test in tests:
-        test()
-        print(f"  ok  {test.__name__}")
-    print(f"\n{len(tests)} checks passed.")
-
-
 # -- drawn hidden-profile tasks ------------------------------------------------ #
 
 def test_drawn_task_pools_are_answerable_and_disjoint() -> None:
@@ -1226,7 +1218,7 @@ def test_correct_rate_is_none_for_runs_collected_before_tasks_existed() -> None:
     assert legacy.hidden_facts_raised() is None
 
 
-def test_old_checkpoints_cannot_be_topped_up_after_the_scenarios_changed(tmp_path) -> None:
+def test_old_checkpoints_cannot_be_topped_up_after_the_scenarios_changed() -> None:
     """Runs seeded by the old hand-written vignette are a different experiment."""
     from pipeline import _reject_foreign_scenario
 
@@ -1236,7 +1228,7 @@ def test_old_checkpoints_cannot_be_topped_up_after_the_scenarios_changed(tmp_pat
 
     ok = RunRecord(run_no=1, condition="threat", members_by_group={}, transcript=[],
                    votes=[], task={"name": drawn.name})
-    _reject_foreign_scenario(ok, condition, tmp_path / "run_001.json")  # must not raise
+    _reject_foreign_scenario(ok, condition, Path("run_001.json"))  # must not raise
 
     for bad in (
         RunRecord(run_no=1, condition="threat", members_by_group={}, transcript=[], votes=[]),
@@ -1244,7 +1236,7 @@ def test_old_checkpoints_cannot_be_topped_up_after_the_scenarios_changed(tmp_pat
                   votes=[], task={"name": "some_task_from_another_pool"}),
     ):
         try:
-            _reject_foreign_scenario(bad, condition, tmp_path / "run_001.json")
+            _reject_foreign_scenario(bad, condition, Path("run_001.json"))
         except SystemExit as exc:
             assert "cannot be mixed" in str(exc)
         else:
@@ -1281,3 +1273,48 @@ def test_measurement_calls_switch_off_the_repetition_guard_and_put_it_back() -> 
     AgentTransport().actions(talking, "say something")
     assert talking.guard_while_acting is True
     assert talking.enable_basic_action_repetition_prevention is True
+
+
+def test_an_unmatchable_task_answer_is_missing_data_not_a_guess() -> None:
+    """Eighteen of the fifty-three drawn tasks have options sharing a first word.
+
+    The vote's _fuzzy_match_name matches on a candidate's first word and falls back to
+    random.choice, so on "Hospital A / Hospital B / Hospital C" it would post every
+    near-miss to Hospital A and invent an answer when nothing matched -- straight into
+    the accuracy figure the tasks were adopted to provide.
+    """
+    from discussion import _resolve_option
+
+    options = ["Hospital A", "Hospital B", "Hospital C"]
+    assert _resolve_option("Hospital B", options) == "Hospital B"
+    assert _resolve_option("  hospital b.", options) == "Hospital B", "punctuation and case"
+    assert _resolve_option("I would send them to Hospital C", options) == "Hospital C"
+
+    # Naming the shared prefix alone identifies nobody, and must not become Hospital A.
+    assert _resolve_option("Hospital", options) is None
+    assert _resolve_option("whichever is closest", options) is None
+    assert _resolve_option("", options) is None
+
+    # Two options in one reply is ambiguity, not a reason to take the first.
+    assert _resolve_option("Hospital A or Hospital B", options) is None
+
+
+def test_accuracy_excludes_unanswered_rather_than_scoring_them_wrong() -> None:
+    answered = [
+        {"group": "P", "choice": "West City", "correct": True},
+        {"group": "D", "choice": "East Town", "correct": False},
+        {"group": "N", "choice": None, "correct": None},
+    ]
+    record = RunRecord(run_no=1, condition="threat", members_by_group={}, transcript=[],
+                       votes=[], task={"name": "t"}, answers=answered)
+    # One of the two real answers was right -- not one of three.
+    assert record.correct_rate() == 0.5
+    assert record.correct_rate("N") is None, "a group with no usable answer has no rate"
+
+
+if __name__ == "__main__":
+    tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
+    for test in tests:
+        test()
+        print(f"  ok  {test.__name__}")
+    print(f"\n{len(tests)} checks passed.")

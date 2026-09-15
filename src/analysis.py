@@ -870,7 +870,13 @@ def summarize_task_performance(records: list) -> dict[str, Any]:
     if not scored:
         return {}
 
-    answers = [a for r in scored for a in r.answers]
+    # An answer that matched no option is missing data, not a wrong decision, so it is
+    # absent from accuracy rather than counted against it. `unmatched` keeps it visible:
+    # a rate that climbs is the model losing the response format, not losing the task.
+    all_answers = [a for r in scored for a in r.answers]
+    answers = [a for a in all_answers if a.get("correct") is not None]
+    if not answers:
+        return {}
     groups = sorted({a["group"] for a in answers})
     # Only runs the judge has scored contribute; unscored runs are absent, not zero.
     judged = [x for x in (r.hidden_facts_raised() for r in scored) if x is not None]
@@ -878,16 +884,21 @@ def summarize_task_performance(records: list) -> dict[str, Any]:
 
     return {
         "runs": len(scored),
+        "unmatched": (len(all_answers) - len(answers)) / len(all_answers) if all_answers else 0.0,
         "accuracy": mean([float(a["correct"]) for a in answers]),
         "accuracy_by_group": {
             g: mean([float(a["correct"]) for a in answers if a["group"] == g]) for g in groups
         },
         "unanimous": mean(
-            [float(len({a["choice"] for a in r.answers}) == 1) for r in scored]
+            [float(len({a["choice"] for a in r.answers if a.get("correct") is not None}) == 1)
+             for r in scored]
         ),
         "unanimously_correct": mean(
             [
-                float(len({a["choice"] for a in r.answers}) == 1 and r.answers[0]["correct"])
+                float(
+                    len({a["choice"] for a in r.answers if a.get("correct") is not None}) == 1
+                    and any(a.get("correct") for a in r.answers)
+                )
                 for r in scored
             ]
         ),

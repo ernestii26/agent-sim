@@ -1,7 +1,7 @@
 """One simulation run's output — the thing checkpoints hold and every report reads.
 
 The on-disk shape is fixed: {run_no, condition, members, transcript, votes, measures,
-instruments}.
+instruments, task, answers}.
 Readers ask questions here instead of walking that dict, which is also where the
 tolerance for pre-instrument checkpoints (no "measures" key) lives — see `responses`.
 """
@@ -64,7 +64,10 @@ class RunRecord:
         None when the run carries no task, which is every run collected before scenarios
         were drawn — callers must skip those rather than score them as zero.
         """
-        rows = [a for a in self.answers if group is None or a["group"] == group]
+        rows = [
+            a for a in self.answers
+            if (group is None or a["group"] == group) and a.get("correct") is not None
+        ]
         if not rows:
             return None
         return sum(1 for a in rows if a["correct"]) / len(rows)
