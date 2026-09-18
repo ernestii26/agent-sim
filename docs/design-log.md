@@ -2519,3 +2519,93 @@ This is the second defect found by running the cheap model rather than trusting 
 gpt-4.1 passing means the code is right. gpt-4.1 was hiding it by accident -- by
 complying with a framework instruction that has nothing to do with measurement -- and
 nothing in the design guaranteed it would keep doing so.
+
+## 37. What a local open model exposed, and why that arm is parked (2026-09-18)
+
+An open-weight arm was attempted on the department's shared GPU boxes: does the effect
+replicate on a much weaker model? The arm is parked, but the attempt paid for itself —
+it surfaced four failures, three of them real defects in code that gpt-4.1 had been
+hiding, and one a hard ceiling.
+
+**1. The framework was deleting ratings.** Section 36 has it in full: TinyTroupe
+discards an action too similar to the agent's last non-DONE one, judged as Jaccard over
+the CHARACTER SET of the raw reply, so `{"effectiveness_1": 5}` against
+`{"effectiveness_1": 2}` scores 0.913 against a 0.85 threshold. Fixed by lifting the
+guard for measurement transports. This one affects gpt-4.1 too; it simply never fired
+there because gpt-4.1 emits a THINK before its TALK and the comparison lands on a
+different action type.
+
+**2. A thinking model returns empty content.** `qwen3:30b` is a thinking model by
+default: the reasoning goes in a separate `reasoning` field and `content` comes back
+empty, which every parser in `src/` reads as a total failure. Passing `think: false`
+does not help — it moves the reasoning INTO `content`, in front of the JSON — and the
+OpenAI-compatible `/v1` endpoint has no such parameter anyway. The fix is to pick the
+right tag: `qwen3:30b-instruct`.
+
+**3. ollama ignores `max_completion_tokens`.** Measured directly:
+
+    max_tokens=20             -> completion_tokens=20     (honoured)
+    max_completion_tokens=20  -> completion_tokens=1892   (ignored)
+
+TinyTroupe sends the newer `max_completion_tokens`, so `SURVEY_MAX_TOKENS = 4500` was
+decorative and generation was effectively unbounded: one survey ran to 26,755 tokens and
+triggered context shifts. The cap has to live on the serving side —
+`PARAMETER num_predict` in a derived Modelfile — which touches neither our code nor
+TinyTroupe.
+
+**4. The ceiling, and it is not fixable.** With all of the above fixed, a 30B model
+still cannot hold a strong persona and an output format at the same time. Measured on
+the FFNI, same instrument, same code path:
+
+    P1, P2   22/22 answered, 5-6 s
+    D1       never completed, >7 min, repeated LengthFinishReasonError
+
+The Dominance personas are the ones that break. Their `style` field reads "Claims
+influence by taking control of the room. Sets the agenda, closes questions down", and
+TinyTroupe's system prompt instructs the model that it **must** always enforce `style`.
+A model told to dominate the room keeps talking, blows through the token cap, and never
+emits parseable JSON.
+
+**Why that is disqualifying rather than merely slow.** The failures are correlated with
+the experimental condition. D personas lose their ratings and P personas do not, so the
+missing data lands precisely on the side H2, H5 and H7 depend on. A run that completed
+would be biased, not noisy. The same shape as the effectiveness defect in section 36 —
+the difference is that one was ours to fix and this one is the model's capacity.
+
+On the instruments themselves the news is good, and it is the first real evidence for
+the 51-item 2018 scale: administered on its own it parsed 51/51 on the first attempt in
+7.4 s, with no straight-lining and the full 3-10 range in use. Alpha and retest still
+have no number, because measure-check never got past the D personas.
+
+**The quota, which governs everything on these boxes.** `gpu-policy` gives each user 24
+GPU-hours a day, counted purely as time holding a GPU context, and charges
+**(N+0.2)xN GPU-seconds per second** to anyone holding N GPUs while M<N sit idle. Six
+cards is 37.2x, which spends a full day's quota in 39 minutes — the first run was killed
+at exactly that mark. One card is 1x, so fewer cards is dramatically better, the
+opposite of the intuition. That also rules out a 67 GB model (llama4:scout): it needs
+three cards, giving eight hours a day against a study that needs about thirty.
+
+Two diagnoses were wrong before the right one, which is worth recording as a caution:
+memory pressure was blamed first (the GPUs were nearly empty), then Vulkan spreading
+across six cards (the log says `gpu_count=1`). The actual signature is
+`llama-server --list-devices failed: signal: killed` — the CUDA *discovery probe* was
+killed, so ollama concluded CUDA was unavailable and fell back to Vulkan, which does not
+honour `CUDA_VISIBLE_DEVICES`. Cause and effect run the other way round from the first
+story: the quota was already gone, and that is what made CUDA look broken. Where the
+second day's 24 hours went is still unexplained — nothing of ours was running on either
+box during the twelve hours in question.
+
+**Working setup, for whenever this is picked up again.** The system ollama is unusable
+for non-root users (`/usr/local/lib/ollama/cuda_v12` is mode 700), so install the release
+tarball under `/tmp2/<user>/`; keep models on `/tmp2` and not in the tmpfs home; pin
+`CUDA_VISIBLE_DEVICES` to ONE card and verify from the log that the backend really is
+CUDA; do not rebuild this project on the boxes (they have Python 3.14, too new for
+tinytroupe) but tunnel the port and point `OPENAI_BASE_URL` at it, which needs no code
+change at all.
+
+**Where this leaves the arm.** Parked, and its claim must be rewritten if it is revived:
+not "replicated across a comparable model" — nothing at gpt-4.1's level fits the quota —
+but "does the effect survive a much weaker open model". That question is worth asking
+precisely because of findings 1 through 4: model capability decides whether the
+measurement path works at all. It just cannot be answered until the main gpt-4.1 result
+stands, because there is nothing to replicate yet.
