@@ -185,3 +185,68 @@ Read on the same statistic at both levels (β with the other five needs controll
 | H7 | Threat strengthens protection → D effectiveness | G2 | Extends rather than replicates: environmental threat, not intergroup conflict |
 | H7b | Threat strengthens protection → authoritarianism effectiveness (post, threat minus routine β, run-level bootstrap) | G2 | p. 789's question in its own words. The authoritarianism items target other departments, an outgroup our scenarios lack |
 
+### Replication of Study 5 on LLM personas (no meeting)
+
+Before Step 2, we checked whether Sheng et al.'s Study 5 results reproduce on LLM personas at all. `tools/replicate_study5.py`, `gpt-4.1`, temperature 0. Data: `results/replication/`.
+
+**Method**
+
+| Arm | Compares with | N | Measures |
+|---|---|---|---|
+| A | Table 13 (5a) | 261 | FFNI with the paper's generic instruction ("the leaders in your life"), then ILT, 51 items, 1-10 |
+| B | Table 3, Model 2 (5c) | 367 | FFNI with the paper's work instruction ("the leaders in your WORK ORGANIZATION"), then the 57 descriptions, 1-7 |
+
+- The two arms are separate samples, as in the paper. Personas are bank rows that `ffni_mediation` does not use, spread over the 243 OCEAN profiles. They are neutral: no P/D traits.
+- Each instrument is answered on a fresh fork, so no answer is made with another instrument's answers in memory.
+- Analysis is the paper's: each dimension regressed on all six needs. The table reports the standardised β, and p from the ΔR² F test (df 1, n − 7).
+- A cell **replicates** if, where the paper is significant, our β has the same sign at p < .05, and, where the paper is null, our p ≥ .05. No multiple-comparison correction is applied, as in the paper.
+- Differences from the paper: the paper's respondents are people, not LLM personas. Sample E (5c) was Chinese and answered in Chinese; arm B is in English. 5c had a one-week gap between the FFNI and the effectiveness ratings; arm B has two separate sittings with nothing in between.
+
+**Results: arm A, Table 13** (10/14 cells replicate)
+
+| Need → ILT dimension | Paper β | Our β | p | Replicates |
+|---|---|---|---|---|
+| Protection → strength | .26* | .04 | .557 | No |
+| Status → tyranny | .32* | .28 | < .001 | Yes |
+| Status → masculinity | .19* | .07 | .368 | No |
+| Status → well-groomed | .30* | .08 | .272 | No |
+| Vision → sensitivity | .20* | .09 | .025 | Yes |
+| Vision → dedication | .30* | .41 | < .001 | Yes |
+| Vision → charisma | .19* | .22 | .002 | Yes |
+| Vision → creativity | .24* | .18 | .010 | Yes |
+| Expertise → sensitivity | .32* | .12 | .005 | Yes |
+| Expertise → charisma | .22* | .15 | .036 | Yes |
+| Expertise → intelligence | .21* | .27 | .001 | Yes |
+| Fairness → dedication | .25* | .20 | .033 | Yes |
+| Fairness → intelligence | .26* | .11 | .261 | No |
+| Fairness → ethics | .29* | .16 | .032 | Yes |
+
+\* significant in the paper.
+
+**Results: arm B, Table 3 Model 2** (8/13 cells replicate)
+
+| Need → effectiveness of | Paper β | Our β | p | Replicates |
+|---|---|---|---|---|
+| Protection → safety | .05 | .22 | < .001 | No |
+| Protection → authoritarianism | .01 | −.11 | .077 | Yes (null) |
+| Affiliation → benevolence | .10* | .67 | < .001 | Yes |
+| Affiliation → team-building | .36* | .56 | < .001 | Yes |
+| Status → narcissism | .04 | .07 | .240 | Yes (null) |
+| Status → authoritarianism | −.02 | .14 | .038 | No |
+| Status → dominance | .02 | .14 | .038 | No |
+| Vision → vision communication | .18* | .31 | < .001 | Yes |
+| Vision → high-expectation | .10 | .31 | < .001 | No |
+| Expertise → competence | .08 | .16 | .017 | No |
+| Expertise → intellectual stimulation | .13* | .42 | < .001 | Yes |
+| Fairness → moral character | .25* | .17 | .013 | Yes |
+| Fairness → virtue | .08 | .08 | .096 | Yes (null) |
+
+**Reading**
+
+1. **The prestige side reproduces.** Arm A replicates 9 of 10 vision, expertise and fairness cells. Arm B replicates all 5 of the paper's significant cells, with larger effects. It can serve as Step 2's positive control.
+2. **The dominance side does not, and the reason is measurement.** Arm A: strength has a ceiling, M = 7.75 and SD = 0.39 on 1-10, and protection–strength r = .01 even before controls. Arm B: the dominance-side styles sit on the floor, narcissism M = 1.48 (SD 0.21), dominance 1.81 (0.30), authoritarianism 2.11 (0.29), and R² is .04 to .09. The personas nearly agree that a leader is strong, and that domineering leadership is ineffective, so there is little individual variance for any need to predict.
+3. **Affiliation is the persona's agreeableness.** In arm A, r(affiliation, the persona's agreeableness setting) = .89. Affiliation then carries large unique effects that the paper does not have: sensitivity β = .74, ethics .45, tyranny −.41 (arm A); benevolence .67, virtue .58 (arm B). In the paper, affiliation's ΔR² is .00 to .01 on all eleven ILT dimensions.
+4. **The needs correlate differently.** In arm A they range from −.50 to .70, where the paper's run .60 to .72. Status correlates negatively with fairness (−.50), and protection is unrelated to vision and expertise (about .00).
+5. **G1 does not appear here.** Protection reaches the evaluation layer (safety .22) but not the prototype (strength .04), the reverse of the paper. Status reaches both: tyranny .28, and authoritarianism and dominance .14 each. The two status cells are at p = .038 among 13 uncorrected tests, so they are weak evidence.
+
+**What this means for Step 2.** Dominance-side results for H4, H5, H5b and H7b cannot be compared directly with the paper, whether they come back null or significant. Floor and ceiling effects limit them in this environment before any situation is manipulated. Prestige-side results can be compared.

@@ -19,3 +19,5 @@ results_*/
 
 # Sheng thesis PDF: 167 MB, over GitHub's 100 MB limit. Items transcribed in docs/sheng-2026-S10.1-effectiveness-items.md
 docs/xsheng-thesis-withcover*.pdf
+# Replication personas are rebuilt from bank_sample.json and the seed by tools/replicate_study5.py
+results/replication/*/personas/
