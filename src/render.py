@@ -323,6 +323,19 @@ def render_mediation(study: Study, med: dict[str, Any]) -> None:
     print("=" * 88)
 
 
+def render_style_check(title: str, result: dict[str, Any]) -> bool:
+    """One block per comparison; each subscale must go the way `expects` says."""
+    print(f"\n{title}")
+    print(f"  {'subscale':<12} {'expected':<8} {'n':>3} {'high':>6} {'low':>6} "
+          f"{'t':>7} {'p (2-sided)':>12} {'d_av':>6} {'ICC(1,1)':>9}")
+    for name, r in result["subscales"].items():
+        print(f"  {name:<12} {r['higher'] + '>' + r['lower']:<8} {r['n']:>3} "
+              f"{_fmt(r['mean_higher'], 2):>6} {_fmt(r['mean_lower'], 2):>6} {_fmt(r['t'], 2):>7} "
+              f"{_fmt(r['p_two_sided'], 4):>12} {_fmt(r['d_av'], 2):>6} "
+              f"{_fmt(r.get('icc_single', float('nan')), 2):>9}  [{'PASS' if r['passed'] else 'FAIL'}]")
+    return result["passed"]
+
+
 def render_measure_check(study: Study, summary: dict[str, Any]) -> bool:
     """Is the instrument alive on these agents? Printed before any full study is paid for."""
     render_needs(study, summary)

@@ -61,6 +61,21 @@ def make_samplers(study: Study) -> dict[str, BalancedSampler]:
     }
 
 
+def check_no_reuse(study: Study, runs: int) -> None:
+    """Refuse a run count that would seat a sampled persona twice.
+
+    Personas are built as exactly one cycle (tools/build_personas.py), so every run is a
+    fresh draw from the bank. Past the cycle the sampler starts over and the same people
+    come back, which is a different design, and nothing downstream would say so.
+    """
+    for key, group in study.groups.items():
+        if group.sample is not None and group.pair_with is None and runs * group.sample > len(group.ids):
+            raise SystemExit(
+                f"{runs} runs need {runs * group.sample} '{key}' personas, the study has "
+                f"{len(group.ids)}; rebuild with tools/build_personas.py --runs {runs}"
+            )
+
+
 def compose_run(
     study: Study,
     pool: dict[str, Participant],
@@ -113,6 +128,7 @@ def run_condition(
         if on_progress:
             on_progress(msg)
 
+    check_no_reuse(study, runs)
     ckpt_dir = output_dir / "checkpoints"
     ckpt_dir.mkdir(parents=True, exist_ok=True)
 
@@ -210,8 +226,11 @@ def run_condition(
             )
 
             # After the vote, so committing to an answer cannot colour the endorsement.
+            # Skipped with the vote: a study that endorses nobody (validate, dp_check) has
+            # no use for task accuracy either, and it is another call per agent per run.
             answers = (
-                run_poll(participants=cast, task=task, model=config.vote) if task else []
+                run_poll(participants=cast, task=task, model=config.vote)
+                if task and with_votes else []
             )
         except APIQuotaExhausted as exc:
             progress(f"\n[FATAL] {exc}")

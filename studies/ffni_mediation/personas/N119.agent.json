@@ -1,0 +1,20 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 172",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person is outgoing and energetic, often seeking conversation, group activities, and lively interaction, while still preferring a familiar structure over constant novelty. In daily habits, they tend to follow impulses, stay flexible, and adapt quickly, though they may be disorganized or overlook deadlines unless reminded. When faced with moral dilemmas, they usually begin by trying to protect everyone’s feelings and preserve harmony, weighing choices through an empathetic and cooperative lens before taking a stand. In group discussions, they speak freely and enthusiastically, encourage others to participate, and use a warm, conciliatory tone even when under some stress.",
+      "big_five": {
+        "openness": "medium",
+        "conscientiousness": "low",
+        "extraversion": "high",
+        "agreeableness": "high",
+        "neuroticism": "medium"
+      }
+    }
+  },
+  "persona_id": "N119"
+}

@@ -43,7 +43,7 @@ def welch_onesided_greater(a: list[float], b: list[float]) -> tuple[float, float
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("study", nargs="?", default="pd_matched")
+    ap.add_argument("study", nargs="?", default="ffni_mediation")
     args = ap.parse_args()
 
     threat = latest_summary(args.study, "threat")

@@ -1,0 +1,27 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 39",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person tends to explore new ideas eagerly while still organizing life with careful plans, checklists, and close attention to details. They usually respond to moral dilemmas by thinking them through calmly, weighing both principles and consequences before making a firm but fair choice. In group discussions, they speak with steady confidence, listen well, and contribute thoughtful, well-structured points without dominating the conversation. They are generally cooperative, yet will clearly defend their position when they believe it is justified.",
+      "big_five": {
+        "openness": "high",
+        "conscientiousness": "high",
+        "extraversion": "medium",
+        "agreeableness": "medium",
+        "neuroticism": "low"
+      },
+      "traits": [
+        "has assertively moved up the ranks into positions of leadership",
+        "prioritizes having control and authority over others",
+        "makes quick and definitive decisions, and once a decision is made it is usually final",
+        "has their own views of how tasks should be accomplished",
+        "uses reward and punishment to get people to follow their ideas"
+      ]
+    }
+  },
+  "persona_id": "D33"
+}

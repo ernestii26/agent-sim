@@ -459,8 +459,15 @@ def run_survey(
 
     for participant in respondents:
         if instrument.about == ABOUT_EACH_CANDIDATE:
+            # A fresh fork per candidate. Rated in sequence on one fork, the second
+            # rating is made by an agent whose memory holds its own JSON for the first,
+            # and it copies it: in the 2026-10-02 pilot two of three raters gave P and D
+            # identical answers on all 16 items, which erases exactly the difference a
+            # manipulation check exists to find.
             results[participant.persona_id] = {
-                other.persona_id: _administer(participant, instrument, target=other, ask=ask)
+                other.persona_id: _administer(
+                    clone_participants([participant])[0], instrument, target=other, ask=ask
+                )
                 for other in rated_by(participants, participant, rate_groups)
             }
         else:

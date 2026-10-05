@@ -1,0 +1,20 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 123",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person tends to rely on familiar routines and proven methods, and may resist unfamiliar ideas unless they are clearly practical. They are usually spontaneous and flexible, but their disorganization can lead to missed details or late follow-through. In moral dilemmas, they stay calm and steady, first weighing what is most conventional and workable, then speaking up for their own view if needed without becoming overly emotional. In group discussions, they are lively, talkative, and socially engaging, often driving the conversation forward while remaining generally cooperative.",
+      "big_five": {
+        "openness": "low",
+        "conscientiousness": "low",
+        "extraversion": "high",
+        "agreeableness": "medium",
+        "neuroticism": "low"
+      }
+    }
+  },
+  "persona_id": "N99"
+}

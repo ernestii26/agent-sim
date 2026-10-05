@@ -1,0 +1,20 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 126",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person is highly imaginative and curious, often exploring unusual ideas, trying new approaches, and shifting direction when something more interesting appears. In daily habits, they tend to work in bursts of inspiration rather than steady routines, so they may leave tasks scattered, forget details, or act on impulse. When faced with a moral dilemma, they usually analyze it through a skeptical, self-protective lens, questioning other people’s intentions while also feeling a lot of inner tension and second-guessing themselves. In group discussions, they speak with a mix of openness and defensiveness: they are willing to share original thoughts, but they may sound sharp, challenge assumptions, and become visibly stressed if the exchange feels contentious.",
+      "big_five": {
+        "openness": "high",
+        "conscientiousness": "low",
+        "extraversion": "medium",
+        "agreeableness": "low",
+        "neuroticism": "high"
+      }
+    }
+  },
+  "persona_id": "N28"
+}

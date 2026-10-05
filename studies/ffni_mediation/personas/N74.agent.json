@@ -1,0 +1,20 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 177",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person tends to keep a steady, low-key routine while remaining open to occasional change or new ideas. They are usually moderately organized and flexible, preferring to plan enough to stay on track without becoming rigid. In group settings, they often speak briefly but thoughtfully, listening more than they talk and choosing words carefully to maintain harmony. When faced with moral dilemmas, they first try to understand everyone’s perspective, then look for a fair, compassionate solution that minimizes conflict while staying calm and grounded.",
+      "big_five": {
+        "openness": "medium",
+        "conscientiousness": "medium",
+        "extraversion": "low",
+        "agreeableness": "high",
+        "neuroticism": "low"
+      }
+    }
+  },
+  "persona_id": "N74"
+}

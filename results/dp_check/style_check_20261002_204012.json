@@ -1,0 +1,138 @@
+{
+  "study": "dp_check",
+  "instrument": "dp_peer",
+  "conditions": {
+    "collaborative": {
+      "subscales": {
+        "dominance": {
+          "higher": "D",
+          "lower": "P",
+          "n": 10,
+          "mean_higher": 2.770833333333333,
+          "mean_lower": 1.9041666666666668,
+          "t": 5.161433336648838,
+          "p_two_sided": 0.0005939484560753798,
+          "d_av": 1.1413130345716853,
+          "passed": true,
+          "icc_single": 0.7114526453173133
+        },
+        "prestige": {
+          "higher": "P",
+          "lower": "D",
+          "n": 10,
+          "mean_higher": 4.445833333333334,
+          "mean_lower": 4.508333333333334,
+          "t": -0.34109511521183195,
+          "p_two_sided": 0.7408598618251836,
+          "d_av": -0.14918707216861643,
+          "passed": false,
+          "icc_single": 0.3102642141943451
+        }
+      },
+      "passed": false
+    },
+    "threat": {
+      "subscales": {
+        "dominance": {
+          "higher": "D",
+          "lower": "P",
+          "n": 10,
+          "mean_higher": 3.15,
+          "mean_lower": 1.775,
+          "t": 2.9605707948348003,
+          "p_two_sided": 0.015944727356285448,
+          "d_av": 1.7395651416519304,
+          "passed": true,
+          "icc_single": 0.9469441517386722
+        },
+        "prestige": {
+          "higher": "P",
+          "lower": "D",
+          "n": 10,
+          "mean_higher": 4.6416666666666675,
+          "mean_lower": 4.316666666666667,
+          "t": 2.1563386087653704,
+          "p_two_sided": 0.059420547217994044,
+          "d_av": 0.915129605129737,
+          "passed": false,
+          "icc_single": 0.3615032809703719
+        }
+      },
+      "passed": false
+    }
+  },
+  "passed": false,
+  "provenance": {
+    "written": "2026-10-02T20:40:12",
+    "discussion_model": "gpt-4.1",
+    "discussion_temperature": 0.7,
+    "vote_model": "gpt-4.1",
+    "vote_temperature": 0.2,
+    "survey_model": "gpt-4.1",
+    "survey_temperature": 0.0,
+    "rounds": 3,
+    "instruments": {
+      "dp_self": "81193ca91833",
+      "dp_peer": "1a4e74519f34"
+    },
+    "scenario_pools": {
+      "collaborative": [
+        "toma_butera_2009",
+        "baker_2010",
+        "schulz_hardt_mojzisch_2012",
+        "graetz_et_al_1998",
+        "Stasser_Stewart_1992",
+        "Laboratory Theft Deduction",
+        "lunch_group_decision",
+        "scientists_animal_base_decision",
+        "choosing_base_camp",
+        "community_banquet_venue_decision",
+        "research_station_site_selection",
+        "the_lead_investor_decision",
+        "weather_sensor_deployment",
+        "Choosing the Safe Offsite Venue",
+        "Find the Missing Prototype",
+        "choosing_the_safe_field_station",
+        "island_research_base_choice",
+        "archaeological_dig_site",
+        "last_minute_move",
+        "The Elusive Bird Sighting",
+        "power_outage_island",
+        "company_acquisition_decision",
+        "Emergency Event Relocation"
+      ],
+      "threat": [
+        "evacuation_west_city",
+        "evacuation_north_hill",
+        "evacuation_east_town",
+        "critical_hospital_transfer",
+        "emergency_supply_drop",
+        "evacuate_park_dilemma",
+        "city_storm_shelter_decision",
+        "meteor_shower_shelter",
+        "emergency_transportation_decision",
+        "Antarctic Storm Safe Haven",
+        "select_emergency_shelter",
+        "manuscript_flood_shelter",
+        "Rescue the Lost Researchers",
+        "Safe Shelter Selection",
+        "critical_vaccine_route",
+        "Critical Sample Transfer",
+        "Safe Haven After the Spill",
+        "the_safe_shelter",
+        "emergency_warehouse_selection",
+        "storm_recovery_clinic_site_selection",
+        "emergency_aircraft_landing_site",
+        "emergency_hospital_transfer",
+        "Space Evacuation Decision",
+        "safe_haven_decision",
+        "Safe Lab Choice After Earthquake",
+        "emergency_evacuation_center_choice",
+        "emergency_supply_distribution",
+        "mountain_storm_shelter",
+        "emergency_drone_delivery",
+        "Missing Medicine Delivery"
+      ]
+    }
+  }
+}

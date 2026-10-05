@@ -1,0 +1,28 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 155",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person tends to spend time exploring new ideas privately, often keeping a notebook of thoughts, plans, or creative possibilities. They are meticulous and organized in daily habits, carefully checking details and preparing ahead so that situations unfold smoothly. In moral dilemmas, they usually respond with calm reflection, weighing different viewpoints, looking for a fair compromise, and trying to reduce harm while preserving harmony. In group discussions, they speak thoughtfully and briefly, listen closely, and prefer measured, considerate contributions over dominating the conversation.",
+      "big_five": {
+        "openness": "high",
+        "conscientiousness": "high",
+        "extraversion": "low",
+        "agreeableness": "high",
+        "neuroticism": "low"
+      },
+      "traits": [
+        "has achieved positions of leadership through exceptional performance and abilities",
+        "is intelligent and skilled",
+        "focuses on fostering positive relationships and teamwork",
+        "cares a lot about what others think of them",
+        "takes input from others on how tasks should be accomplished",
+        "is quick to find common ground between other people's ideas and their own"
+      ]
+    }
+  },
+  "persona_id": "P6"
+}

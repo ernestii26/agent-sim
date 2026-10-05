@@ -1,0 +1,27 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 154",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person is moderately open to new ideas and experiences, but usually prefers changes that do not disrupt familiar routines. They tend to act spontaneously and flexibly, yet may be disorganized, follow through inconsistently, and occasionally let deadlines slip. In moral dilemmas, they usually weigh outcomes in a practical, self-protective way, often questioning others’ intentions and favoring choices that preserve their own interests while still trying to stay within acceptable limits. In group discussions, they speak in a balanced but guarded way: comfortable contributing and listening, but often skeptical, competitive, and direct when challenging others or defending their own position.",
+      "big_five": {
+        "openness": "medium",
+        "conscientiousness": "low",
+        "extraversion": "medium",
+        "agreeableness": "low",
+        "neuroticism": "medium"
+      },
+      "traits": [
+        "has assertively moved up the ranks into positions of leadership",
+        "prioritizes having control and authority over others",
+        "makes quick and definitive decisions, and once a decision is made it is usually final",
+        "has their own views of how tasks should be accomplished",
+        "uses reward and punishment to get people to follow their ideas"
+      ]
+    }
+  },
+  "persona_id": "D12"
+}

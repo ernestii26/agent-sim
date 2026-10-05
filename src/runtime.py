@@ -90,6 +90,12 @@ def configure_tinytroupe_runtime(settings: "ModelSettings") -> None:
         "model": settings.model,
         "temperature": float(settings.temperature),
         "max_completion_tokens": int(settings.max_tokens),
+        # After every act TinyTroupe spends one more call summarising the episode into
+        # semantic memory, and storing that summary needs embedding credentials we never
+        # set: the 2026-08-26 logs show 99 consolidation calls out of 356 and 540
+        # "Error storing engram ... Missing credentials. Ignoring and continuing." So the
+        # calls were ~28% of the bill and left nothing behind for any agent to recall.
+        "enable_memory_consolidation": False,
     })
     TinyPerson.communication_display = False
     TinyWorld.communication_display = False

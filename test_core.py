@@ -54,30 +54,16 @@ def test_every_study_loads() -> None:
         for group in study.groups.values():
             for pid in group.ids:
                 assert study.group_of(pid) == group.key
-        # A study can be seeded but not yet generated — sample_bank.py writes the design,
-        # gen_personas.py fills it in later. Only demand the files once the directory is there.
-        if study.personas_dir.exists():
-            missing = [pid for g in study.groups.values() for pid in g.ids
-                       if not (study.personas_dir / f"{pid}.agent.json").exists()]
-            assert not missing, f"{name}: personas/ exists but is missing {missing}"
+        missing = [pid for g in study.groups.values() for pid in g.ids
+                   if not (study.personas_dir / f"{pid}.agent.json").exists()]
+        assert not missing, f"{name}: personas/ is missing {missing}"
         if study.personas_from:
-            continue  # borrows another study's personas, so it has no seeds of its own
-        if not study.seeds_path.exists():
-            # Personas converted straight from the bank (sample_bank.py --direct) have no
-            # generation seeds; bank_sample.json records the provenance instead.
-            provenance = study.directory / "bank_sample.json"
-            assert provenance.exists(), f"{name}: neither seeds.json nor bank_sample.json"
-            sampled = {p["persona_id"] for p in
-                       json.loads(provenance.read_text(encoding="utf-8"))["personas"]}
-            declared = {pid for g in study.groups.values() for pid in g.ids}
-            assert sampled == declared, f"{name}: bank_sample.json and study.json disagree"
-            continue
-        seeds = json.loads(study.seeds_path.read_text(encoding="utf-8"))
-        seeded = {s["persona_id"] for s in seeds["personas"]}
+            continue  # borrows another study's personas, and their provenance with them
+        provenance = study.directory / "bank_sample.json"
+        sampled = {p["persona_id"] for p in
+                   json.loads(provenance.read_text(encoding="utf-8"))["personas"]}
         declared = {pid for g in study.groups.values() for pid in g.ids}
-        assert seeded == declared, f"{name}: seeds.json and study.json disagree on persona ids"
-        for seed in seeds["personas"]:
-            assert seed["prompt"] in seeds["prompts"], f"{name}: unknown prompt {seed['prompt']}"
+        assert sampled == declared, f"{name}: bank_sample.json and study.json disagree"
 
 
 def test_balanced_sampler_exhausts_pool_before_repeating() -> None:
@@ -121,13 +107,13 @@ def test_balanced_sampler_is_seeded_so_conditions_align() -> None:
 
 
 def test_paired_groups_draw_the_matching_index() -> None:
-    # pd_matched builds P_i and D_i from one bank row; drawing them independently
+    # build_personas.py makes P_i and D_i from one bank row; drawing them independently
     # throws that away, which is what pair_with exists to prevent.
     from pipeline import compose_run, make_samplers
     from persona_store import Participant
 
-    study = load_study("pd_matched")
-    assert study.groups["D"].pair_with == "P", "pd_matched must pair D to P"
+    study = load_study("ffni_mediation")
+    assert study.groups["D"].pair_with == "P", "ffni_mediation must pair D to P"
     pool = {
         pid: Participant(agent=None, persona_id=pid, name=pid, group=group.key)
         for group in study.groups.values()
@@ -145,7 +131,7 @@ def test_compose_run_respects_group_sampling() -> None:
     from pipeline import compose_run, make_samplers
     from persona_store import Participant
 
-    study = load_study("prestige_dominance")
+    study = load_study("ffni_mediation")
     pool = {
         pid: Participant(agent=None, persona_id=pid, name=pid, group=group.key)
         for group in study.groups.values()
@@ -222,7 +208,7 @@ def test_ttest_direction_and_degenerate_input() -> None:
 
 def test_summarize_contrast_counts_only_the_electorate() -> None:
     """The contrasted groups stand for election, so their own ballots stay out of the DV."""
-    study = load_study("prestige_dominance")
+    study = load_study("ffni_mediation")
     ns = ("N1", "N2", "N3")
     records = [_record(1, p_votes=2, neutrals=ns), _record(2, p_votes=3, neutrals=ns)]
 
@@ -245,7 +231,11 @@ def test_summarize_contrast_counts_only_the_electorate() -> None:
 
 
 def test_summarize_validation_judges_only_always_present_groups() -> None:
-    study = load_study("prestige_dominance")
+    from dataclasses import replace
+
+    # Every group in ffni_mediation is sampled; give it one present in every run.
+    study = load_study("ffni_mediation")
+    study = replace(study, groups={**study.groups, "N": replace(study.groups["N"], sample=None)})
     neutrals = ("N1", "N2", "N3", "N4")
     summary = summarize_validation(study, [_record(neutrals=neutrals)])
 
@@ -293,28 +283,30 @@ def test_ffni_matches_the_published_instrument() -> None:
         assert "apl0001347" in ffni.citation, study.name
 
 
-def test_ffni_mediation_borrows_personas_instead_of_copying_them() -> None:
-    """It borrows pd_matched's, not prestige_dominance's — the mediation has to run on
-    the matched pairs, or every confound pd_matched removes comes back."""
+def test_ffni_mediation_draws_its_tasks_and_shares_one_friction() -> None:
     study = load_study("ffni_mediation")
-    matched = load_study("pd_matched")
-    assert study.personas_from == "pd_matched"
-    assert study.personas_dir == matched.personas_dir
-    assert (study.personas_dir / "P1.agent.json").exists()
-    assert study.groups["D"].pair_with == "P"
-    assert {k: g.ids for k, g in study.groups.items()} == {k: g.ids for k, g in matched.groups.items()}
-    # It borrows the personas and NOT the scenarios. design-log section 13's manipulation
-    # evidence was measured on pd_matched's hand-written wording; ffni_mediation now draws
-    # its tasks from HiddenBench instead, so that evidence does not transfer and the
-    # manipulation has to be re-checked against the drawn tasks. This assertion exists to
-    # make a silent drift back to shared wording fail loudly.
     for key, cond in study.conditions.items():
         assert cond.pool, f"{key}: expected a drawn task pool"
-        assert cond.scenario != matched.conditions[key].scenario, key
     # One friction for both conditions: the only thing that differs is which pool the run
     # draws from. Two condition-specific frictions would put the manipulation back into
     # prose we wrote, which is what drawing tasks is meant to remove.
     assert len({c.friction for c in study.conditions.values()}) == 1
+
+
+def test_a_run_count_past_one_cycle_is_refused() -> None:
+    """Every persona sits in exactly one run. A longer study would quietly start
+    re-seating the same people, so it has to fail before anything is spent."""
+    from pipeline import check_no_reuse
+
+    study = load_study("ffni_mediation")
+    pairs = len(study.groups["P"].ids)
+    check_no_reuse(study, pairs)
+    try:
+        check_no_reuse(study, pairs + 1)
+    except SystemExit as exc:
+        assert "build_personas.py" in str(exc)
+    else:
+        raise AssertionError("a second cycle was allowed")
 
 
 def test_subscale_scores_drop_bad_ratings_rather_than_impute() -> None:
@@ -460,7 +452,7 @@ def test_mediation_is_not_fooled_by_a_condition_difference_alone() -> None:
 def test_need_outcome_links_separates_cognition_from_evaluation() -> None:
     study = load_study("ffni_mediation")
     ffni = next(i for i in study.instruments if i.key == "ffni")
-    ideals = next(i for i in study.instruments if i.key == "leader_ideal")
+    ideals = next(i for i in study.instruments if i.key == "ilt")
     effectiveness = next(i for i in study.instruments if i.key == "effectiveness")
 
     records = []
@@ -469,7 +461,7 @@ def test_need_outcome_links_separates_cognition_from_evaluation() -> None:
     ):
         record = _needs_record(run_no, protection=protection, d_rating=d_rating)
         # protection is predicted to move the ILT strength dimension (strong, bold).
-        record.measures["post"]["leader_ideal"] = {
+        record.measures["post"]["ilt"] = {
             pid: {"strength_1": ideal, "strength_2": ideal}
             for pid in record.members("N")
         }
@@ -629,10 +621,10 @@ def test_transports_do_not_share_a_failure_counter() -> None:
 # Persona bank sampling                                                        #
 # --------------------------------------------------------------------------- #
 
-def _sample_bank_module():
+def _build_module():
     import importlib.util
     spec = importlib.util.spec_from_file_location(
-        "sample_bank", PROJECT_DIR / "tools" / "sample_bank.py"
+        "build_personas", PROJECT_DIR / "tools" / "build_personas.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -643,7 +635,7 @@ def _fake_bank(profiles: int, per_profile: int = 3) -> list[dict]:
     levels = ["low", "medium", "high"]
     bank = []
     for i in range(profiles):
-        ocean = {t: levels[(i + j) % 3] for j, t in enumerate(
+        ocean = {t: levels[i // 3 ** j % 3] for j, t in enumerate(
             ("openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism"))}
         for k in range(per_profile):
             bank.append({
@@ -654,54 +646,48 @@ def _fake_bank(profiles: int, per_profile: int = 3) -> list[dict]:
     return bank
 
 
-def test_split_parsing_rejects_nonsense() -> None:
-    sb = _sample_bank_module()
-    assert sb.parse_split("P=6,D=6,N=24") == {"P": 6, "D": 6, "N": 24}
-    for bad in ("P=0", "P=-1", "P", "P=x", "=3"):
-        try:
-            sb.parse_split(bad)
-        except SystemExit:
-            pass
-        else:
-            raise AssertionError(f"accepted bad split {bad!r}")
-
-
 def test_sampling_never_repeats_a_personality_and_refuses_to_overdraw() -> None:
-    sb = _sample_bank_module()
+    bp = _build_module()
     bank = _fake_bank(profiles=3, per_profile=4)   # only 3 distinct OCEAN profiles
 
-    picked = sb.stratified_sample(bank, 3, random.Random(0))
-    keys = [tuple(e["ocean_description"]["ocean"].values()) for e in picked]
-    assert len(set(keys)) == 3, keys
+    rows = bp.sample_rows(bank, 3, random.Random(0))
+    assert len({bp.profile(bank[i]) for i in rows}) == 3, rows
 
     # Asking for more than the bank can supply without repeating must fail loudly,
     # not silently hand back duplicate personalities.
     try:
-        sb.stratified_sample(bank, 4, random.Random(0))
+        bp.sample_rows(bank, 4, random.Random(0))
     except SystemExit as exc:
         assert "distinct OCEAN profiles" in str(exc)
     else:
         raise AssertionError("overdrawing was allowed")
 
 
-def test_assigned_style_reaches_the_generation_prompt() -> None:
-    """A leadership label the prompt does not carry would leave the agent unchanged."""
-    sb = _sample_bank_module()
-    entry = _fake_bank(profiles=1, per_profile=1)[0]
+def test_built_personas_pair_on_one_row_and_carry_only_the_manipulation() -> None:
+    bp = _build_module()
+    bank = _fake_bank(profiles=12, per_profile=2)
+    built = bp.build(bank, runs=3, seed=0)
+    by_id = {pid: (group, row, spec["persona"]) for pid, group, row, spec in built}
+    assert len(built) == 15
 
-    dominance = sb.build_user_prompt(entry, "D")
-    assert "DOMINANCE" in dominance
-    assert "traits, mannerisms" in dominance          # style must be woven in, not labelled
-    assert entry["ocean_description"]["description_en"] in dominance
+    # P_i and D_i are one bank row; every other row is a different personality.
+    for i in (1, 2, 3):
+        assert by_id[f"P{i}"][1] == by_id[f"D{i}"][1]
+    rows = {row for _, row, _ in by_id.values()}
+    assert len(rows) == 12 and len({bp.profile(bank[r]) for r in rows}) == 12
 
-    neutral = sb.build_user_prompt(entry, "N")
-    assert "NOT a natural leader" in neutral
-    assert "DOMINANCE" not in neutral and "PRESTIGE" not in neutral
-
-    # gen_personas.py substitutes this by plain replacement, so a prompt may also
-    # contain unrelated braces (the rendered score dict does).
-    assert "{existing_names}" in dominance
-    assert dominance.replace("{existing_names}", "Ana, Bo").count("Ana, Bo") == 1
+    names = [p["name"] for _, _, p in by_id.values()]
+    assert len(set(names)) == 15, "a duplicate name kills TinyWorld mid-run"
+    for pid, (group, _, persona) in by_id.items():
+        # The name is the one thing every agent sees about every other, so it must not
+        # carry the group the way the persona id does.
+        assert persona["name"].split(" ")[0] == "Participant", persona["name"]
+        assert persona["name"].split(" ")[1].isdigit(), persona["name"]
+        assert persona["occupation"] == persona["age"] == persona["nationality"] == "not specified"
+        traits = persona["personality"].get("traits")
+        assert traits == (bp.TRAITS[group] if group in "PD" else None), pid
+        text = json.dumps(persona).lower()
+        assert "dominan" not in text and "prestig" not in text, f"{pid} names the construct"
 
 
 def test_a_survey_clone_never_shares_memory_with_the_agent_that_votes() -> None:
@@ -737,6 +723,39 @@ def test_a_survey_clone_never_shares_memory_with_the_agent_that_votes() -> None:
         pass
     else:
         raise AssertionError("an impossible clone must raise, not return the original")
+
+
+def test_each_candidate_is_rated_by_a_fork_that_has_rated_no_one_else() -> None:
+    """One fork rating every candidate in turn remembers its own first answer and copies
+    it for the second, so P and D come out identical."""
+    import discussion
+
+    class FakeAgent:
+        def __init__(self) -> None:
+            self.episodic_memory: list[str] = ["the meeting"]
+
+    def ask(agent, prompt):
+        agent.episodic_memory.append(prompt)  # what listen_and_act would remember
+        seen.append(list(agent.episodic_memory))
+        return "{}"
+
+    room = [Participant(agent=FakeAgent(), persona_id=pid, name=pid, group=g)
+            for pid, g in (("P1", "P"), ("D1", "D"), ("N1", "N"))]
+    inst = load_study("dp_check").candidate_rating
+    seen: list[list[str]] = []
+    real_transport, real_configure = discussion.AgentTransport, discussion.configure_tinytroupe_runtime
+    discussion.AgentTransport = lambda **_: ask
+    discussion.configure_tinytroupe_runtime = lambda _: None
+    try:
+        discussion.run_survey(participants=room, instrument=inst, model=None,
+                              rate_groups=("P", "D"))
+    finally:
+        discussion.AgentTransport, discussion.configure_tinytroupe_runtime = real_transport, real_configure
+
+    first_prompts = [memory[1] for memory in seen if len(memory) == 2]
+    assert len(first_prompts) == 2, seen          # each rating starts from the meeting only
+    assert all(m[0] == "the meeting" for m in seen)
+    assert room[2].agent.episodic_memory == ["the meeting"], "the rater itself is untouched"
 
 
 def test_alpha_gate_judges_each_read_subscale_not_the_average() -> None:
@@ -898,8 +917,8 @@ def _layer_run(run_no: int, condition: str, rng: random.Random, lift: float) -> 
         "run_no": run_no, "condition": condition,
         "members": {"P": ["P1"], "D": ["D1"], "N": neutrals},
         "transcript": [], "votes": votes,
-        "measures": {"baseline": {"ffni": baseline, "leader_ideal": ideals_base},
-                     "post": {"ffni": post, "leader_ideal": ideals,
+        "measures": {"baseline": {"ffni": baseline, "ilt": ideals_base},
+                     "post": {"ffni": post, "ilt": ideals,
                               "effectiveness": effect}},
     })
 
@@ -931,7 +950,7 @@ def test_layer_moderation_separates_the_two_layers_and_the_two_conditions() -> N
     assert protection["cognition"]["ci95"][0] > 0
 
     # H4, within a person: the change in the need went with the change in the prototype.
-    # This is the reading the level scores cannot give, and it is why leader_ideal is
+    # This is the reading the level scores cannot give, and it is why ilt is
     # administered at baseline as well.
     induced = protection["cognition_induced"]
     assert induced["beta"] > 0.4, induced
@@ -1310,6 +1329,67 @@ def test_accuracy_excludes_unanswered_rather_than_scoring_them_wrong() -> None:
     # One of the two real answers was right -- not one of three.
     assert record.correct_rate() == 0.5
     assert record.correct_rate("N") is None, "a group with no usable answer has no rate"
+
+
+def test_reverse_items_are_flipped_for_scores_but_stored_raw() -> None:
+    inst = load_study("dp_check").candidate_rating
+    assert "dominance_5" in inst.reverse            # "does not have a forceful ... personality"
+    answers = {f"dominance_{i}": 7 for i in range(1, 9)}
+    answers.update({"dominance_5": 1, "dominance_7": 1})   # consistent high-dominance reply
+    assert subscale_scores(answers, inst)["dominance"] == 7.0
+    assert inst.scored("dominance_1", 7) == 7 and inst.scored("dominance_5", 1) == 7
+
+
+def _style_record(run_no: int, d_scores: dict, p_scores: dict) -> RunRecord:
+    """Three neutrals rate D1 and P1; every item of a subscale gets that subscale's score,
+    reverse items written raw the way an agent would answer them."""
+    inst = load_study("dp_check").candidate_rating
+    def answers(scores: dict) -> dict:
+        low, high = inst.scale
+        return {item: (low + high - scores[sub] if item in inst.reverse else scores[sub])
+                for item, sub, _ in inst.items}
+    rng = random.Random(run_no)
+    ratings = {n: {"D1": answers({k: v + rng.choice((0, 1)) for k, v in d_scores.items()}),
+                   "P1": answers({k: v + rng.choice((0, 1)) for k, v in p_scores.items()})}
+               for n in ("N1", "N2", "N3")}
+    return RunRecord.from_dict({
+        "run_no": run_no, "condition": "c",
+        "members": {"P": ["P1"], "D": ["D1"], "N": ["N1", "N2", "N3"]},
+        "transcript": [], "votes": [], "measures": {"post": {"dp_peer": ratings}},
+    })
+
+
+def test_style_check_must_pass_both_directions_in_every_condition() -> None:
+    from analysis import summarize_style_check
+    study = load_study("dp_check")
+    inst = study.candidate_rating
+    works = [_style_record(i, {"dominance": 5, "prestige": 2}, {"dominance": 2, "prestige": 5})
+             for i in range(1, 11)]
+    # P reads as merely less dominant, not more prestigious: half a manipulation.
+    half = [_style_record(i, {"dominance": 5, "prestige": 3}, {"dominance": 2, "prestige": 3})
+            for i in range(1, 11)]
+
+    good = summarize_style_check(study, {"a": works, "b": works}, inst)
+    assert good["passed"], good
+    assert good["conditions"]["a"]["subscales"]["dominance"]["n"] == 10
+
+    bad = summarize_style_check(study, {"a": works, "b": half}, inst)
+    assert bad["conditions"]["a"]["passed"] and not bad["conditions"]["b"]["passed"]
+    assert bad["conditions"]["b"]["subscales"]["dominance"]["passed"]
+    assert not bad["passed"], "a weak condition must not hide behind a strong one"
+
+
+def test_a_borrowing_study_seats_the_same_casts_as_its_lender() -> None:
+    """dp_check is only evidence about ffni_mediation's runs if run i is the same cast in
+    both. Rebuilding the personas without updating the borrower would break that silently."""
+    for name in list_studies():
+        study = load_study(name)
+        if not study.personas_from:
+            continue
+        lender = load_study(study.personas_from)
+        assert {k: (g.ids, g.sample, g.pair_with) for k, g in study.groups.items()} == \
+               {k: (g.ids, g.sample, g.pair_with) for k, g in lender.groups.items()}, name
+        assert study.sampler_seed == lender.sampler_seed, name
 
 
 if __name__ == "__main__":

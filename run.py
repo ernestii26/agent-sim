@@ -8,6 +8,7 @@
     python3 run.py report   <study> <condition>
     python3 run.py mediate  <study>            H6
     python3 run.py layers   <study>            H3, H4, H5, H7
+    python3 run.py style-check <study>         P/D manipulation check, every condition
 
 Every theme-specific detail (groups, personas, scenarios) lives in studies/<study>/.
 """
@@ -24,7 +25,8 @@ sys.path.insert(0, str(_PROJECT_DIR / "src"))
 os.chdir(_PROJECT_DIR)  # TinyTroupe reads config.ini from the CWD
 
 from analysis import (  # noqa: E402
-    need_outcome_links, prototype_by_dimension, rater_agreement, summarize_contrast,
+    need_outcome_links, prototype_by_dimension, rater_agreement, self_style_check,
+    summarize_contrast, summarize_style_check,
     summarize_layer_moderation,
     summarize_measure_check, summarize_mediation, summarize_needs,
     summarize_task_performance, summarize_validation,
@@ -35,7 +37,8 @@ from pipeline import load_records, run_condition, run_measure_check  # noqa: E40
 from render import (  # noqa: E402
     plot_contrast, render_contrast, render_layer_moderation, render_layers,
     render_mediation, render_measure_check, render_needs, render_prototype_by_dimension,
-    render_rater_agreement, render_task_performance, render_validation, save_summary,
+    render_rater_agreement, render_style_check, render_task_performance, render_validation,
+    save_summary,
 )
 from runtime import setup_file_logging  # noqa: E402
 from study import Study, list_studies, load_study  # noqa: E402
@@ -123,7 +126,8 @@ def cmd_run(args: argparse.Namespace) -> None:
     print(f"  Runs: {runs}   Rounds: {rounds}   Personas: {study.personas_dir}\n")
 
     records = run_condition(
-        study, condition, config, runs=runs, rounds=rounds, output_dir=out, on_progress=print,
+        study, condition, config, runs=runs, rounds=rounds, with_votes=study.votes,
+        output_dir=out, on_progress=print,
     )
     _report(study, condition, records, out, _provenance(config, study))
 
@@ -145,6 +149,14 @@ def _report(study: Study, condition, records: list, out: Path,
             provenance: dict[str, Any] | None = None) -> None:
     if not records:
         raise SystemExit("No completed runs to report.")
+    rating = study.candidate_rating
+    if not study.votes:
+        # Nothing was endorsed, so there is no contrast to test; the instruments are all
+        # this study produced.
+        summary = summarize_style_check(study, {condition.key: records}, rating)
+        render_style_check(f"{rating.title} — {condition.label}", summary["conditions"][condition.key])
+        save_summary(summary, out, condition.key, provenance=provenance)
+        return
     summary = summarize_contrast(study, condition, records)
     render_contrast(study, condition, summary)
 
@@ -208,9 +220,32 @@ def cmd_measure_check(args: argparse.Namespace) -> None:
     for instrument in checkable:
         summary = summarize_measure_check(study, record, instrument)
         passed &= render_measure_check(study, summary)
+        if instrument.expects:
+            summary["style_check"] = self_style_check(study, record, instrument)
+            passed &= render_style_check(f"{instrument.title} — matched pairs",
+                                         summary["style_check"])
         save_summary(summary, out, f"measure_check_{instrument.key}",
                      provenance=_provenance(config, study))
     if not passed:
+        sys.exit(1)
+
+
+def cmd_style_check(args: argparse.Namespace) -> None:
+    """Did neutrals see D as dominant and P as prestigious, in every condition?"""
+    config = RunConfig.from_ini(_PROJECT_DIR / "config.ini")
+    study = load_study(args.study)
+    rating = study.candidate_rating
+    if rating is None or not rating.expects:
+        raise SystemExit(f"Study '{study.name}' has no candidate rating with `expects`.")
+    by_condition = {key: load_records(_output_dir(config, study, key)) for key in study.conditions}
+    out = summarize_style_check(study, by_condition, rating)
+    for key, result in out["conditions"].items():
+        print(f"  {key}: {len(by_condition[key])} runs")
+        render_style_check(f"{rating.title} — {study.conditions[key].label}", result)
+    print(f"\n  Verdict: {'PASS' if out['passed'] else 'FAIL'} — every condition, every subscale")
+    save_summary(out, Path(config.output_dir) / study.name, "style_check",
+                 provenance=_provenance(config, study))
+    if not out["passed"]:
         sys.exit(1)
 
 
@@ -286,6 +321,7 @@ def cmd_layers(args: argparse.Namespace) -> None:
         render_prototype_by_dimension(study, by_dim)
         out["prototype_by_dimension"] = by_dim
 
+
     save_summary(out, Path(config.output_dir) / study.name, "layers",
                  provenance=_provenance(config, study))
 
@@ -300,6 +336,10 @@ def main() -> None:
     check = sub.add_parser("measure-check", help="is the survey instrument usable on these agents?")
     check.add_argument("study")
     check.set_defaults(func=cmd_measure_check)
+
+    sc = sub.add_parser("style-check", help="P/D manipulation check over every condition")
+    sc.add_argument("study")
+    sc.set_defaults(func=cmd_style_check)
 
     med = sub.add_parser("mediate", help="test the indirect path across both conditions")
     med.add_argument("study")

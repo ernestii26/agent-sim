@@ -1,0 +1,27 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 67",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person is imaginative and curious, often drawn to fresh ideas, unusual angles, and spontaneous changes in plans. In daily habits, they tend to start things energetically, shift quickly between interests, and keep a flexible approach, though they may be disorganized and sometimes overlook details or deadlines. When faced with moral dilemmas, they usually try to understand multiple perspectives and look for creative compromises, but will firmly defend their own principles if they feel strongly about an issue. In group discussions, they speak easily and enthusiastically, contribute many ideas, and are socially engaging, while remaining willing to cooperate without always yielding their own viewpoint.",
+      "big_five": {
+        "openness": "high",
+        "conscientiousness": "low",
+        "extraversion": "high",
+        "agreeableness": "medium",
+        "neuroticism": "medium"
+      },
+      "traits": [
+        "has assertively moved up the ranks into positions of leadership",
+        "prioritizes having control and authority over others",
+        "makes quick and definitive decisions, and once a decision is made it is usually final",
+        "has their own views of how tasks should be accomplished",
+        "uses reward and punishment to get people to follow their ideas"
+      ]
+    }
+  },
+  "persona_id": "D19"
+}

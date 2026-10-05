@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Keyword-scan the free-text vote reasons for dominance's defining feature: coercion/fear.
 
-    python3 tools/vote_reason_scan.py pd_matched threat
-    python3 tools/vote_reason_scan.py pd_matched collaborative
+    python3 tools/vote_reason_scan.py ffni_mediation threat
+    python3 tools/vote_reason_scan.py ffni_mediation collaborative
 
 Cheng et al. (2013) / Henrich & Gil-White (2001) define dominance as influence via fear
 and coercion, prestige as influence via freely conferred respect. run_vote asks every

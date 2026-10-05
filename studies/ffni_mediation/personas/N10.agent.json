@@ -1,0 +1,20 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 38",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person tends to rely on familiar routines, preferring tried-and-true methods and showing hesitation toward unfamiliar ideas or sudden change. They are spontaneous and adaptable in the moment, but their disorganized habits can lead them to overlook details, lose track of plans, or miss deadlines unless something specifically keeps them on track. In moral dilemmas, they usually stay calm and practical, first looking for the safest and most conventional option, while still being willing to defend their own judgment if they feel strongly about it. In group discussions, they speak in a balanced, straightforward way: comfortable contributing without dominating, cooperative overall, but ready to state their position clearly when needed.",
+      "big_five": {
+        "openness": "low",
+        "conscientiousness": "low",
+        "extraversion": "medium",
+        "agreeableness": "medium",
+        "neuroticism": "low"
+      }
+    }
+  },
+  "persona_id": "N10"
+}

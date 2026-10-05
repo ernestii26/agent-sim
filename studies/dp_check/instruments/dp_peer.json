@@ -1,0 +1,61 @@
+{
+  "key": "dp_peer",
+  "title": "Dominance and Prestige (peer rating)",
+  "instructions": "Think about how this person behaved in the meeting you just had. Indicate the extent to which each statement accurately describes this person.",
+  "scale": [
+    1,
+    7
+  ],
+  "anchors": [
+    "not at all",
+    "very much"
+  ],
+  "about": "each_candidate",
+  "targets": [
+    "N"
+  ],
+  "timing": [
+    "post"
+  ],
+  "citation": "Cheng, J. T., Tracy, J. L., & Henrich, J. (2010). Pride, personality, and the evolutionary foundations of human social status. Evolution and Human Behavior, 31, 334-347. Items from the Electronic Supplementary Material, Table 1 (docs/cheng-tracy-henrich-2010-supplement.pdf, p.7-8): the 17 items retained in the final scales (those not marked with a dagger), in table order. Response scale from the same supplement, p.2: 1 (Not at all) to 7 (Very much), 4 = Somewhat. Peer wording: the parenthesised substitutions, as Table 1's note specifies. The item 'Members of my (your) group do not want to be like me (him/her)' is omitted following Cheng, J. T., Tracy, J. L., Foulsham, T., Kingstone, A., & Henrich, J. (2013). Two ways to the top. Journal of Personality and Social Psychology, 104(1), 103-125, p.110 (docs/cheng-et-al-2013-two-ways-to-the-top.pdf): 'due to its unsuitability for briefly acquainted group members'.",
+  "license": "",
+  "note": "Manipulation check for the P/D traits (Ronay et al. 2023 Table 2, Study 3), which the source paper pre-tested with these same scales. The supplement says the final scales are also posted at ubc-emotionlab.ca; that page could not be retrieved verbatim (it blocks scripted downloads), and a paraphrase of it reads 'Members of my peer group' where Table 1 reads 'Members of my group'. Table 1 is used because it is the version that can be checked against a page. The prompt shows only the two end anchors; the published midpoint label 'Somewhat' is not shown. The main check: neutrals rate the P and D they just watched, as Ronay et al.'s pre-test raters rated the leader text. Instructions are the self-report instruction turned onto the target, plus the meeting reference effectiveness uses; the supplement gives no separate peer instruction. Cheng et al. (2013) quote their peer items in the rater's first person ('I am afraid of him/her'); their full list is only on the unreachable lab page, so the 2010 Table 1 wording is used.",
+  "subscales": {
+    "dominance": [
+      "He/she enjoys having control over other members of the group.",
+      "He/she often tries to get his/her own way regardless of what others in the group may want.",
+      "He/she is willing to use aggressive tactics to get his/her way.",
+      "He/she tries to control others rather than permit them to control him/her.",
+      "He/she does not have a forceful or dominant personality.",
+      "Other members of the group know it is better to let him/her have his/her way.",
+      "He/she does not enjoy having authority over members of the group.",
+      "Members of your group are afraid of him/her."
+    ],
+    "prestige": [
+      "Members of your group respect and admire him/her.",
+      "Other members of your group always expect him/her to be successful.",
+      "Other members of your group do not value his/her opinion.",
+      "He/she is held in high esteem by members of the group.",
+      "His/her unique talents and abilities are recognized by others in the group.",
+      "He/she is considered an expert on some matters by other members of the group.",
+      "Other members of your group seek his/her advice on a variety of matters.",
+      "Other members of your group do not enjoy hanging out with him/her."
+    ]
+  },
+  "reverse": [
+    "dominance_5",
+    "dominance_7",
+    "prestige_3",
+    "prestige_8"
+  ],
+  "expects": {
+    "dominance": [
+      "D",
+      "P"
+    ],
+    "prestige": [
+      "P",
+      "D"
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 17",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person tends to approach daily life with a mix of originality and strict self-discipline, often generating inventive ideas while carefully organizing every step in advance. They are usually energetic and socially bold, speaking up readily and moving conversations forward, but they may also watch others closely and question hidden motives. When facing moral dilemmas, they are likely to analyze the details thoroughly, compare competing principles, and then choose the option that best protects their own goals and standards, even if it creates friction. In group discussions, their speech is animated and direct, often confident and detailed, though stress can make them tense, argumentative, or overly focused on possible problems.",
+      "big_five": {
+        "openness": "high",
+        "conscientiousness": "high",
+        "extraversion": "high",
+        "agreeableness": "low",
+        "neuroticism": "high"
+      }
+    }
+  },
+  "persona_id": "N14"
+}

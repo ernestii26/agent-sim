@@ -20,7 +20,11 @@ python3 test_core.py                  # fast self-check, no API calls
 
 ```bash
 python3 run.py list                                        # studies + conditions
-python3 run.py validate      pd_matched                    # do agents ever stay silent?
+python3 run.py validate      ffni_mediation                # do agents ever stay silent?
+python3 run.py measure-check dp_check                      # gate (a): P/D self-report on every pair
+python3 run.py run           dp_check collaborative --runs 20
+python3 run.py run           dp_check threat --runs 20
+python3 run.py style-check   dp_check                      # gate (b): must pass before ffni_mediation
 python3 run.py measure-check ffni_mediation                # is the rating scale usable at all?
 python3 run.py run           ffni_mediation collaborative
 python3 run.py run           ffni_mediation threat --runs 20 --rounds 3
@@ -48,58 +52,44 @@ a summary JSON and chart (tracked).
 
 ## Adding a study
 
-Create `studies/<name>/` with two files:
-
-**`study.json`** — the whole design.
+Create `studies/<name>/study.json` — the whole design.
 
 ```jsonc
 {
   "title": "...",
   "groups": {
-    "A": {"label": "Prestige",  "ids": ["A1", "A2"], "sample": 1},   // 1 drawn per run
-    "N": {"label": "Neutral",   "ids": ["N1", "N2"], "sample": null} // all, every run
+    "P": {"label": "Prestige",  "ids": [], "sample": 1},                     // 1 drawn per run
+    "D": {"label": "Dominance", "ids": [], "sample": 1, "pair_with": "P"},  // same index as P
+    "N": {"label": "Neutral",   "ids": [], "sample": 3}
   },
-  "contrast": ["A", "B"],          // the two groups compared statistically
-  "vote_prompt": "Who do you most trust to lead this team?",
+  "contrast": ["P", "D"],          // the two groups compared statistically
+  "vote_prompt": "Based on what you observed, who should lead this team?",
   "instruments": ["ffni"],         // optional: files under instruments/
-  "personas_from": "other_study",  // optional: borrow personas instead of copying them
+  "personas_from": "other_study",  // optional: borrow personas instead of building them
   "conditions": {
     "collaborative": {
       "label": "Collaborative",
-      "hypothesis": "H1: A receives more votes than B",
+      "hypothesis": "H1: P receives more votes than D",
       "scenario": "The situation put to the room.",
       "friction": "[Optional background tension broadcast after the scenario.]",
-      "contrast": ["B", "A"]       // optional: flip the direction for this condition
+      "contrast": ["D", "P"]       // optional: flip the direction for this condition
     }
   }
 }
 ```
 
-Sampled groups draw from a balanced sampler — every id appears once per cycle before any repeats,
-so no persona is over-represented. `sample: null` means the whole group is in every run.
-
-**`seeds.json`** — the persona generation prompts.
-
-```jsonc
-{
-  "prompts": {"leader": "<system prompt>", "neutral": "<system prompt>"},
-  "personas": [
-    {"persona_id": "A1", "group": "A", "prompt": "leader", "temperature": 0.8,
-     "user": "Generate a persona for: ...  {existing_names}"}
-  ]
-}
-```
-
-`{existing_names}` is replaced with the names generated so far — useful for telling the model to
-avoid near-duplicates. Then:
+Then build the personas from the bank:
 
 ```bash
-python3 tools/gen_personas.py <name>     # writes studies/<name>/personas/*.agent.json
-python3 test_core.py                     # verifies study.json and seeds.json agree
+python3 tools/build_personas.py <name> --runs 40   # personas/, bank_sample.json, fills in ids
+python3 test_core.py                               # verifies study.json and personas agree
 ```
 
-`test_core.py` checks every study in `studies/` — a persona id declared in `study.json` but missing
-from `seeds.json` or from disk fails the check.
+It builds exactly one cast per run: P_i and D_i from one bank row, three neutrals from
+three more, every row a different OCEAN profile. The balanced sampler seats every id once
+per cycle, so each persona appears in exactly one run, and `run` refuses a run count past
+that cycle instead of quietly reusing people. What a persona carries, and where the P/D
+traits come from, is in the tool's docstring.
 
 ## Layout
 
@@ -117,7 +107,7 @@ from `seeds.json` or from disk fails the check.
 | `src/analysis.py` | Run records → summary dicts (`summarize_*`, `need_outcome_links`) |
 | `src/render.py` | Summary dicts → terminal tables, JSON files, charts (`render_*`, `plot_*`) |
 | `src/runtime.py` | TinyTroupe wiring and logging |
-| `tools/gen_personas.py` | Generates a study's personas from `seeds.json` |
+| `tools/build_personas.py` | Builds a study's personas from `personas_output.json` |
 | `studies/` | One directory per research theme |
 | `docs/` | Design notes, prior results, debugging log |
 
@@ -160,32 +150,28 @@ Hypothesis tests are one-sided paired t-tests over per-run values, testing
 
 ## Studies
 
-### `prestige_dominance` — superseded, kept for its write-up
+### `dp_check` — the gate before `ffni_mediation`
 
-Do prestige-type agents (influence earned through expertise) receive more peer leadership votes
-than dominance-type agents (influence claimed through authority)? Follows Henrich & Gil-White
-(2001) and Cheng et al. (2013). H1: Prestige wins in the collaborative condition. H2: Dominance
-wins under threat.
-
-**Do not run it as a current design.** `pd_matched` exists to remove the confound this study
-has: design-log section 1 measures Big Five gaps of 5.2 on agreeableness and 2.4 on extraversion
-between its hand-written P and D personas, section 3 replaced its sampler, and its groups still
-declare the 10-agent cast section 15 cut to 5, from before section 16 took the candidates out of
-the electorate. It is kept because `results/archive_prestige_dominance/` and `docs/result.md` are
-its write-up, and because it is the only study with a `seeds.json` and therefore the worked
-example `tools/gen_personas.py` operates on. Those charts predate the 2026-08 restructure and use
-the old record format, so `run.py report` cannot read them.
+Do the P and D traits make agents read as prestigious and dominant? Borrows
+`ffni_mediation`'s personas, task pools, friction and sampler seed, so run i here is run i's
+cast there. Neutrals rate the P and D they just watched on Cheng, Tracy & Henrich's (2010)
+peer-rated Dominance and Prestige scales (`dp_peer`, 16 items, one omitted as in Cheng et al.
+2013 for briefly acquainted groups); P and D also rate themselves (`dp_self`, 17 items) as a
+sanity check. Passes when, in **each** condition, D > P on dominance **and** P > D on
+prestige, paired over runs, two-sided p < .05. d_av is printed beside Ronay et al. (2023)
+Study 3's pre-test (d = 2.15 / 2.06) as a benchmark, not a threshold.
 
 ### `ffni_mediation`
 
 Adds the Fundamental Follower Needs Inventory as a **mediator** between context and endorsement,
-reusing the same 18 personas (`personas_from`). Sheng, Andrews & van Vugt (2026, *JAP* 111(6),
-768-801; `docs/2027-27008-001.pdf`) validated the FFNI and left two questions open, both of which this
-study is shaped to answer:
+on personas built from the bank, one fresh cast per run. Sheng, Andrews & van Vugt (2026, *JAP* 111(6),
+768-801; `docs/2027-27008-001.pdf`) validated the FFNI and left open the questions this study is shaped
+to answer. The full list, quoted with page numbers, is under *Research gaps* in `docs/README.md`.
+Two of them:
 
 - follower needs are *assumed* to mediate the known conflict-to-dominant-leader effect, but were
-  never measured (p.45-46)
-- would intergroup conflict strengthen the protection-to-dominance link (p.42)?
+  never measured (p. 795)
+- would intergroup conflict strengthen the protection–authoritarianism link (p. 789)?
 
 The pivot is that the paper's own results split across two psychological layers. In Study 5 the
 protection and status needs predicted **leadership prototypes** (Strength, Tyranny, Masculinity,
@@ -195,9 +181,9 @@ an authoritarian boss effective: classification and association are one process,
 evaluation is another. So this study measures both layers, and H5's dominance half is expected to
 possibly come back null — that is a result, not a bug.
 
-H1 and H2 carry over unchanged; H3 (threat raises protection/status), H4 (cognition layer), H5
-(evaluation layer), H6 (mediation) and H7 (threat moderates, narrowing the layer gap) are new.
-All seven are listed in `studies/ffni_mediation/study.json`.
+H1 and H2 carry over unchanged. New: H3 (threat raises protection), H4 (cognition layer), H5
+(evaluation layer, the observed P and D), H6 (mediation) and H7 (threat strengthens protection → D
+effectiveness). All seven are in `studies/ffni_mediation/study.json`.
 
 The FFNI is reproduced verbatim under CC BY-NC-ND 4.0 — attribution and licence travel with the
 items in `instruments/ffni.json`, and NoDerivatives means they must not be reworded, abridged, or

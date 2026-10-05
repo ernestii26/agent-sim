@@ -1,0 +1,20 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 82",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person tends to organize life with careful plans, detailed checklists, and a strong preference for getting things exactly right. They are creatively curious and enjoy exploring unusual ideas or alternative ways of doing things, but they usually do so privately or in a small, controlled circle rather than in large social settings. In moral dilemmas, they rely on their own judgment, scrutinize others' motives, and often favor choices that protect their own goals or advantage, while still applying a consistent internal standard. In group discussions, they speak sparingly, choose words precisely, and can sound firm, skeptical, and somewhat competitive, especially when they think an idea is weak or inefficient.",
+      "big_five": {
+        "openness": "high",
+        "conscientiousness": "high",
+        "extraversion": "low",
+        "agreeableness": "low",
+        "neuroticism": "medium"
+      }
+    }
+  },
+  "persona_id": "N88"
+}

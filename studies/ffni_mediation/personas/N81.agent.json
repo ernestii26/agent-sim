@@ -1,0 +1,20 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 164",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person tends to stick to familiar routines, prefers proven methods, and is cautious about adopting unfamiliar ideas. They are highly organized and detail-focused, often planning ahead carefully and following through with strong discipline. In moral dilemmas, they usually weigh rules, obligations, and practical consequences before deciding, and they may defend a familiar standard if they believe it is reliable, while still trying to remain fair. In group discussions, they speak openly and energetically, often taking up space in the conversation, but their points are usually structured and precise, with enough cooperativeness to listen yet enough firmness to state their own view.",
+      "big_five": {
+        "openness": "low",
+        "conscientiousness": "high",
+        "extraversion": "high",
+        "agreeableness": "medium",
+        "neuroticism": "medium"
+      }
+    }
+  },
+  "persona_id": "N81"
+}

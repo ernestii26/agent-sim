@@ -30,7 +30,7 @@ def load_personas(personas_dir: Path, groups: dict[str, str]) -> dict[str, Parti
     for pid, group in groups.items():
         path = personas_dir / f"{pid}.agent.json"
         if not path.exists():
-            raise SystemExit(f"Persona file not found: {path} (run tools/gen_personas.py)")
+            raise SystemExit(f"Persona file not found: {path} (run tools/build_personas.py)")
         spec = json.loads(path.read_text(encoding="utf-8"))
         agent = TinyPerson.load_specification(
             path_or_dict=spec,

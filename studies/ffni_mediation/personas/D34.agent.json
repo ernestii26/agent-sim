@@ -1,0 +1,27 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 152",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person tends to plan ahead carefully, track details closely, and maintain routines that help them feel organized and in control. They are open to some new ideas and experiences, but usually prefer changes that do not disrupt stability too much. In moral dilemmas, they weigh consequences and rules thoughtfully, but high anxiety can make them second-guess themselves and ruminate over whether they made the right choice. In group discussions, they speak in a measured way, listen well, and cooperate easily, yet they will state their opinion firmly when they believe an important point is at stake.",
+      "big_five": {
+        "openness": "medium",
+        "conscientiousness": "high",
+        "extraversion": "medium",
+        "agreeableness": "medium",
+        "neuroticism": "high"
+      },
+      "traits": [
+        "has assertively moved up the ranks into positions of leadership",
+        "prioritizes having control and authority over others",
+        "makes quick and definitive decisions, and once a decision is made it is usually final",
+        "has their own views of how tasks should be accomplished",
+        "uses reward and punishment to get people to follow their ideas"
+      ]
+    }
+  },
+  "persona_id": "D34"
+}

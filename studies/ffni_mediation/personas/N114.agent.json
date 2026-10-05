@@ -1,0 +1,20 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 65",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person tends to explore ideas independently, often keeping a few creative routines while leaving room for spontaneous adjustments. They are usually careful enough to stay on track, but they do not hesitate to revise plans when a better possibility appears. In moral dilemmas, they first test the situation against their own goals and principles, and they may question whether others are being fully honest or self-serving before committing to a choice. In group discussions, they speak sparingly but with precision, preferring concise, thoughtful comments over long exchanges, and they may sound skeptical or challenging when they disagree.",
+      "big_five": {
+        "openness": "high",
+        "conscientiousness": "medium",
+        "extraversion": "low",
+        "agreeableness": "low",
+        "neuroticism": "medium"
+      }
+    }
+  },
+  "persona_id": "N114"
+}

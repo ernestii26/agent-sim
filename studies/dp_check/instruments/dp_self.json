@@ -1,0 +1,62 @@
+{
+  "key": "dp_self",
+  "title": "Dominance and Prestige (self-report)",
+  "instructions": "Indicate the extent to which each statement accurately describes you.",
+  "scale": [
+    1,
+    7
+  ],
+  "anchors": [
+    "not at all",
+    "very much"
+  ],
+  "about": "self",
+  "targets": [
+    "P",
+    "D"
+  ],
+  "timing": [],
+  "citation": "Cheng, J. T., Tracy, J. L., & Henrich, J. (2010). Pride, personality, and the evolutionary foundations of human social status. Evolution and Human Behavior, 31, 334-347. Items from the Electronic Supplementary Material, Table 1 (docs/cheng-tracy-henrich-2010-supplement.pdf, p.7-8): the 17 items retained in the final scales (those not marked with a dagger), in table order. Response scale from the same supplement, p.2: 1 (Not at all) to 7 (Very much), 4 = Somewhat. Self-report wording: the text outside the parentheses.",
+  "license": "",
+  "note": "Manipulation check for the P/D traits (Ronay et al. 2023 Table 2, Study 3), which the source paper pre-tested with these same scales. The supplement says the final scales are also posted at ubc-emotionlab.ca; that page could not be retrieved verbatim (it blocks scripted downloads), and a paraphrase of it reads 'Members of my peer group' where Table 1 reads 'Members of my group'. Table 1 is used because it is the version that can be checked against a page. The prompt shows only the two end anchors; the published midpoint label 'Somewhat' is not shown. Sanity check only (run.py measure-check): the P/D traits were adapted from text that Ronay et al. based on these items, so a persona endorsing them shows the traits were read, not that the style shows in behaviour. Empty timing: never administered in a run, only by measure-check, so it costs nothing per run.",
+  "subscales": {
+    "dominance": [
+      "I enjoy having control over others.",
+      "I often try to get my own way regardless of what others may want.",
+      "I am willing to use aggressive tactics to get my way.",
+      "I try to control others rather than permit them to control me.",
+      "I do not have a forceful or dominant personality.",
+      "Others know it is better to let me have my way.",
+      "I do not enjoy having authority over other people.",
+      "Some people are afraid of me."
+    ],
+    "prestige": [
+      "Members of my group respect and admire me.",
+      "Members of my group do not want to be like me.",
+      "Others always expect me to be successful.",
+      "Others do not value my opinion.",
+      "I am held in high esteem by those I know.",
+      "My unique talents and abilities are recognized by others.",
+      "I am considered an expert on some matters by others.",
+      "Others seek my advice on a variety of matters.",
+      "Others do not enjoy hanging out with me."
+    ]
+  },
+  "reverse": [
+    "dominance_5",
+    "dominance_7",
+    "prestige_2",
+    "prestige_4",
+    "prestige_9"
+  ],
+  "expects": {
+    "dominance": [
+      "D",
+      "P"
+    ],
+    "prestige": [
+      "P",
+      "D"
+    ]
+  }
+}

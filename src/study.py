@@ -88,6 +88,7 @@ class Study:
     sampler_seed: int = 0
     instruments: tuple["Instrument", ...] = ()
     personas_from: str | None = None  # borrow another study's personas instead of copying them
+    votes: bool = True  # False for a study whose only output is its instruments (dp_check)
 
     @property
     def personas_dir(self) -> Path:
@@ -113,10 +114,6 @@ class Study:
     @property
     def candidate_rating(self) -> "Instrument | None":
         return self._about(ABOUT_EACH_CANDIDATE)
-
-    @property
-    def seeds_path(self) -> Path:
-        return self.directory / "seeds.json"
 
     def group_of(self, persona_id: str) -> str:
         for group in self.groups.values():
@@ -257,7 +254,7 @@ def load_study(name: str) -> Study:
     instruments = []
     for key in spec.get("instruments", []):
         inst = load_instrument(directory / "instruments" / f"{key}.json")
-        unknown_targets = set(inst.targets) - set(groups)
+        unknown_targets = (set(inst.targets) | {g for pair in inst.expects.values() for g in pair}) - set(groups)
         if unknown_targets:
             raise SystemExit(
                 f"{path}: instrument '{key}' targets unknown group(s) {sorted(unknown_targets)}"
@@ -291,4 +288,5 @@ def load_study(name: str) -> Study:
         sampler_seed=spec.get("sampler_seed", 0),
         instruments=tuple(instruments),
         personas_from=personas_from,
+        votes=spec.get("votes", True),
     )

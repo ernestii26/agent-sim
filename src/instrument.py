@@ -39,6 +39,11 @@ class Instrument:
     # many-to-many onto ILT dimensions (status reaches tyranny, masculinity AND
     # well-groomed), so a name-matching convention cannot express the hypothesis.
     predicts: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    # Item ids scored as low+high-value. Stored answers stay raw, so straight-lining still
+    # sees what the respondent actually typed.
+    reverse: frozenset[str] = frozenset()
+    # Manipulation checks only: subscale -> (group expected higher, group expected lower).
+    expects: dict[str, tuple[str, str]] = field(default_factory=dict)
 
     @property
     def items(self) -> list[tuple[str, str, str]]:
@@ -63,6 +68,10 @@ class Instrument:
         import hashlib
         blob = "\n".join(f"{i}\t{t}" for i, _, t in self.items)
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
+
+    def scored(self, item_id: str, value: float) -> float:
+        low, high = self.scale
+        return low + high - value if item_id in self.reverse else value
 
     def is_valid_rating(self, value: object) -> bool:
         low, high = self.scale
@@ -89,10 +98,12 @@ def load_instrument(path: Path) -> Instrument:
     if about not in ABOUT_KINDS:
         raise SystemExit(f"{path}: about must be one of {ABOUT_KINDS}, got '{about}'")
 
+    # An empty timing is legal: the instrument is never administered in a run, only by
+    # measure-check (dp_self — a sanity check that has no business costing calls per run).
     timing = tuple(spec.get("timing", [POST]))
     unknown = set(timing) - set(TIMINGS)
-    if unknown or not timing:
-        raise SystemExit(f"{path}: timing must be a non-empty subset of {TIMINGS}, got {timing}")
+    if unknown:
+        raise SystemExit(f"{path}: timing must be a subset of {TIMINGS}, got {timing}")
 
     anchors = tuple(spec.get("anchors", ["", ""]))
     if len(anchors) != 2:
@@ -106,6 +117,17 @@ def load_instrument(path: Path) -> Instrument:
                 f"{path}: predicts['{source}'] names subscale(s) "
                 f"{sorted(unknown_subscales)} that this instrument does not have"
             )
+
+    reverse = frozenset(spec.get("reverse", ()))
+    unknown_items = reverse - {item_id for name, items in subscales.items()
+                               for item_id in (f"{name}_{i}" for i in range(1, len(items) + 1))}
+    if unknown_items:
+        raise SystemExit(f"{path}: reverse names unknown item(s) {sorted(unknown_items)}")
+
+    expects = {k: tuple(v) for k, v in spec.get("expects", {}).items()}
+    for name, pair in expects.items():
+        if name not in subscales or len(pair) != 2:
+            raise SystemExit(f"{path}: expects['{name}'] must name a subscale and two groups")
 
     return Instrument(
         key=spec.get("key", path.stem),
@@ -121,6 +143,8 @@ def load_instrument(path: Path) -> Instrument:
         license=spec.get("license", ""),
         note=spec.get("note", ""),
         predicts=predicts,
+        reverse=reverse,
+        expects=expects,  # type: ignore[arg-type]
     )
 
 
@@ -134,7 +158,7 @@ def subscale_scores(responses: dict[str, float | None], instrument: Instrument) 
     for item_id, subscale, _ in instrument.items:
         value = responses.get(item_id)
         if instrument.is_valid_rating(value):
-            usable[subscale].append(float(value))  # type: ignore[arg-type]
+            usable[subscale].append(instrument.scored(item_id, float(value)))  # type: ignore[arg-type]
     return {
         name: (sum(vals) / len(vals) if vals else float("nan"))
         for name, vals in usable.items()

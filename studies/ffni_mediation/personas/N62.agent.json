@@ -1,0 +1,20 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 19",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person tends to balance curiosity with discipline: they eagerly explore new ideas while still organizing their plans carefully and paying close attention to details. In daily habits, they are likely to keep structured routines, prepare ahead, and seek out stimulating conversations or activities that let them engage with others. When facing moral dilemmas, they usually consider multiple perspectives, try to act fairly, and then settle on a reasoned position they can defend if necessary. In group discussions, they speak with energy and confidence, contribute ideas freely, and are usually cooperative, though they will clearly state their own view when they think it matters.",
+      "big_five": {
+        "openness": "high",
+        "conscientiousness": "high",
+        "extraversion": "high",
+        "agreeableness": "medium",
+        "neuroticism": "medium"
+      }
+    }
+  },
+  "persona_id": "N62"
+}

@@ -1,0 +1,1007 @@
+{
+  "bank": "personas_output.json",
+  "seed": 0,
+  "runs": 40,
+  "personas": [
+    {
+      "persona_id": "P1",
+      "group": "P",
+      "bank_index": 2013
+    },
+    {
+      "persona_id": "P2",
+      "group": "P",
+      "bank_index": 879
+    },
+    {
+      "persona_id": "P3",
+      "group": "P",
+      "bank_index": 1513
+    },
+    {
+      "persona_id": "P4",
+      "group": "P",
+      "bank_index": 1734
+    },
+    {
+      "persona_id": "P5",
+      "group": "P",
+      "bank_index": 1006
+    },
+    {
+      "persona_id": "P6",
+      "group": "P",
+      "bank_index": 3336
+    },
+    {
+      "persona_id": "P7",
+      "group": "P",
+      "bank_index": 2866
+    },
+    {
+      "persona_id": "P8",
+      "group": "P",
+      "bank_index": 140
+    },
+    {
+      "persona_id": "P9",
+      "group": "P",
+      "bank_index": 58
+    },
+    {
+      "persona_id": "P10",
+      "group": "P",
+      "bank_index": 946
+    },
+    {
+      "persona_id": "P11",
+      "group": "P",
+      "bank_index": 1320
+    },
+    {
+      "persona_id": "P12",
+      "group": "P",
+      "bank_index": 1374
+    },
+    {
+      "persona_id": "P13",
+      "group": "P",
+      "bank_index": 2985
+    },
+    {
+      "persona_id": "P14",
+      "group": "P",
+      "bank_index": 18
+    },
+    {
+      "persona_id": "P15",
+      "group": "P",
+      "bank_index": 902
+    },
+    {
+      "persona_id": "P16",
+      "group": "P",
+      "bank_index": 431
+    },
+    {
+      "persona_id": "P17",
+      "group": "P",
+      "bank_index": 3196
+    },
+    {
+      "persona_id": "P18",
+      "group": "P",
+      "bank_index": 172
+    },
+    {
+      "persona_id": "P19",
+      "group": "P",
+      "bank_index": 2763
+    },
+    {
+      "persona_id": "P20",
+      "group": "P",
+      "bank_index": 3101
+    },
+    {
+      "persona_id": "P21",
+      "group": "P",
+      "bank_index": 1962
+    },
+    {
+      "persona_id": "P22",
+      "group": "P",
+      "bank_index": 1485
+    },
+    {
+      "persona_id": "P23",
+      "group": "P",
+      "bank_index": 3464
+    },
+    {
+      "persona_id": "P24",
+      "group": "P",
+      "bank_index": 565
+    },
+    {
+      "persona_id": "P25",
+      "group": "P",
+      "bank_index": 1290
+    },
+    {
+      "persona_id": "P26",
+      "group": "P",
+      "bank_index": 2933
+    },
+    {
+      "persona_id": "P27",
+      "group": "P",
+      "bank_index": 771
+    },
+    {
+      "persona_id": "P28",
+      "group": "P",
+      "bank_index": 2289
+    },
+    {
+      "persona_id": "P29",
+      "group": "P",
+      "bank_index": 1471
+    },
+    {
+      "persona_id": "P30",
+      "group": "P",
+      "bank_index": 643
+    },
+    {
+      "persona_id": "P31",
+      "group": "P",
+      "bank_index": 2524
+    },
+    {
+      "persona_id": "P32",
+      "group": "P",
+      "bank_index": 3016
+    },
+    {
+      "persona_id": "P33",
+      "group": "P",
+      "bank_index": 3423
+    },
+    {
+      "persona_id": "P34",
+      "group": "P",
+      "bank_index": 2236
+    },
+    {
+      "persona_id": "P35",
+      "group": "P",
+      "bank_index": 3505
+    },
+    {
+      "persona_id": "P36",
+      "group": "P",
+      "bank_index": 2029
+    },
+    {
+      "persona_id": "P37",
+      "group": "P",
+      "bank_index": 1115
+    },
+    {
+      "persona_id": "P38",
+      "group": "P",
+      "bank_index": 36
+    },
+    {
+      "persona_id": "P39",
+      "group": "P",
+      "bank_index": 737
+    },
+    {
+      "persona_id": "P40",
+      "group": "P",
+      "bank_index": 1380
+    },
+    {
+      "persona_id": "D1",
+      "group": "D",
+      "bank_index": 2013
+    },
+    {
+      "persona_id": "D2",
+      "group": "D",
+      "bank_index": 879
+    },
+    {
+      "persona_id": "D3",
+      "group": "D",
+      "bank_index": 1513
+    },
+    {
+      "persona_id": "D4",
+      "group": "D",
+      "bank_index": 1734
+    },
+    {
+      "persona_id": "D5",
+      "group": "D",
+      "bank_index": 1006
+    },
+    {
+      "persona_id": "D6",
+      "group": "D",
+      "bank_index": 3336
+    },
+    {
+      "persona_id": "D7",
+      "group": "D",
+      "bank_index": 2866
+    },
+    {
+      "persona_id": "D8",
+      "group": "D",
+      "bank_index": 140
+    },
+    {
+      "persona_id": "D9",
+      "group": "D",
+      "bank_index": 58
+    },
+    {
+      "persona_id": "D10",
+      "group": "D",
+      "bank_index": 946
+    },
+    {
+      "persona_id": "D11",
+      "group": "D",
+      "bank_index": 1320
+    },
+    {
+      "persona_id": "D12",
+      "group": "D",
+      "bank_index": 1374
+    },
+    {
+      "persona_id": "D13",
+      "group": "D",
+      "bank_index": 2985
+    },
+    {
+      "persona_id": "D14",
+      "group": "D",
+      "bank_index": 18
+    },
+    {
+      "persona_id": "D15",
+      "group": "D",
+      "bank_index": 902
+    },
+    {
+      "persona_id": "D16",
+      "group": "D",
+      "bank_index": 431
+    },
+    {
+      "persona_id": "D17",
+      "group": "D",
+      "bank_index": 3196
+    },
+    {
+      "persona_id": "D18",
+      "group": "D",
+      "bank_index": 172
+    },
+    {
+      "persona_id": "D19",
+      "group": "D",
+      "bank_index": 2763
+    },
+    {
+      "persona_id": "D20",
+      "group": "D",
+      "bank_index": 3101
+    },
+    {
+      "persona_id": "D21",
+      "group": "D",
+      "bank_index": 1962
+    },
+    {
+      "persona_id": "D22",
+      "group": "D",
+      "bank_index": 1485
+    },
+    {
+      "persona_id": "D23",
+      "group": "D",
+      "bank_index": 3464
+    },
+    {
+      "persona_id": "D24",
+      "group": "D",
+      "bank_index": 565
+    },
+    {
+      "persona_id": "D25",
+      "group": "D",
+      "bank_index": 1290
+    },
+    {
+      "persona_id": "D26",
+      "group": "D",
+      "bank_index": 2933
+    },
+    {
+      "persona_id": "D27",
+      "group": "D",
+      "bank_index": 771
+    },
+    {
+      "persona_id": "D28",
+      "group": "D",
+      "bank_index": 2289
+    },
+    {
+      "persona_id": "D29",
+      "group": "D",
+      "bank_index": 1471
+    },
+    {
+      "persona_id": "D30",
+      "group": "D",
+      "bank_index": 643
+    },
+    {
+      "persona_id": "D31",
+      "group": "D",
+      "bank_index": 2524
+    },
+    {
+      "persona_id": "D32",
+      "group": "D",
+      "bank_index": 3016
+    },
+    {
+      "persona_id": "D33",
+      "group": "D",
+      "bank_index": 3423
+    },
+    {
+      "persona_id": "D34",
+      "group": "D",
+      "bank_index": 2236
+    },
+    {
+      "persona_id": "D35",
+      "group": "D",
+      "bank_index": 3505
+    },
+    {
+      "persona_id": "D36",
+      "group": "D",
+      "bank_index": 2029
+    },
+    {
+      "persona_id": "D37",
+      "group": "D",
+      "bank_index": 1115
+    },
+    {
+      "persona_id": "D38",
+      "group": "D",
+      "bank_index": 36
+    },
+    {
+      "persona_id": "D39",
+      "group": "D",
+      "bank_index": 737
+    },
+    {
+      "persona_id": "D40",
+      "group": "D",
+      "bank_index": 1380
+    },
+    {
+      "persona_id": "N1",
+      "group": "N",
+      "bank_index": 938
+    },
+    {
+      "persona_id": "N2",
+      "group": "N",
+      "bank_index": 307
+    },
+    {
+      "persona_id": "N3",
+      "group": "N",
+      "bank_index": 3030
+    },
+    {
+      "persona_id": "N4",
+      "group": "N",
+      "bank_index": 579
+    },
+    {
+      "persona_id": "N5",
+      "group": "N",
+      "bank_index": 2386
+    },
+    {
+      "persona_id": "N6",
+      "group": "N",
+      "bank_index": 2621
+    },
+    {
+      "persona_id": "N7",
+      "group": "N",
+      "bank_index": 756
+    },
+    {
+      "persona_id": "N8",
+      "group": "N",
+      "bank_index": 1623
+    },
+    {
+      "persona_id": "N9",
+      "group": "N",
+      "bank_index": 289
+    },
+    {
+      "persona_id": "N10",
+      "group": "N",
+      "bank_index": 185
+    },
+    {
+      "persona_id": "N11",
+      "group": "N",
+      "bank_index": 1874
+    },
+    {
+      "persona_id": "N12",
+      "group": "N",
+      "bank_index": 3326
+    },
+    {
+      "persona_id": "N13",
+      "group": "N",
+      "bank_index": 697
+    },
+    {
+      "persona_id": "N14",
+      "group": "N",
+      "bank_index": 3553
+    },
+    {
+      "persona_id": "N15",
+      "group": "N",
+      "bank_index": 3404
+    },
+    {
+      "persona_id": "N16",
+      "group": "N",
+      "bank_index": 2174
+    },
+    {
+      "persona_id": "N17",
+      "group": "N",
+      "bank_index": 984
+    },
+    {
+      "persona_id": "N18",
+      "group": "N",
+      "bank_index": 2252
+    },
+    {
+      "persona_id": "N19",
+      "group": "N",
+      "bank_index": 2156
+    },
+    {
+      "persona_id": "N20",
+      "group": "N",
+      "bank_index": 595
+    },
+    {
+      "persona_id": "N21",
+      "group": "N",
+      "bank_index": 3633
+    },
+    {
+      "persona_id": "N22",
+      "group": "N",
+      "bank_index": 1317
+    },
+    {
+      "persona_id": "N23",
+      "group": "N",
+      "bank_index": 255
+    },
+    {
+      "persona_id": "N24",
+      "group": "N",
+      "bank_index": 1092
+    },
+    {
+      "persona_id": "N25",
+      "group": "N",
+      "bank_index": 3175
+    },
+    {
+      "persona_id": "N26",
+      "group": "N",
+      "bank_index": 1187
+    },
+    {
+      "persona_id": "N27",
+      "group": "N",
+      "bank_index": 3298
+    },
+    {
+      "persona_id": "N28",
+      "group": "N",
+      "bank_index": 2597
+    },
+    {
+      "persona_id": "N29",
+      "group": "N",
+      "bank_index": 500
+    },
+    {
+      "persona_id": "N30",
+      "group": "N",
+      "bank_index": 3218
+    },
+    {
+      "persona_id": "N31",
+      "group": "N",
+      "bank_index": 3154
+    },
+    {
+      "persona_id": "N32",
+      "group": "N",
+      "bank_index": 2551
+    },
+    {
+      "persona_id": "N33",
+      "group": "N",
+      "bank_index": 684
+    },
+    {
+      "persona_id": "N34",
+      "group": "N",
+      "bank_index": 359
+    },
+    {
+      "persona_id": "N35",
+      "group": "N",
+      "bank_index": 2227
+    },
+    {
+      "persona_id": "N36",
+      "group": "N",
+      "bank_index": 3490
+    },
+    {
+      "persona_id": "N37",
+      "group": "N",
+      "bank_index": 1202
+    },
+    {
+      "persona_id": "N38",
+      "group": "N",
+      "bank_index": 1845
+    },
+    {
+      "persona_id": "N39",
+      "group": "N",
+      "bank_index": 67
+    },
+    {
+      "persona_id": "N40",
+      "group": "N",
+      "bank_index": 2830
+    },
+    {
+      "persona_id": "N41",
+      "group": "N",
+      "bank_index": 1641
+    },
+    {
+      "persona_id": "N42",
+      "group": "N",
+      "bank_index": 1544
+    },
+    {
+      "persona_id": "N43",
+      "group": "N",
+      "bank_index": 3084
+    },
+    {
+      "persona_id": "N44",
+      "group": "N",
+      "bank_index": 2713
+    },
+    {
+      "persona_id": "N45",
+      "group": "N",
+      "bank_index": 1583
+    },
+    {
+      "persona_id": "N46",
+      "group": "N",
+      "bank_index": 2099
+    },
+    {
+      "persona_id": "N47",
+      "group": "N",
+      "bank_index": 709
+    },
+    {
+      "persona_id": "N48",
+      "group": "N",
+      "bank_index": 1555
+    },
+    {
+      "persona_id": "N49",
+      "group": "N",
+      "bank_index": 1430
+    },
+    {
+      "persona_id": "N50",
+      "group": "N",
+      "bank_index": 1926
+    },
+    {
+      "persona_id": "N51",
+      "group": "N",
+      "bank_index": 493
+    },
+    {
+      "persona_id": "N52",
+      "group": "N",
+      "bank_index": 3070
+    },
+    {
+      "persona_id": "N53",
+      "group": "N",
+      "bank_index": 1834
+    },
+    {
+      "persona_id": "N54",
+      "group": "N",
+      "bank_index": 2372
+    },
+    {
+      "persona_id": "N55",
+      "group": "N",
+      "bank_index": 1808
+    },
+    {
+      "persona_id": "N56",
+      "group": "N",
+      "bank_index": 2306
+    },
+    {
+      "persona_id": "N57",
+      "group": "N",
+      "bank_index": 2115
+    },
+    {
+      "persona_id": "N58",
+      "group": "N",
+      "bank_index": 2197
+    },
+    {
+      "persona_id": "N59",
+      "group": "N",
+      "bank_index": 2681
+    },
+    {
+      "persona_id": "N60",
+      "group": "N",
+      "bank_index": 1396
+    },
+    {
+      "persona_id": "N61",
+      "group": "N",
+      "bank_index": 530
+    },
+    {
+      "persona_id": "N62",
+      "group": "N",
+      "bank_index": 3581
+    },
+    {
+      "persona_id": "N63",
+      "group": "N",
+      "bank_index": 1515
+    },
+    {
+      "persona_id": "N64",
+      "group": "N",
+      "bank_index": 8
+    },
+    {
+      "persona_id": "N65",
+      "group": "N",
+      "bank_index": 3304
+    },
+    {
+      "persona_id": "N66",
+      "group": "N",
+      "bank_index": 3377
+    },
+    {
+      "persona_id": "N67",
+      "group": "N",
+      "bank_index": 2778
+    },
+    {
+      "persona_id": "N68",
+      "group": "N",
+      "bank_index": 2547
+    },
+    {
+      "persona_id": "N69",
+      "group": "N",
+      "bank_index": 3367
+    },
+    {
+      "persona_id": "N70",
+      "group": "N",
+      "bank_index": 2315
+    },
+    {
+      "persona_id": "N71",
+      "group": "N",
+      "bank_index": 1044
+    },
+    {
+      "persona_id": "N72",
+      "group": "N",
+      "bank_index": 2884
+    },
+    {
+      "persona_id": "N73",
+      "group": "N",
+      "bank_index": 3190
+    },
+    {
+      "persona_id": "N74",
+      "group": "N",
+      "bank_index": 1715
+    },
+    {
+      "persona_id": "N75",
+      "group": "N",
+      "bank_index": 1764
+    },
+    {
+      "persona_id": "N76",
+      "group": "N",
+      "bank_index": 164
+    },
+    {
+      "persona_id": "N77",
+      "group": "N",
+      "bank_index": 3145
+    },
+    {
+      "persona_id": "N78",
+      "group": "N",
+      "bank_index": 2968
+    },
+    {
+      "persona_id": "N79",
+      "group": "N",
+      "bank_index": 1284
+    },
+    {
+      "persona_id": "N80",
+      "group": "N",
+      "bank_index": 1172
+    },
+    {
+      "persona_id": "N81",
+      "group": "N",
+      "bank_index": 1151
+    },
+    {
+      "persona_id": "N82",
+      "group": "N",
+      "bank_index": 124
+    },
+    {
+      "persona_id": "N83",
+      "group": "N",
+      "bank_index": 1056
+    },
+    {
+      "persona_id": "N84",
+      "group": "N",
+      "bank_index": 2696
+    },
+    {
+      "persona_id": "N85",
+      "group": "N",
+      "bank_index": 1791
+    },
+    {
+      "persona_id": "N86",
+      "group": "N",
+      "bank_index": 2458
+    },
+    {
+      "persona_id": "N87",
+      "group": "N",
+      "bank_index": 3055
+    },
+    {
+      "persona_id": "N88",
+      "group": "N",
+      "bank_index": 3256
+    },
+    {
+      "persona_id": "N89",
+      "group": "N",
+      "bank_index": 2070
+    },
+    {
+      "persona_id": "N90",
+      "group": "N",
+      "bank_index": 3009
+    },
+    {
+      "persona_id": "N91",
+      "group": "N",
+      "bank_index": 1668
+    },
+    {
+      "persona_id": "N92",
+      "group": "N",
+      "bank_index": 2516
+    },
+    {
+      "persona_id": "N93",
+      "group": "N",
+      "bank_index": 395
+    },
+    {
+      "persona_id": "N94",
+      "group": "N",
+      "bank_index": 1892
+    },
+    {
+      "persona_id": "N95",
+      "group": "N",
+      "bank_index": 618
+    },
+    {
+      "persona_id": "N96",
+      "group": "N",
+      "bank_index": 3618
+    },
+    {
+      "persona_id": "N97",
+      "group": "N",
+      "bank_index": 850
+    },
+    {
+      "persona_id": "N98",
+      "group": "N",
+      "bank_index": 2752
+    },
+    {
+      "persona_id": "N99",
+      "group": "N",
+      "bank_index": 321
+    },
+    {
+      "persona_id": "N100",
+      "group": "N",
+      "bank_index": 1226
+    },
+    {
+      "persona_id": "N101",
+      "group": "N",
+      "bank_index": 2804
+    },
+    {
+      "persona_id": "N102",
+      "group": "N",
+      "bank_index": 730
+    },
+    {
+      "persona_id": "N103",
+      "group": "N",
+      "bank_index": 3414
+    },
+    {
+      "persona_id": "N104",
+      "group": "N",
+      "bank_index": 1258
+    },
+    {
+      "persona_id": "N105",
+      "group": "N",
+      "bank_index": 3231
+    },
+    {
+      "persona_id": "N106",
+      "group": "N",
+      "bank_index": 3555
+    },
+    {
+      "persona_id": "N107",
+      "group": "N",
+      "bank_index": 3276
+    },
+    {
+      "persona_id": "N108",
+      "group": "N",
+      "bank_index": 1453
+    },
+    {
+      "persona_id": "N109",
+      "group": "N",
+      "bank_index": 1571
+    },
+    {
+      "persona_id": "N110",
+      "group": "N",
+      "bank_index": 1464
+    },
+    {
+      "persona_id": "N111",
+      "group": "N",
+      "bank_index": 3531
+    },
+    {
+      "persona_id": "N112",
+      "group": "N",
+      "bank_index": 462
+    },
+    {
+      "persona_id": "N113",
+      "group": "N",
+      "bank_index": 445
+    },
+    {
+      "persona_id": "N114",
+      "group": "N",
+      "bank_index": 2861
+    },
+    {
+      "persona_id": "N115",
+      "group": "N",
+      "bank_index": 2415
+    },
+    {
+      "persona_id": "N116",
+      "group": "N",
+      "bank_index": 1157
+    },
+    {
+      "persona_id": "N117",
+      "group": "N",
+      "bank_index": 202
+    },
+    {
+      "persona_id": "N118",
+      "group": "N",
+      "bank_index": 1606
+    },
+    {
+      "persona_id": "N119",
+      "group": "N",
+      "bank_index": 1594
+    },
+    {
+      "persona_id": "N120",
+      "group": "N",
+      "bank_index": 1691
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 159",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person tends to rely on familiar routines, standard methods, and well-tested procedures, and may resist unfamiliar ideas until they have been carefully vetted. They are highly organized and meticulous, often planning ahead in detail, checking for errors, and maintaining strict personal standards. In moral dilemmas, they usually analyze the situation carefully but may become anxious, suspicious of others’ intentions, and inclined to protect their own interests if they feel uncertain or pressured. In group discussions, they speak readily and energetically, but their comments can be forceful, competitive, and critical, with a tendency to question assumptions and revisit concerns repeatedly when stressed.",
+      "big_five": {
+        "openness": "low",
+        "conscientiousness": "high",
+        "extraversion": "high",
+        "agreeableness": "low",
+        "neuroticism": "high"
+      },
+      "traits": [
+        "has assertively moved up the ranks into positions of leadership",
+        "prioritizes having control and authority over others",
+        "makes quick and definitive decisions, and once a decision is made it is usually final",
+        "has their own views of how tasks should be accomplished",
+        "uses reward and punishment to get people to follow their ideas"
+      ]
+    }
+  },
+  "persona_id": "D37"
+}

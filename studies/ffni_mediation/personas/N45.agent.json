@@ -1,0 +1,20 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 93",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person is outgoing, energetic, and socially confident, so they often start conversations easily, speak freely in groups, and keep the atmosphere lively. They are usually flexible and spontaneous in daily habits, but their low conscientiousness can show up as disorganization, missed details, or difficulty sticking to plans. In moral dilemmas, they tend to look for a compassionate, practical compromise that protects relationships and reduces conflict rather than taking a rigid stance. Because they are emotionally stable, they usually stay calm under pressure and discuss disagreements in a warm, cooperative, and tactful way.",
+      "big_five": {
+        "openness": "medium",
+        "conscientiousness": "low",
+        "extraversion": "high",
+        "agreeableness": "high",
+        "neuroticism": "low"
+      }
+    }
+  },
+  "persona_id": "N45"
+}

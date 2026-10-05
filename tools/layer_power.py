@@ -77,8 +77,8 @@ def make_run(run_no: int, condition: str, rng: random.Random, *, lift: float,
         "run_no": run_no, "condition": condition,
         "members": {"P": ["P1"], "D": ["D1"], "N": neutrals},
         "transcript": [], "votes": votes,
-        "measures": {"baseline": {"ffni": baseline, "leader_ideal": proto_base},
-                     "post": {"ffni": post, "leader_ideal": proto_post,
+        "measures": {"baseline": {"ffni": baseline, "ilt": proto_base},
+                     "post": {"ffni": post, "ilt": proto_post,
                               "effectiveness": effect}},
     })
 

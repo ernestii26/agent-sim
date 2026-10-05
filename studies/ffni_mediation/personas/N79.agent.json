@@ -1,0 +1,20 @@
+{
+  "type": "TinyPerson",
+  "persona": {
+    "name": "Participant 99",
+    "age": "not specified",
+    "nationality": "not specified",
+    "occupation": "not specified",
+    "personality": {
+      "description": "This person tends to keep a loose, flexible routine, often acting on the moment and adapting plans as circumstances change, though they may leave tasks unfinished or forget details. They are open to new ideas when those ideas seem practical, but they still prefer a sense of stability and familiar habits overall. When facing a moral dilemma, they usually try to be fair and considerate, but if a value feels important to them, they will quietly stand their ground rather than go along with the group. In group discussions, they speak in a restrained, measured way, usually listening more than talking, and they become more direct only when they feel a point truly needs to be made.",
+      "big_five": {
+        "openness": "medium",
+        "conscientiousness": "low",
+        "extraversion": "low",
+        "agreeableness": "medium",
+        "neuroticism": "medium"
+      }
+    }
+  },
+  "persona_id": "N79"
+}

@@ -9,7 +9,7 @@ import math
 import random
 from typing import Any
 
-from instrument import BASELINE, POST, Instrument
+from instrument import BASELINE, POST, Instrument, subscale_scores
 from run_record import RunRecord
 from stats import (
     cronbach_alpha, icc_one_way, mean, paired_ttest_onesided, partial_betas,
@@ -150,6 +150,89 @@ def summarize_contrast(
 # Instrument summaries — needs, prototypes, effectiveness, mediation           #
 # --------------------------------------------------------------------------- #
 
+def expected_contrast(
+    units: list[dict[str, dict[str, float]]], instrument: Instrument
+) -> dict[str, Any]:
+    """Is each subscale higher in the group `instrument.expects` says it should be?
+
+    A unit is one matched comparison, {group: {subscale: score}} — one run's D and P as
+    rated by the same neutrals, or one bank row's D and P rating themselves. Paired
+    t-test, two-sided, because a manipulation check is judged the way the source paper
+    judged its own (Ronay et al. 2023 report two-sided t-tests). d_av divides by the mean
+    of the two SDs, so it sits on the same scale as their between-subjects d instead of
+    being inflated by the pairing.
+    """
+    results: dict[str, Any] = {}
+    for name, (high, low) in instrument.expects.items():
+        pairs = [(u[high][name], u[low][name]) for u in units
+                 if high in u and low in u
+                 and not (math.isnan(u[high][name]) or math.isnan(u[low][name]))]
+        a, b = [x for x, _ in pairs], [y for _, y in pairs]
+        t, p_one = paired_ttest_onesided(a, b)
+        p = p_one if math.isnan(p_one) else 2 * min(p_one, 1 - p_one)
+        sd_av = (std(a) + std(b)) / 2
+        diff = mean(a) - mean(b)
+        results[name] = {
+            "higher": high, "lower": low, "n": len(pairs),
+            "mean_higher": mean(a), "mean_lower": mean(b),
+            "t": t, "p_two_sided": p,
+            "d_av": diff / sd_av if sd_av else float("nan"),
+            "passed": diff > 0 and not math.isnan(p) and p < 0.05,
+        }
+    return {"subscales": results,
+            "passed": bool(results) and all(r["passed"] for r in results.values())}
+
+
+def summarize_style_check(
+    study: Study, by_condition: dict[str, list[RunRecord]], instrument: Instrument
+) -> dict[str, Any]:
+    """The P/D manipulation check, judged in every condition separately.
+
+    Each target's score is the mean over the neutrals who rated it; a run is one unit.
+    Pooling the conditions would let a strong one carry a weak one, and both conditions
+    were run precisely to see whether the manipulation holds in each.
+    """
+    out: dict[str, Any] = {"study": study.name, "instrument": instrument.key, "conditions": {}}
+    for key, records in by_condition.items():
+        units, cells = [], {name: [] for name in instrument.expects}
+        for record in records:
+            by_target: dict[str, dict[str, list[float]]] = {}
+            for by_rated in record.responses(POST, instrument).values():
+                for target, answers in by_rated.items():
+                    for name, value in subscale_scores(answers, instrument).items():
+                        by_target.setdefault(target, {}).setdefault(name, []).append(value)
+            unit = {}
+            for group in {g for pair in instrument.expects.values() for g in pair}:
+                for pid in record.members(group):
+                    if pid in by_target:
+                        unit[group] = {n: mean(v) for n, v in by_target[pid].items()}
+                        for name in cells:
+                            rated = [v for v in by_target[pid].get(name, []) if not math.isnan(v)]
+                            if len(rated) > 1:
+                                cells[name].append(rated)
+            units.append(unit)
+        result = expected_contrast(units, instrument)
+        for name, rated in cells.items():
+            result["subscales"][name]["icc_single"] = icc_one_way(rated)[0]
+        out["conditions"][key] = result
+    out["passed"] = bool(by_condition) and all(c["passed"] for c in out["conditions"].values())
+    return out
+
+
+def self_style_check(study: Study, record: RunRecord, instrument: Instrument) -> dict[str, Any]:
+    """The same comparison on self-report: P_i against D_i, the pair built from one row."""
+    scores = record.needs(BASELINE, instrument)
+    units = []
+    for group in study.groups.values():
+        if group.pair_with is None:
+            continue
+        source = study.groups[group.pair_with]
+        for a, b in zip(group.ids, source.ids):
+            if a in scores and b in scores:
+                units.append({group.key: scores[a], source.key: scores[b]})
+    return expected_contrast(units, instrument)
+
+
 def straight_lining(record: RunRecord, timing: str, instrument: Instrument) -> float:
     """Share of respondents who gave the same rating to every item. High = dead instrument."""
     flat = 0
@@ -199,9 +282,11 @@ def summarize_needs(
     for record in records:
         for answers in record.responses(BASELINE, instrument).values():
             for name, texts in instrument.subscales.items():
-                row = [answers.get(f"{name}_{i}") for i in range(1, len(texts) + 1)]
+                ids = [f"{name}_{i}" for i in range(1, len(texts) + 1)]
+                row = [answers.get(i) for i in ids]
                 if all(v is not None for v in row):
-                    alpha_rows[name].append([float(v) for v in row])  # type: ignore[arg-type]
+                    alpha_rows[name].append([instrument.scored(i, float(v))  # type: ignore[arg-type]
+                                             for i, v in zip(ids, row)])
 
     return {
         "study": study.name,
