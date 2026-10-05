@@ -180,11 +180,14 @@ def render_layers(study: Study, links: dict[str, Any]) -> None:
     print("=" * 88)
 
 
-def render_prototype_by_dimension(study: Study, out: dict[str, Any]) -> None:
-    """H4 laid out the way the source paper reports it — one row per dimension per need."""
+def render_prototype_by_dimension(study: Study, out: dict[str, Any], heading: str | None = None) -> None:
+    """H4 laid out the way the source paper reports it — one row per dimension per need.
+
+    Also used for the style descriptions (H5b, H7b), whose `predicts` is Table 3's pairs.
+    """
     print()
     print("=" * 88)
-    print(f"COGNITION LAYER BY DIMENSION — the shape of Sheng et al. Table 13 ({out['timing']})")
+    print(heading or f"COGNITION LAYER BY DIMENSION — the shape of Sheng et al. Table 13 ({out['timing']})")
     print("=" * 88)
     print("  One regression per prototype dimension on all six needs. Only the cells the")
     print("  paper gives a significant increment are shown; `predicts` is that list.")

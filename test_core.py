@@ -20,7 +20,7 @@ sys.path.insert(0, str(PROJECT_DIR / "src"))
 
 from analysis import (  # noqa: E402
     group_metrics, need_outcome_links, persona_metrics, straight_lining, summarize_contrast,
-    prototype_by_dimension, summarize_layer_moderation, summarize_mediation,
+    prototype_by_dimension, style_link_by_condition, summarize_layer_moderation, summarize_mediation,
     summarize_needs, summarize_validation, weak_subscales,
 )
 from discussion import (  # noqa: E402
@@ -1377,6 +1377,42 @@ def test_style_check_must_pass_both_directions_in_every_condition() -> None:
     assert bad["conditions"]["a"]["passed"] and not bad["conditions"]["b"]["passed"]
     assert bad["conditions"]["b"]["subscales"]["dominance"]["passed"]
     assert not bad["passed"], "a weak condition must not hide behind a strong one"
+
+
+def test_h7b_finds_a_link_that_grows_under_threat_and_not_one_that_does_not() -> None:
+    """H7b is decided by its interval. Protection drives authoritarianism ratings under
+    threat only, so the threat-minus-routine beta must clear zero; for safety, which
+    nothing drives, the interval must contain it."""
+    study = load_study("ffni_mediation")
+    needs, styles = study.self_report, study.descriptions
+    rng = random.Random(5)
+
+    def run(run_no: int, condition: str, slope: float) -> RunRecord:
+        ffni, rated = {}, {}
+        for k in range(3):
+            pid = f"N{run_no}_{k}"
+            level = {n: rng.uniform(2, 6) for n in needs.subscales}
+            ffni[pid] = {f"{n}_{i}": level[n] for n in needs.subscales
+                         for i in range(1, len(needs.subscales[n]) + 1)}
+            auth = 4 + slope * (level["protection"] - 4) + rng.gauss(0, 0.5)
+            rated[pid] = {f"{s}_{i}": (auth if s == "authoritarianism" else rng.uniform(2, 6))
+                          for s in styles.subscales
+                          for i in range(1, len(styles.subscales[s]) + 1)}
+        return RunRecord.from_dict({
+            "run_no": run_no, "condition": condition,
+            "members": {"P": ["P1"], "D": ["D1"], "N": list(ffni)},
+            "transcript": [], "votes": [],
+            "measures": {"post": {"ffni": ffni, "effectiveness_styles": rated}},
+        })
+
+    by_condition = {"collaborative": [run(i, "collaborative", 0.0) for i in range(1, 21)],
+                    "threat": [run(i, "threat", 0.8) for i in range(1, 21)]}
+    grows = style_link_by_condition(by_condition, needs, styles, bootstrap=200)
+    assert grows["beta"]["threat"] > 0.5 > abs(grows["beta"]["collaborative"]), grows
+    assert grows["ci95"][0] > 0, grows
+
+    flat = style_link_by_condition(by_condition, needs, styles, style="safety", bootstrap=200)
+    assert flat["ci95"][0] < 0 < flat["ci95"][1], flat
 
 
 def test_a_borrowing_study_seats_the_same_casts_as_its_lender() -> None:

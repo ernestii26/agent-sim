@@ -9,11 +9,12 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
-# Who the rating is about. Drives prompt shape only; parsing is identical for all three.
+# Who the rating is about. Drives prompt shape only; parsing is identical for all kinds.
 ABOUT_SELF = "self"                      # self-report (FFNI: "I need a leader who...")
 ABOUT_PROTOTYPE = "prototype"            # the generic leader concept, no target (ILT)
+ABOUT_DESCRIPTION = "description"        # written descriptions of hypothetical leaders (Sheng 5c)
 ABOUT_EACH_CANDIDATE = "each_candidate"  # one administration per other participant
-ABOUT_KINDS = (ABOUT_SELF, ABOUT_PROTOTYPE, ABOUT_EACH_CANDIDATE)
+ABOUT_KINDS = (ABOUT_SELF, ABOUT_PROTOTYPE, ABOUT_DESCRIPTION, ABOUT_EACH_CANDIDATE)
 
 BASELINE = "baseline"  # before the scenario is broadcast
 POST = "post"          # after the discussion

@@ -182,8 +182,9 @@ evaluation is another. So this study measures both layers, and H5's dominance ha
 possibly come back null — that is a result, not a bug.
 
 H1 and H2 carry over unchanged. New: H3 (threat raises protection), H4 (cognition layer), H5
-(evaluation layer, the observed P and D), H6 (mediation) and H7 (threat strengthens protection → D
-effectiveness). All seven are in `studies/ffni_mediation/study.json`.
+(evaluation layer, the observed P and D), H5b (evaluation layer, the paper's 57 descriptions), H6
+(mediation), H7 (threat strengthens protection → D effectiveness) and H7b (the same for
+authoritarianism, p. 789's own wording). All nine are in `studies/ffni_mediation/study.json`.
 
 The FFNI is reproduced verbatim under CC BY-NC-ND 4.0 — attribution and licence travel with the
 items in `instruments/ffni.json`, and NoDerivatives means they must not be reworded, abridged, or

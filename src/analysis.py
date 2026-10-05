@@ -451,6 +451,63 @@ def rater_agreement(records: list[RunRecord], instrument: Instrument) -> dict[st
     }
 
 
+def style_link_by_condition(
+    by_condition: dict[str, list[RunRecord]],
+    needs: Instrument,
+    styles: Instrument,
+    *,
+    need: str = "protection",
+    style: str = "authoritarianism",
+    timing: str = POST,
+    bootstrap: int = 1000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """H7b: does `need` -> effectiveness of `style` grow under threat?
+
+    The paper's p.789 question in its own terms: one beta per condition from a six-need
+    fit (Table 3's Model 2), and their difference with a run-level bootstrap interval.
+    Each condition is fitted on its own, so no centring is needed.
+    """
+    names = list(needs.subscales)
+    at = names.index(need)
+
+    def rows(records: list[RunRecord]) -> list[list[tuple[list[float], float]]]:
+        out = []
+        for record in records:
+            have, rated = record.needs(timing, needs), record.needs(timing, styles)
+            out.append([([scores.get(n, float("nan")) for n in names],
+                         rated.get(pid, {}).get(style, float("nan")))
+                        for pid, scores in have.items()])
+        return out
+
+    def beta(runs: list[list[tuple[list[float], float]]]) -> float:
+        flat = [r for run in runs for r in run]
+        betas, _, _, _ = partial_betas([x for x, _ in flat], [y for _, y in flat],
+                                       with_deltas=False)
+        return betas[at] if betas else float("nan")
+
+    per = {key: rows(records) for key, records in by_condition.items()}
+    keys = sorted(per)
+    if len(keys) != 2:
+        raise SystemExit(f"H7b needs exactly two conditions, got {keys}")
+    low, high = keys
+    point = {key: beta(per[key]) for key in keys}
+
+    rng = random.Random(seed)
+    diffs = []
+    for _ in range(bootstrap):
+        draw = {key: beta([rng.choice(per[key]) for _ in per[key]]) for key in keys}
+        d = draw[high] - draw[low]
+        if not math.isnan(d):
+            diffs.append(d)
+    diffs.sort()
+    ci = ([diffs[int(0.025 * len(diffs))], diffs[int(0.975 * len(diffs)) - 1]]
+          if len(diffs) >= 20 else [float("nan"), float("nan")])
+    return {"need": need, "style": style, "timing": timing, "beta": point,
+            "difference": point[high] - point[low], "ci95": ci,
+            "conditions": {"low": low, "high": high}, "bootstrap_draws": len(diffs)}
+
+
 def need_outcome_links(
     study: Study,
     records: list[RunRecord],

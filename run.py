@@ -26,13 +26,14 @@ os.chdir(_PROJECT_DIR)  # TinyTroupe reads config.ini from the CWD
 
 from analysis import (  # noqa: E402
     need_outcome_links, prototype_by_dimension, rater_agreement, self_style_check,
+    style_link_by_condition,
     summarize_contrast, summarize_style_check,
     summarize_layer_moderation,
     summarize_measure_check, summarize_mediation, summarize_needs,
     summarize_task_performance, summarize_validation,
 )
 from config import RunConfig  # noqa: E402
-from instrument import BASELINE  # noqa: E402
+from instrument import BASELINE, POST  # noqa: E402
 from pipeline import load_records, run_condition, run_measure_check  # noqa: E402
 from render import (  # noqa: E402
     plot_contrast, render_contrast, render_layer_moderation, render_layers,
@@ -195,13 +196,14 @@ def _report(study: Study, condition, records: list, out: Path,
 def cmd_measure_check(args: argparse.Namespace) -> None:
     """Are the instruments usable on these agents, before a full study is paid for?
 
-    Covers every instrument that can be answered without a meeting: the self-report and
-    the leader prototype. An each_candidate instrument is excluded because it asks about
+    Covers every instrument that can be answered without a meeting: the self-report, the
+    leader prototype and the style descriptions. An each_candidate instrument is excluded because it asks about
     a person the respondent has just observed, and here nobody has observed anyone.
     """
     config = RunConfig.from_ini(_PROJECT_DIR / "config.ini")
     study = load_study(args.study)
-    checkable = tuple(i for i in (study.self_report, study.prototype) if i is not None)
+    checkable = tuple(i for i in (study.self_report, study.prototype, study.descriptions)
+                      if i is not None)
     if not checkable:
         raise SystemExit(f"Study '{study.name}' has no instrument that can be checked.")
 
@@ -321,6 +323,27 @@ def cmd_layers(args: argparse.Namespace) -> None:
         render_prototype_by_dimension(study, by_dim)
         out["prototype_by_dimension"] = by_dim
 
+    # The paper's own effectiveness stimulus (Table 3, Model 2). Baseline, pooled: the
+    # replication, measured before anything happened. Post, per condition: H7 in the
+    # paper's words, protection -> authoritarianism under threat against routine.
+    styles = study.descriptions
+    if styles is not None:
+        pooled = [r for records in by_condition.values() for r in records]
+        by_style = {BASELINE: prototype_by_dimension(pooled, needs, styles)}
+        render_prototype_by_dimension(study, by_style[BASELINE], heading=(
+            "EVALUATION LAYER, PAPER'S STIMULUS — Sheng et al. Table 3, Model 2 (baseline, pooled)"))
+        for key, records in by_condition.items():
+            by_style[key] = prototype_by_dimension(records, needs, styles, timing=POST)
+            render_prototype_by_dimension(study, by_style[key], heading=(
+                f"EVALUATION LAYER, PAPER'S STIMULUS — post, {key} only (H7b)"))
+        out["styles_by_dimension"] = by_style
+        h7b = style_link_by_condition(by_condition, needs, styles, need=args.need)
+        lo, hi = h7b["conditions"]["low"], h7b["conditions"]["high"]
+        print(f"  H7b  {h7b['need']} -> {h7b['style']} effectiveness, beta at post: "
+              f"{lo} {h7b['beta'][lo]:.3f}, {hi} {h7b['beta'][hi]:.3f}, "
+              f"{hi} minus {lo} {h7b['difference']:.3f} "
+              f"[{h7b['ci95'][0]:.3f}, {h7b['ci95'][1]:.3f}]  ({h7b['bootstrap_draws']} draws)")
+        out["h7b"] = h7b
 
     save_summary(out, Path(config.output_dir) / study.name, "layers",
                  provenance=_provenance(config, study))

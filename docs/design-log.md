@@ -2609,3 +2609,36 @@ but "does the effect survive a much weaker open model". That question is worth a
 precisely because of findings 1 through 4: model capability decides whether the
 measurement path works at all. It just cannot be answered until the main gpt-4.1 result
 stands, because there is nothing to replicate yet.
+
+## 38. The paper's effectiveness stimulus, added beside ours (2026-10-05)
+
+Table S10.1, the item list for Study 5c that section 30 could not find, is in Sheng's
+thesis (VU Amsterdam 2026, doi 10.5463/thesis.1652, CC BY-ND, pp. 267-269). The thesis is
+image-only, so it was OCRed and checked against the page images. The 57 items are
+transcribed in `docs/sheng-2026-S10.1-effectiveness-items.md`. The 167 MB PDF is
+gitignored because it is over GitHub's file limit.
+
+What the items change:
+
+- **Authoritarianism faces outward.** All five items are toughness toward *staff of other
+  departments/divisions*. The scale behind the paper's "protection–authoritarianism"
+  question is already about an outgroup. Protection still predicts it at .01.
+- **Safety is occupational safety**: three items, α = .57. The Model 1 β of .20 was never
+  strong evidence that protection reaches the evaluation layer, and Model 2 makes it .05.
+
+`instruments/effectiveness_styles.json` administers the items with the paper's
+instruction, verbatim, at baseline and post. A new `about: "description"` kind carries
+it, using the prototype frame ("leaders in general, not anyone in this meeting"), because
+`load_study` allows one instrument per kind and `prototype` belongs to the ILT.
+`effectiveness.json` (the observed P and D) stays. The two answer different gaps: G6
+needs the observed person, and G5 needs the paper's stimulus. Two hypotheses are added:
+
+- **H5b**: Table 3, Model 2, pair by pair, at baseline. `run.py layers` prints it in
+  Table 13's layout through `prototype_by_dimension`, whose `predicts` is Table 3's
+  preregistered pairs.
+- **H7b**: protection → authoritarianism at post, threat minus routine, with a run-level
+  bootstrap CI (`analysis.style_link_by_condition`). It is decidable, not only printable.
+
+Cost: two more survey calls per neutral per run, one at baseline and one at post (57
+items each, output tokens only). measure-check now covers this instrument, so it gets an
+alpha and a retest before any run is paid for.

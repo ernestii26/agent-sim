@@ -180,5 +180,8 @@ Read on the same statistic at both levels (β with the other five needs controll
 | H3 | Threat raises protection need | G4 (manipulation) | The paper measured only stable antecedents. pp. 795-796 propose manipulating the cue |
 | H4 | Needs predict prototype dimensions (Table 13) | Positive control | Reproduces a supported result first. If it fails, the environment is the problem, not the new hypotheses |
 | H5 | Needs predict effectiveness of P and D (Table 3, Model 2) | G1, G5, G6 | Same raters, same run, observed targets. A protection-to-D null replicates G1. A non-null result would point to G5 or G6 |
+| H5b | The same needs predict effectiveness of the paper's 57 descriptions (Table 3, Model 2), at baseline | G5 | Same stimulus as the paper, same raters as the prototype layer. Separates the dominance-side scales (authoritarianism, dominance, narcissism) that H5's single rating collapses. Items: `docs/sheng-2026-S10.1-effectiveness-items.md` |
 | H6 | Protection need mediates condition → D endorsement | G3 | The paper names the gap but gives no estimator, so the estimator is ours |
 | H7 | Threat strengthens protection → D effectiveness | G2 | Extends rather than replicates: environmental threat, not intergroup conflict |
+| H7b | Threat strengthens protection → authoritarianism effectiveness (post, threat minus routine β, run-level bootstrap) | G2 | p. 789's question in its own words. The authoritarianism items target other departments, an outgroup our scenarios lack |
+

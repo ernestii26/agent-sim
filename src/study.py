@@ -10,7 +10,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from instrument import (
-    ABOUT_EACH_CANDIDATE, ABOUT_KINDS, ABOUT_PROTOTYPE, ABOUT_SELF, Instrument, load_instrument,
+    ABOUT_DESCRIPTION, ABOUT_EACH_CANDIDATE, ABOUT_KINDS, ABOUT_PROTOTYPE, ABOUT_SELF, Instrument,
+    load_instrument,
 )
 
 STUDIES_DIR = Path(__file__).resolve().parent.parent / "studies"
@@ -110,6 +111,10 @@ class Study:
     @property
     def prototype(self) -> "Instrument | None":
         return self._about(ABOUT_PROTOTYPE)
+
+    @property
+    def descriptions(self) -> "Instrument | None":
+        return self._about(ABOUT_DESCRIPTION)
 
     @property
     def candidate_rating(self) -> "Instrument | None":

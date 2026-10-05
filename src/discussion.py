@@ -11,7 +11,7 @@ from itertools import count
 from typing import Any
 
 from config import ModelSettings
-from instrument import ABOUT_EACH_CANDIDATE, ABOUT_PROTOTYPE, ABOUT_SELF, Instrument
+from instrument import ABOUT_DESCRIPTION, ABOUT_EACH_CANDIDATE, ABOUT_PROTOTYPE, ABOUT_SELF, Instrument
 from persona_store import Participant
 from study import Task
 from runtime import actions_to_text, configure_tinytroupe_runtime, ensure_tinytroupe_imports
@@ -508,7 +508,7 @@ def _administer(
 
     if instrument.about == ABOUT_SELF:
         frame = f"You are {participant.name}. Answer about yourself, honestly."
-    elif instrument.about == ABOUT_PROTOTYPE:
+    elif instrument.about in (ABOUT_PROTOTYPE, ABOUT_DESCRIPTION):
         frame = (
             f"You are {participant.name}. Answer about leaders in general — not about any "
             "specific person in this meeting."

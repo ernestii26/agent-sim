@@ -1,0 +1,138 @@
+{
+  "key": "effectiveness_styles",
+  "title": "Perceived effectiveness of leadership styles (Sheng et al. Study 5c descriptions)",
+  "instructions": "We will now present approximately 50 leadership descriptions. We are interested in how well these descriptions match your expectations of effective leadership at this moment in time. These descriptions are about subordinates’ expectations of effective leadership in a Work Organization (e.g., senior managers, direct supervisors). Please answer to what extent you perceive these leadership descriptions as effective if these individuals were your own leaders. For each description, indicate your perceptions of its effectiveness.",
+  "scale": [
+    1,
+    7
+  ],
+  "anchors": [
+    "not at all effective as a leader",
+    "extremely effective as a leader"
+  ],
+  "about": "description",
+  "targets": [
+    "N"
+  ],
+  "timing": [
+    "baseline",
+    "post"
+  ],
+  "subscales": {
+    "team_building": [
+      "Fosters collaboration among team members.",
+      "Encourages group members to be “team players.”",
+      "Develops a team attitude and spirit among team members.",
+      "Gets the team to work together for the same goal.",
+      "Resolves friction among team members in the interest of teamwork."
+    ],
+    "vision_communication": [
+      "Articulates a compelling vision of the future for the team.",
+      "Talks optimistically about the future of the team.",
+      "Talks enthusiastically about what needs to be accomplished by the team.",
+      "Communicates a clear direction of where the team is going."
+    ],
+    "high_expectation": [
+      "Encourages subordinates to set high goals for themselves.",
+      "Communicates high performance expectations to subordinates.",
+      "Shows confidence in subordinates’ ability to meet performance expectations.",
+      "Demonstrates total confidence in subordinates.",
+      "Encourages subordinates to live up to their potential."
+    ],
+    "intellectual_stimulation": [
+      "Gets subordinates to look at problems from many different angles.",
+      "Challenges subordinates to think about old problems in new ways.",
+      "Challenges subordinates to be innovative in their approach to work assignments.",
+      "Encourages subordinates to be independent thinkers."
+    ],
+    "authoritarianism": [
+      "Appears to be intimidating in front of staff of other departments/divisions.",
+      "Brings staff of other departments/divisions a lot of pressure when they work together.",
+      "Very strict with staff of other departments/divisions.",
+      "Scolds staff of other departments/divisions when they fail expected target.",
+      "Disciplines staff of other departments/divisions for violation of his/her principles."
+    ],
+    "benevolence": [
+      "Often shows his/her concern about subordinates.",
+      "Understands subordinates’ preference enough to accommodate their personal requests.",
+      "Encourages subordinates when they encounter difficulties in work.",
+      "Would try to understand the real cause of subordinates’ unsatisfied performance.",
+      "Trains and coaches subordinates when they lack required abilities at work."
+    ],
+    "moral_character": [
+      "Avenges a personal wrong in the name of public interest when he/she is offended.",
+      "Employs people according to their virtues and does not envy others’ abilities and virtues.",
+      "Uses his/her authority to seek special privileges for himself/herself.",
+      "Doesn’t take the credit for subordinates’ achievements and contributions for himself/herself.",
+      "Does not take advantage of subordinates for personal gain.",
+      "Does not use guanxi (personal relationships) or back-door practices to obtain illicit personal gains."
+    ],
+    "dominance": [
+      "Some subordinates are afraid of him/her.",
+      "Some subordinates are too scared to confront him/her.",
+      "Some subordinates dare not refuse his/her requests.",
+      "He/she enjoys having control over others."
+    ],
+    "competence": [
+      "His/her talents and abilities are recognized by others.",
+      "He/she possesses skills and expertise to succeed.",
+      "Subordinates respect his/her skills or expertise.",
+      "He/she is considered an expert on some matters by others."
+    ],
+    "virtue": [
+      "When subordinates think of him/her, they believe there is still some good in the world.",
+      "Subordinates are deeply touched by his/her goodness.",
+      "He/she helps subordinates recognize the better part of themselves.",
+      "He/she is willing to sacrifice his/her self-interest to help others.",
+      "Subordinates strive to follow his/her moral standards.",
+      "Subordinates feel uplifted by his/her goodness."
+    ],
+    "safety": [
+      "Emphasizes work efficiency and also emphasizes work safety.",
+      "Meets the organization’s need for revenue and also tells subordinates that the safety of employees and customers is the prerequisite for revenue.",
+      "Gives equal consideration to production goals and safe working."
+    ],
+    "narcissism": [
+      "Thinks he/she deserves to be seen as a great personality.",
+      "Shows others how special he/her is.",
+      "Manages to be the center of attention with his/her outstanding contributions.",
+      "He/she thinks most people are somehow losers.",
+      "Wants his/her rivals to fail.",
+      "Reacts annoyed if another person steals the show from him/her."
+    ]
+  },
+  "reverse": [
+    "moral_character_1",
+    "moral_character_3"
+  ],
+  "predicts": {
+    "protection": [
+      "safety",
+      "authoritarianism"
+    ],
+    "affiliation": [
+      "benevolence",
+      "team_building"
+    ],
+    "status": [
+      "narcissism",
+      "authoritarianism",
+      "dominance"
+    ],
+    "vision": [
+      "vision_communication",
+      "high_expectation"
+    ],
+    "expertise": [
+      "competence",
+      "intellectual_stimulation"
+    ],
+    "fairness": [
+      "moral_character",
+      "virtue"
+    ]
+  },
+  "citation": "Sheng, X., Andrews, W., & van Vugt, M. (2026). Journal of Applied Psychology, 111(6), 768-801, Study 5 (Sample E). Instruction verbatim from p.785, with the closing scale anchors moved to `anchors`. Items verbatim from Table S10.1 of Sheng's thesis (Vrije Universiteit Amsterdam, 2026, pp.267-269, https://doi.org/10.5463/thesis.1652, CC BY-ND), transcribed in docs/sheng-2026-S10.1-effectiveness-items.md. Scale sources: Podsakoff et al. (1990) and Wang & Howell (2010); Cheng et al. (2004, 2014); Bai et al. (2020); Hu et al. (2025); Back et al. (2013).",
+  "license": "Thesis CC BY-ND: items verbatim, not reworded or abridged. The thesis's '(R)' marks are moved to `reverse` rather than left in the item text a respondent reads. Each source scale keeps its own copyright.",
+  "note": "The paper's own stimulus, beside effectiveness.json's observed-person version rather than replacing it. Rating the P and D just watched is what the paper never did (gap G6); rating these descriptions is what it did, with the same raters in the same run as the prototype layer (gap G5). At baseline it is a replication of Table 3 Model 2 on our respondents; at post, split by condition, protection -> authoritarianism is the literal form of the paper's p.789 question (H7). `predicts` is Table 3's preregistered pairs, supported or not."
+}
