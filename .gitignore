@@ -25,3 +25,5 @@ results/replication/*/personas/
 studies/dp_check_traits/personas/
 # nohup stdout of background runs
 results/**/*.out
+# Run logs echo config.ini, API key included
+results/**/*.log
