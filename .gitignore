@@ -21,3 +21,7 @@ results_*/
 docs/xsheng-thesis-withcover*.pdf
 # Replication personas are rebuilt from bank_sample.json and the seed by tools/replicate_study5.py
 results/replication/*/personas/
+# Traits-only personas are rebuilt from ffni_mediation by tools/make_dp_check_traits.py
+studies/dp_check_traits/personas/
+# nohup stdout of background runs
+results/**/*.out

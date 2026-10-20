@@ -1,0 +1,77 @@
+{
+  "study": "dp_check_traits",
+  "instrument": "dp_peer",
+  "conditions": {
+    "collaborative": {
+      "subscales": {
+        "dominance": {
+          "higher": "D",
+          "lower": "P",
+          "n": 10,
+          "mean_higher": 5.5875,
+          "mean_lower": 1.7666666666666668,
+          "t": 18.060810602441354,
+          "p_two_sided": 2.22777151249924e-08,
+          "d_av": 9.767360747504695,
+          "passed": true,
+          "icc_single": 0.9650505708903901
+        },
+        "prestige": {
+          "higher": "P",
+          "lower": "D",
+          "n": 10,
+          "mean_higher": 4.754166666666666,
+          "mean_lower": 3.9208333333333334,
+          "t": 3.2597143890938,
+          "p_two_sided": 0.009843231860452654,
+          "d_av": 1.4490897648267755,
+          "passed": true,
+          "icc_single": 0.7858715111671999
+        }
+      },
+      "passed": true
+    }
+  },
+  "passed": true,
+  "provenance": {
+    "written": "2026-10-13T20:08:57",
+    "discussion_model": "gpt-4.1",
+    "discussion_temperature": 0.7,
+    "vote_model": "gpt-4.1",
+    "vote_temperature": 0.2,
+    "survey_model": "gpt-4.1",
+    "survey_temperature": 0.0,
+    "rounds": 3,
+    "instruments": {
+      "dp_self": "81193ca91833",
+      "dp_peer": "1a4e74519f34"
+    },
+    "scenario_pools": {
+      "collaborative": [
+        "toma_butera_2009",
+        "baker_2010",
+        "schulz_hardt_mojzisch_2012",
+        "graetz_et_al_1998",
+        "Stasser_Stewart_1992",
+        "Laboratory Theft Deduction",
+        "lunch_group_decision",
+        "scientists_animal_base_decision",
+        "choosing_base_camp",
+        "community_banquet_venue_decision",
+        "research_station_site_selection",
+        "the_lead_investor_decision",
+        "weather_sensor_deployment",
+        "Choosing the Safe Offsite Venue",
+        "Find the Missing Prototype",
+        "choosing_the_safe_field_station",
+        "island_research_base_choice",
+        "archaeological_dig_site",
+        "last_minute_move",
+        "The Elusive Bird Sighting",
+        "power_outage_island",
+        "company_acquisition_decision",
+        "Emergency Event Relocation"
+      ]
+    }
+  }
+}
