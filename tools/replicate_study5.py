@@ -135,7 +135,6 @@ def main() -> None:
     arms = args.arm or ["a", "b"]
 
     from config import RunConfig
-    from discussion import clone_participants, run_survey
     from persona_store import load_personas
 
     config = RunConfig.from_ini(_PROJECT_DIR / "config.ini")
@@ -159,56 +158,73 @@ def main() -> None:
 
     for arm in arms:
         folder = root / arm
-        personas = folder / "personas"
-        personas.mkdir(parents=True, exist_ok=True)
-        ids = []
         # TinyTroupe names are global, so arm b continues arm a's numbering.
         offset = 0 if arm == "a" else sizes["a"]
-        for k, row in enumerate(split[arm], start=1):
-            pid = f"R{arm.upper()}{k}"
-            ids.append(pid)
-            path = personas / f"{pid}.agent.json"
-            if not path.exists():
-                path.write_text(json.dumps(to_spec(bank[row], pid, f"Participant {offset + k}", "N"),
-                                           indent=2, ensure_ascii=False), encoding="utf-8")
-        (folder / "bank_sample.json").write_text(json.dumps(
-            {"seed": args.seed, "rows": dict(zip(ids, split[arm]))}, indent=2), encoding="utf-8")
-        pool = load_personas(personas, {pid: "N" for pid in ids})
+        ids = write_personas(folder, arm, split[arm], bank, offset, args.seed)
+        pool = load_personas(folder / "personas", {pid: "N" for pid in ids})
+        measures = collect(folder, arm, plan[arm], pool, config)
+        report(folder, arm, plan[arm], measures)
 
-        measures: dict = {}
-        for inst in plan[arm]:
-            saved = folder / f"{inst.key}.json"
-            if saved.exists():
-                measures[inst.key] = json.loads(saved.read_text(encoding="utf-8"))
-                print(f"  {arm}/{inst.key}: {len(measures[inst.key])} saved answers, skipped")
-                continue
-            print(f"  {arm}/{inst.key}: {len(pool)} respondents")
-            measures[inst.key] = run_survey(participants=clone_participants(list(pool.values())),
-                                            instrument=inst, model=config.survey,
-                                            on_progress=print)
-            saved.write_text(json.dumps(measures[inst.key], indent=1), encoding="utf-8")
 
-        needs, outcome = plan[arm]
-        record = RunRecord(run_no=1, condition=f"replication_{arm}", members_by_group={},
-                           transcript=[], votes=[], measures={BASELINE: measures},
-                           instruments={i.key: i.fingerprint for i in plan[arm]})
-        fitted = prototype_by_dimension([record], needs, outcome)
-        table = compare(arm, fitted)
+def write_personas(folder: Path, arm: str, rows: list[int], bank: list[dict], offset: int,
+                   seed: int) -> list[str]:
+    """Write the arm's persona files (keeping any already there) and its bank sample; return ids."""
+    personas = folder / "personas"
+    personas.mkdir(parents=True, exist_ok=True)
+    ids = []
+    for k, row in enumerate(rows, start=1):
+        pid = f"R{arm.upper()}{k}"
+        ids.append(pid)
+        path = personas / f"{pid}.agent.json"
+        if not path.exists():
+            path.write_text(json.dumps(to_spec(bank[row], pid, f"Participant {offset + k}", "N"),
+                                       indent=2, ensure_ascii=False), encoding="utf-8")
+    (folder / "bank_sample.json").write_text(json.dumps(
+        {"seed": seed, "rows": dict(zip(ids, rows))}, indent=2), encoding="utf-8")
+    return ids
 
-        title = {"a": "Table 13 (5a): FFNI generic -> ILT",
-                 "b": "Table 3 Model 2 (5c): FFNI work -> effectiveness of descriptions"}[arm]
-        print(f"\n{title}   n = {table[0]['n']}")
-        print(f"  {'need':<12}{'dimension':<26}{'paper':>7}{'beta':>8}{'p':>8}  replicated")
-        for t in table:
-            star = "*" if t["paper_significant"] else " "
-            print(f"  {t['need']:<12}{t['dimension']:<26}{t['paper_beta']:>6.2f}{star}"
-                  f"{t['beta']:>8.2f}{t['p']:>8.3f}  {'yes' if t['replicated'] else 'NO'}")
-        hits = sum(t["replicated"] for t in table)
-        print(f"  {hits}/{len(table)} cells replicate  (* = significant in the paper)\n")
-        (folder / "summary.json").write_text(json.dumps(
-            {"arm": arm, "title": title, "cells": table, "fit": fitted}, indent=1,
-            default=str), encoding="utf-8")
 
+def collect(folder: Path, arm: str, instruments: list, pool: dict, config) -> dict:
+    """Each instrument's answers, loaded if saved, otherwise surveyed (the only model calls) and saved."""
+    from discussion import clone_participants, run_survey
+
+    measures: dict = {}
+    for inst in instruments:
+        saved = folder / f"{inst.key}.json"
+        if saved.exists():
+            measures[inst.key] = json.loads(saved.read_text(encoding="utf-8"))
+            print(f"  {arm}/{inst.key}: {len(measures[inst.key])} saved answers, skipped")
+            continue
+        print(f"  {arm}/{inst.key}: {len(pool)} respondents")
+        measures[inst.key] = run_survey(participants=clone_participants(list(pool.values())),
+                                        instrument=inst, model=config.survey,
+                                        on_progress=print)
+        saved.write_text(json.dumps(measures[inst.key], indent=1), encoding="utf-8")
+    return measures
+
+
+def report(folder: Path, arm: str, instruments: list, measures: dict) -> None:
+    """Fit the arm's table, print it beside the paper's, and write summary.json."""
+    needs, outcome = instruments
+    record = RunRecord(run_no=1, condition=f"replication_{arm}", members_by_group={},
+                       transcript=[], votes=[], measures={BASELINE: measures},
+                       instruments={i.key: i.fingerprint for i in instruments})
+    fitted = prototype_by_dimension([record], needs, outcome)
+    table = compare(arm, fitted)
+
+    title = {"a": "Table 13 (5a): FFNI generic -> ILT",
+             "b": "Table 3 Model 2 (5c): FFNI work -> effectiveness of descriptions"}[arm]
+    print(f"\n{title}   n = {table[0]['n']}")
+    print(f"  {'need':<12}{'dimension':<26}{'paper':>7}{'beta':>8}{'p':>8}  replicated")
+    for t in table:
+        star = "*" if t["paper_significant"] else " "
+        print(f"  {t['need']:<12}{t['dimension']:<26}{t['paper_beta']:>6.2f}{star}"
+              f"{t['beta']:>8.2f}{t['p']:>8.3f}  {'yes' if t['replicated'] else 'NO'}")
+    hits = sum(t["replicated"] for t in table)
+    print(f"  {hits}/{len(table)} cells replicate  (* = significant in the paper)\n")
+    (folder / "summary.json").write_text(json.dumps(
+        {"arm": arm, "title": title, "cells": table, "fit": fitted}, indent=1,
+        default=str), encoding="utf-8")
 
 if __name__ == "__main__":
     main()

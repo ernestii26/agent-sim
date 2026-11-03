@@ -16,7 +16,7 @@ from config import RunConfig
 from instrument import BASELINE, POST, Instrument
 from persona_store import Participant
 from run_record import RunRecord
-from study import Condition, Study
+from study import Condition, Study, Task
 
 
 class BalancedSampler:
@@ -120,9 +120,7 @@ def run_condition(
     """
     # Imported here, not at module scope: openai/tinytroupe are only needed to actually
     # run a simulation, so tools and tests can import this module without them installed.
-    from discussion import (
-        APIQuotaExhausted, clone_participants, run_discussion, run_poll, run_survey, run_vote,
-    )
+    from discussion import APIQuotaExhausted
     from persona_store import load_personas
 
     def progress(msg: str) -> None:
@@ -164,74 +162,15 @@ def run_condition(
             continue
 
         members: dict[str, list[str]] = {}
-        for p in cast:
-            members.setdefault(p.group, []).append(p.persona_id)
+        for participant in cast:
+            members.setdefault(participant.group, []).append(participant.persona_id)
         progress(f"\nRun {run_no}/{runs}  ({members})")
 
-        scenario, friction = condition.scenario, condition.friction
-        shares: dict[str, list[str]] = {}
-        if task:
-            progress(f"  task {task.name}")
-            scenario = task.briefing()
-            # Shuffled before dealing: which agent holds which private fact must not
-            # track whether they are the Prestige or the Dominance persona, or the
-            # endorsement result would partly be measuring who was handed the answer.
-            holders = [p.persona_id for p in cast]
-            random.Random(f"{study.sampler_seed}:{condition.key}:{run_no}").shuffle(holders)
-            shares = task.shares(holders)
-
+        scenario, shares = _deal_task(study, condition, run_no, task, cast, progress)
         try:
-            # Baseline goes to a throwaway fork: the agents who actually discuss must never
-            # have seen the items, or the battery primes the very needs we then measure.
-            measures: dict[str, dict[str, Any]] = {BASELINE: {}, POST: {}}
-            for inst in study.instruments_at(BASELINE):
-                progress(f"  baseline {inst.key}")
-                measures[BASELINE][inst.key] = run_survey(
-                    participants=clone_participants(cast),
-                    instrument=inst,
-                    model=config.survey,
-                    on_progress=progress,
-                )
-
-            transcript = run_discussion(
-                participants=cast,
-                scenario=scenario,
-                friction=friction,
-                rounds=rounds,
-                model=config.discussion,
-                private=shares,
-                on_progress=progress,
-            )
-
-            # Each post measure branches from the same post-discussion state, so none of
-            # them primes another, yet all of them reflect the discussion that happened.
-            for inst in study.instruments_at(POST):
-                progress(f"  post {inst.key}")
-                measures[POST][inst.key] = run_survey(
-                    participants=clone_participants(cast),
-                    instrument=inst,
-                    model=config.survey,
-                    rate_groups=tuple(condition.contrast),
-                    on_progress=progress,
-                )
-
-            # Vote last, on the original cast — nothing downstream can be primed by it.
-            votes = (
-                run_vote(
-                    participants=cast,
-                    question=study.vote_prompt,
-                    model=config.vote,
-                )
-                if with_votes
-                else []
-            )
-
-            # After the vote, so committing to an answer cannot colour the endorsement.
-            # Skipped with the vote: a study that endorses nobody (validate, dp_check) has
-            # no use for task accuracy either, and it is another call per agent per run.
-            answers = (
-                run_poll(participants=cast, task=task, model=config.vote)
-                if task and with_votes else []
+            measures, transcript, votes, answers = _simulate_run(
+                study, condition, config, cast, scenario, shares, task,
+                rounds=rounds, with_votes=with_votes, progress=progress,
             )
         except APIQuotaExhausted as exc:
             progress(f"\n[FATAL] {exc}")
@@ -252,17 +191,7 @@ def run_condition(
             # positional, so two versions of a scale can share them while asking
             # different questions; this is what lets a later report refuse to mix them.
             instruments={i.key: i.fingerprint for i in study.instruments},
-            task=(
-                {
-                    "id": task.id,
-                    "name": task.name,
-                    "options": list(task.options),
-                    "correct": task.correct,
-                    "shares": shares,
-                }
-                if task
-                else {}
-            ),
+            task=_task_summary(task, shares),
             answers=answers,
         )
         records.append(record)
@@ -271,6 +200,106 @@ def run_condition(
         )
 
     return records
+
+
+def _deal_task(
+    study: Study,
+    condition: Condition,
+    run_no: int,
+    task: Task | None,
+    cast: list[Participant],
+    progress: Callable[[str], None],
+) -> tuple[str, dict[str, list[str]]]:
+    """The run's scenario text, and which agent holds which private fact of its task."""
+    if not task:
+        return condition.scenario, {}
+    progress(f"  task {task.name}")
+    # Shuffled before dealing: which agent holds which private fact must not
+    # track whether they are the Prestige or the Dominance persona, or the
+    # endorsement result would partly be measuring who was handed the answer.
+    holders = [p.persona_id for p in cast]
+    random.Random(f"{study.sampler_seed}:{condition.key}:{run_no}").shuffle(holders)
+    return task.briefing(), task.shares(holders)
+
+
+def _simulate_run(
+    study: Study,
+    condition: Condition,
+    config: RunConfig,
+    cast: list[Participant],
+    scenario: str,
+    shares: dict[str, list[str]],
+    task: Task | None,
+    *,
+    rounds: int,
+    with_votes: bool,
+    progress: Callable[[str], None],
+) -> tuple[dict[str, dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    """One run's model calls, in order: baseline surveys, discussion, post surveys, vote, poll."""
+    from discussion import clone_participants, run_discussion, run_poll, run_survey, run_vote
+
+    # Baseline goes to a throwaway fork: the agents who actually discuss must never
+    # have seen the items, or the battery primes the very needs we then measure.
+    measures: dict[str, dict[str, Any]] = {BASELINE: {}, POST: {}}
+    for inst in study.instruments_at(BASELINE):
+        progress(f"  baseline {inst.key}")
+        measures[BASELINE][inst.key] = run_survey(
+            participants=clone_participants(cast),
+            instrument=inst,
+            model=config.survey,
+            on_progress=progress,
+        )
+
+    transcript = run_discussion(
+        participants=cast,
+        scenario=scenario,
+        friction=condition.friction,
+        rounds=rounds,
+        model=config.discussion,
+        private=shares,
+        on_progress=progress,
+    )
+
+    # Each post measure branches from the same post-discussion state, so none of
+    # them primes another, yet all of them reflect the discussion that happened.
+    for inst in study.instruments_at(POST):
+        progress(f"  post {inst.key}")
+        measures[POST][inst.key] = run_survey(
+            participants=clone_participants(cast),
+            instrument=inst,
+            model=config.survey,
+            rate_groups=tuple(condition.contrast),
+            on_progress=progress,
+        )
+
+    # Vote last, on the original cast — nothing downstream can be primed by it.
+    votes = (
+        run_vote(participants=cast, question=study.vote_prompt, model=config.vote)
+        if with_votes
+        else []
+    )
+
+    # After the vote, so committing to an answer cannot colour the endorsement.
+    # Skipped with the vote: a study that endorses nobody (validate, dp_check) has
+    # no use for task accuracy either, and it is another call per agent per run.
+    answers = (
+        run_poll(participants=cast, task=task, model=config.vote)
+        if task and with_votes else []
+    )
+    return measures, transcript, votes, answers
+
+
+def _task_summary(task: Task | None, shares: dict[str, list[str]]) -> dict[str, Any]:
+    """What a checkpoint records about the run's task, so accuracy can be scored later."""
+    if not task:
+        return {}
+    return {
+        "id": task.id,
+        "name": task.name,
+        "options": list(task.options),
+        "correct": task.correct,
+        "shares": shares,
+    }
 
 
 def _reject_foreign_scenario(record: RunRecord, condition: Condition, path: Path) -> None:

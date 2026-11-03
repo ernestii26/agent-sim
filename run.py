@@ -33,7 +33,7 @@ from analysis import (  # noqa: E402
     summarize_task_performance, summarize_validation,
 )
 from config import RunConfig  # noqa: E402
-from instrument import BASELINE, POST  # noqa: E402
+from instrument import BASELINE, POST, Instrument  # noqa: E402
 from pipeline import load_records, run_condition, run_measure_check  # noqa: E402
 from render import (  # noqa: E402
     plot_contrast, render_contrast, render_layer_moderation, render_layers,
@@ -41,6 +41,7 @@ from render import (  # noqa: E402
     render_rater_agreement, render_style_check, render_task_performance, render_validation,
     save_summary,
 )
+from run_record import RunRecord  # noqa: E402
 from runtime import setup_file_logging  # noqa: E402
 from study import Study, list_studies, load_study  # noqa: E402
 
@@ -281,6 +282,35 @@ def cmd_mediate(args: argparse.Namespace) -> None:
                  provenance=_provenance(config, study))
 
 
+def _styles_by_dimension(
+    styles: Instrument,
+    by_condition: dict[str, list[RunRecord]],
+    pooled: list[RunRecord],
+    needs: Instrument,
+    need: str,
+) -> dict[str, Any]:
+    """The paper's own effectiveness stimulus (Table 3, Model 2), rendered as it is computed.
+
+    Baseline, pooled: the replication, measured before anything happened. Post, per
+    condition: H7 in the paper's words, protection -> authoritarianism under threat
+    against routine.
+    """
+    by_style = {BASELINE: prototype_by_dimension(pooled, needs, styles)}
+    render_prototype_by_dimension(by_style[BASELINE], heading=(
+        "EVALUATION LAYER, PAPER'S STIMULUS — Sheng et al. Table 3, Model 2 (baseline, pooled)"))
+    for key, records in by_condition.items():
+        by_style[key] = prototype_by_dimension(records, needs, styles, timing=POST)
+        render_prototype_by_dimension(by_style[key], heading=(
+            f"EVALUATION LAYER, PAPER'S STIMULUS — post, {key} only (H7b)"))
+    h7b = style_link_by_condition(by_condition, needs, styles, need=need)
+    lo, hi = h7b["conditions"]["low"], h7b["conditions"]["high"]
+    print(f"  H7b  {h7b['need']} -> {h7b['style']} effectiveness, beta at post: "
+          f"{lo} {h7b['beta'][lo]:.3f}, {hi} {h7b['beta'][hi]:.3f}, "
+          f"{hi} minus {lo} {h7b['difference']:.3f} "
+          f"[{h7b['ci95'][0]:.3f}, {h7b['ci95'][1]:.3f}]  ({h7b['bootstrap_draws']} draws)")
+    return {"styles_by_dimension": by_style, "h7b": h7b}
+
+
 def cmd_layers(args: argparse.Namespace) -> None:
     """H3, H4, H5 and H7: both conditions at once, since all four compare them.
 
@@ -323,26 +353,8 @@ def cmd_layers(args: argparse.Namespace) -> None:
         render_prototype_by_dimension(by_dim)
         out["prototype_by_dimension"] = by_dim
 
-    # The paper's own effectiveness stimulus (Table 3, Model 2). Baseline, pooled: the
-    # replication, measured before anything happened. Post, per condition: H7 in the
-    # paper's words, protection -> authoritarianism under threat against routine.
-    styles = study.descriptions
-    if styles is not None:
-        by_style = {BASELINE: prototype_by_dimension(pooled, needs, styles)}
-        render_prototype_by_dimension(by_style[BASELINE], heading=(
-            "EVALUATION LAYER, PAPER'S STIMULUS — Sheng et al. Table 3, Model 2 (baseline, pooled)"))
-        for key, records in by_condition.items():
-            by_style[key] = prototype_by_dimension(records, needs, styles, timing=POST)
-            render_prototype_by_dimension(by_style[key], heading=(
-                f"EVALUATION LAYER, PAPER'S STIMULUS — post, {key} only (H7b)"))
-        out["styles_by_dimension"] = by_style
-        h7b = style_link_by_condition(by_condition, needs, styles, need=args.need)
-        lo, hi = h7b["conditions"]["low"], h7b["conditions"]["high"]
-        print(f"  H7b  {h7b['need']} -> {h7b['style']} effectiveness, beta at post: "
-              f"{lo} {h7b['beta'][lo]:.3f}, {hi} {h7b['beta'][hi]:.3f}, "
-              f"{hi} minus {lo} {h7b['difference']:.3f} "
-              f"[{h7b['ci95'][0]:.3f}, {h7b['ci95'][1]:.3f}]  ({h7b['bootstrap_draws']} draws)")
-        out["h7b"] = h7b
+    if study.descriptions is not None:
+        out.update(_styles_by_dimension(study.descriptions, by_condition, pooled, needs, args.need))
 
     save_summary(out, Path(config.output_dir) / study.name, "layers",
                  provenance=_provenance(config, study))

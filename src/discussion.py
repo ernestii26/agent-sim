@@ -192,6 +192,47 @@ DONE
 """
 
 
+def _tell_private_facts(participants: list[Participant], private: dict[str, list[str]]) -> None:
+    """Deliver each agent its hidden-profile facts, to that agent alone."""
+    for participant in participants:
+        facts = private.get(participant.persona_id)
+        if not facts:
+            continue
+        listing = "\n".join(f"- {fact}" for fact in facts)
+        # Said to one agent only. The instruction to share is deliberate: without it a
+        # null would be ambiguous between "leadership did not help pooling" and "nobody
+        # realised the facts were theirs alone to contribute".
+        participant.agent.listen(
+            "Only you know the following. No one else in the meeting has been told:\n"
+            f"{listing}\n\n"
+            "Others hold different pieces. Decide for yourself what to raise and when.",
+            communication_display=False,
+        )
+
+
+def _take_turn(participant: Participant, transport: AgentTransport, round_no: int) -> dict[str, Any]:
+    """Invite one agent to speak or stay silent, and return its transcript record."""
+    actions = transport.actions(
+        participant.agent, TURN_PROMPT.format(name=participant.name).strip()
+    )
+    time.sleep(1)
+
+    did_speak = any(
+        a.get("action", {}).get("type", "").upper() == "TALK"
+        for a in (actions or [])
+    )
+    text = actions_to_text(actions).strip() if did_speak else ""
+    return {
+        "round": round_no,
+        "name": participant.name,
+        "persona_id": participant.persona_id,
+        "group": participant.group,
+        "spoke": did_speak,
+        "word_count": len(text.split()) if text else 0,
+        "text": text,
+    }
+
+
 def run_discussion(
     *,
     participants: list[Participant],
@@ -229,20 +270,7 @@ def run_discussion(
     if friction:
         world.broadcast(friction)
 
-    for participant in participants:
-        facts = (private or {}).get(participant.persona_id)
-        if not facts:
-            continue
-        listing = "\n".join(f"- {fact}" for fact in facts)
-        # Said to one agent only. The instruction to share is deliberate: without it a
-        # null would be ambiguous between "leadership did not help pooling" and "nobody
-        # realised the facts were theirs alone to contribute".
-        participant.agent.listen(
-            "Only you know the following. No one else in the meeting has been told:\n"
-            f"{listing}\n\n"
-            "Others hold different pieces. Decide for yourself what to raise and when.",
-            communication_display=False,
-        )
+    _tell_private_facts(participants, private or {})
 
     transcript: list[dict[str, Any]] = []
     transport = AgentTransport()
@@ -252,38 +280,15 @@ def run_discussion(
             on_progress(f"  Round {round_no}/{rounds}")
 
         for participant in random.sample(participants, len(participants)):
-            actions = transport.actions(
-                participant.agent, TURN_PROMPT.format(name=participant.name).strip()
-            )
-            time.sleep(1)
-
-            did_speak = any(
-                a.get("action", {}).get("type", "").upper() == "TALK"
-                for a in (actions or [])
-            )
-            text = actions_to_text(actions).strip() if did_speak else ""
-            word_count = len(text.split()) if text else 0
-
-            transcript.append(
-                {
-                    "round": round_no,
-                    "name": participant.name,
-                    "persona_id": participant.persona_id,
-                    "group": participant.group,
-                    "spoke": did_speak,
-                    "word_count": word_count,
-                    "text": text,
-                }
-            )
-
+            turn = _take_turn(participant, transport, round_no)
+            transcript.append(turn)
             if on_progress:
-                status = f"✓  {word_count:>3}w" if did_speak else "·"
+                status = f"✓  {turn['word_count']:>3}w" if turn["spoke"] else "·"
                 on_progress(
                     f"    {participant.name:<16} {participant.persona_id:<4} {participant.group:<3} {status}"
                 )
-
-            if did_speak and text:
-                world.broadcast(text, source=participant.agent)
+            if turn["text"]:
+                world.broadcast(turn["text"], source=participant.agent)
 
     # Tear the world down. Every agent holds a reference to it and it holds every
     # agent, so leaving it attached both defeats cloning (see _clone_agent) and keeps
@@ -485,18 +490,8 @@ def run_survey(
     return results
 
 
-def _administer(
-    participant: Participant,
-    instrument: Instrument,
-    *,
-    target: Participant | None,
-    ask: Any,
-) -> dict[str, Any]:
-    """One administration = one API call, with a single retry on an unusable response.
-
-    `ask(agent, prompt) -> str` is the transport seam, so this parser can be driven from a
-    test with scripted replies instead of a live agent.
-    """
+def _survey_prompt(participant: Participant, instrument: Instrument, target: Participant | None) -> str:
+    """The rating prompt: who to answer about, the scale, and the items in this respondent's order."""
     items = instrument.items
     # Shuffled per respondent, not per administration. Items must be randomly presented
     # (the FFNI was validated that way) and position bias must not accumulate across the
@@ -538,6 +533,23 @@ def _administer(
         to its integer rating, and nothing else.
         """
     ).strip()
+    return prompt
+
+
+def _administer(
+    participant: Participant,
+    instrument: Instrument,
+    *,
+    target: Participant | None,
+    ask: Any,
+) -> dict[str, Any]:
+    """One administration = one API call, with a single retry on an unusable response.
+
+    `ask(agent, prompt) -> str` is the transport seam, so this parser can be driven from a
+    test with scripted replies instead of a live agent.
+    """
+    items = instrument.items
+    prompt = _survey_prompt(participant, instrument, target)
 
     for attempt in (1, 2):
         # A retry that re-sends the prompt byte for byte invites the same unusable reply.

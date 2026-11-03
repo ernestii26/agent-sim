@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from instrument import (
     ABOUT_DESCRIPTION, ABOUT_EACH_CANDIDATE, ABOUT_KINDS, ABOUT_PROTOTYPE, ABOUT_SELF, Instrument,
@@ -182,17 +183,10 @@ def _load_pools(directory: Path, filename: str | None) -> dict[str, tuple[Task, 
     return pools
 
 
-def load_study(name: str) -> Study:
-    directory = STUDIES_DIR / name
-    path = directory / "study.json"
-    if not path.exists():
-        raise SystemExit(
-            f"Study '{name}' not found at {path}. Available: {', '.join(list_studies()) or 'none'}"
-        )
-    spec = json.loads(path.read_text(encoding="utf-8"))
-
+def _load_groups(path: Path, raw_groups: dict[str, Any]) -> dict[str, Group]:
+    """The study's groups, checked: non-empty, valid sample sizes, sound pairing, no shared ids."""
     groups: dict[str, Group] = {}
-    for key, raw in spec["groups"].items():
+    for key, raw in raw_groups.items():
         ids = tuple(raw["ids"])
         sample = raw.get("sample")
         if not ids:
@@ -227,10 +221,14 @@ def load_study(name: str) -> Study:
         if clash:
             raise SystemExit(f"{path}: persona id(s) {sorted(clash)} appear in more than one group")
         seen |= set(group.ids)
+    return groups
 
+
+def _load_conditions(
+    path: Path, spec: dict[str, Any], groups: dict[str, Group], pools: dict[str, tuple[Task, ...]]
+) -> dict[str, Condition]:
+    """The study's conditions, each contrasting known groups and having a scenario or a pool."""
     default_contrast = tuple(spec["contrast"])
-    pools = _load_pools(directory, spec.get("scenarios"))
-
     conditions: dict[str, Condition] = {}
     for key, raw in spec["conditions"].items():
         contrast = tuple(raw.get("contrast", default_contrast))
@@ -256,9 +254,15 @@ def load_study(name: str) -> Study:
         )
     if not conditions:
         raise SystemExit(f"{path}: no conditions defined")
+    return conditions
 
+
+def _load_study_instruments(
+    path: Path, name: str, directory: Path, keys: list[str], groups: dict[str, Group]
+) -> list[Instrument]:
+    """The declared instruments, each targeting known groups, at most one per `about` kind."""
     instruments = []
-    for key in spec.get("instruments", []):
+    for key in keys:
         inst = load_instrument(directory / "instruments" / f"{key}.json")
         unknown_targets = (set(inst.targets) | {g for pair in inst.expects.values() for g in pair}) - set(groups)
         if unknown_targets:
@@ -276,6 +280,22 @@ def load_study(name: str) -> Study:
                 f"{path}: study '{name}' declares {len(clash)} instruments with "
                 f"about='{kind}' ({', '.join(clash)}); at most one is allowed"
             )
+    return instruments
+
+
+def load_study(name: str) -> Study:
+    """Read studies/<name>/study.json and everything it names, exiting on any inconsistency."""
+    directory = STUDIES_DIR / name
+    path = directory / "study.json"
+    if not path.exists():
+        raise SystemExit(
+            f"Study '{name}' not found at {path}. Available: {', '.join(list_studies()) or 'none'}"
+        )
+    spec = json.loads(path.read_text(encoding="utf-8"))
+
+    groups = _load_groups(path, spec["groups"])
+    conditions = _load_conditions(path, spec, groups, _load_pools(directory, spec.get("scenarios")))
+    instruments = _load_study_instruments(path, name, directory, spec.get("instruments", []), groups)
 
     personas_from = spec.get("personas_from")
     if personas_from and not (STUDIES_DIR / personas_from / "personas").exists():

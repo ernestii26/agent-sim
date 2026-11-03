@@ -81,6 +81,32 @@ class Instrument:
         return isinstance(value, (int, float)) and not isinstance(value, bool) and low <= value <= high
 
 
+def _check_references(
+    path: Path,
+    subscales: dict[str, tuple[str, ...]],
+    predicts: dict[str, tuple[str, ...]],
+    reverse: frozenset[str],
+    expects: dict[str, tuple[str, ...]],
+) -> None:
+    """Exit if predicts, reverse or expects names a subscale or item the instrument lacks."""
+    for source, targets in predicts.items():
+        unknown_subscales = set(targets) - set(subscales)
+        if unknown_subscales:
+            raise SystemExit(
+                f"{path}: predicts['{source}'] names subscale(s) "
+                f"{sorted(unknown_subscales)} that this instrument does not have"
+            )
+
+    unknown_items = reverse - {item_id for name, items in subscales.items()
+                               for item_id in (f"{name}_{i}" for i in range(1, len(items) + 1))}
+    if unknown_items:
+        raise SystemExit(f"{path}: reverse names unknown item(s) {sorted(unknown_items)}")
+
+    for name, pair in expects.items():
+        if name not in subscales or len(pair) != 2:
+            raise SystemExit(f"{path}: expects['{name}'] must name a subscale and two groups")
+
+
 def load_instrument(path: Path) -> Instrument:
     """Parse an instrument JSON, exiting with a message on any malformed field."""
     if not path.exists():
@@ -114,24 +140,9 @@ def load_instrument(path: Path) -> Instrument:
         raise SystemExit(f"{path}: anchors must be a pair [low_label, high_label]")
 
     predicts = {k: tuple(v) for k, v in spec.get("predicts", {}).items()}
-    for source, targets in predicts.items():
-        unknown_subscales = set(targets) - set(subscales)
-        if unknown_subscales:
-            raise SystemExit(
-                f"{path}: predicts['{source}'] names subscale(s) "
-                f"{sorted(unknown_subscales)} that this instrument does not have"
-            )
-
     reverse = frozenset(spec.get("reverse", ()))
-    unknown_items = reverse - {item_id for name, items in subscales.items()
-                               for item_id in (f"{name}_{i}" for i in range(1, len(items) + 1))}
-    if unknown_items:
-        raise SystemExit(f"{path}: reverse names unknown item(s) {sorted(unknown_items)}")
-
     expects = {k: tuple(v) for k, v in spec.get("expects", {}).items()}
-    for name, pair in expects.items():
-        if name not in subscales or len(pair) != 2:
-            raise SystemExit(f"{path}: expects['{name}'] must name a subscale and two groups")
+    _check_references(path, subscales, predicts, reverse, expects)
 
     return Instrument(
         key=spec.get("key", path.stem),
