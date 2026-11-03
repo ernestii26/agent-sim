@@ -18,28 +18,8 @@ from pathlib import Path
 import numpy as np
 from scipy import stats
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-from instrument import load_instrument  # noqa: E402
-
-ROOT = Path(__file__).resolve().parent.parent / "results" / "replication"
-OCEAN = ["openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism"]
-LEVEL = {"low": 0, "medium": 1, "high": 2}
-NEEDS = ["protection", "affiliation", "status", "vision", "expertise", "fairness"]
-# Only effectiveness_styles has reverse-keyed items (moral_character_1, _3); FFNI and ILT have none.
-STYLES = load_instrument(Path(__file__).resolve().parent.parent / "studies" / "ffni_mediation"
-                         / "instruments" / "effectiveness_styles.json")
-ARMS = {
-    "a": ("ffni_generic.json", "ilt.json"),
-    "b": ("ffni.json", "effectiveness_styles.json"),
-}
-
-
-def scores(answers: dict, names: list[str], ids: list[str], instrument=None) -> np.ndarray:
-    """Mean of each subscale's items, reverse-keyed items flipped; item keys are '<subscale>_<n>'."""
-    score = instrument.scored if instrument else (lambda k, v: v)
-    return np.array([[np.mean([score(k, v) for k, v in answers[i].items()
-                               if k.rsplit("_", 1)[0] == n and isinstance(v, (int, float))])
-                      for n in names] for i in ids])
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from study5_tables import ARMS, DATA, NEEDS, load  # noqa: E402
 
 
 def fit(x: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray, np.ndarray]:
@@ -61,15 +41,10 @@ def beta_given(z_needs: np.ndarray, z_y: np.ndarray, controls: np.ndarray, j: in
 
 
 def arm(key: str) -> None:
-    ffni_file, out_file = ARMS[key]
-    ffni = json.loads((ROOT / key / ffni_file).read_text())
-    out = json.loads((ROOT / key / out_file).read_text())
-    ids = [i for i in ffni if i in out]
-    levels = np.array([[LEVEL[json.loads((ROOT / key / "personas" / f"{i}.agent.json").read_text())
-                              ["persona"]["personality"]["big_five"][t]] for t in OCEAN] for i in ids])
+    ids, _, needs, _, by_dim, levels = load(key)
     dummies = np.column_stack([(levels[:, j] == v).astype(float) for j in range(5) for v in (1, 2)])
-    dims = sorted({k.rsplit("_", 1)[0] for v in out.values() for k in v if not k.startswith("_")})
-    needs, outcomes = scores(ffni, NEEDS, ids), scores(out, dims, ids, STYLES if key == "b" else None)
+    dims = sorted(by_dim)
+    outcomes = np.column_stack([by_dim[d] for d in dims])
 
     print(f"== arm {key.upper()}, n = {len(ids)}")
     for i, n in enumerate(NEEDS):
@@ -77,7 +52,7 @@ def arm(key: str) -> None:
     for j, d in enumerate(dims):
         y = outcomes[:, j]
         print(f"  outcome {d:23s} M {y.mean():.2f}  SD {y.std(ddof=1):.2f}  R2(OCEAN) {fit(dummies, y)[0]:.2f}")
-    for c in json.loads((ROOT / key / "summary.json").read_text())["cells"]:
+    for c in json.loads((DATA / key / "summary.json").read_text())["cells"]:
         x, y = needs[:, NEEDS.index(c["need"])], outcomes[:, dims.index(c["dimension"])]
         r_raw = np.corrcoef(x, y)[0, 1]
         _, rx, fx = fit(dummies, x)

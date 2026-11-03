@@ -19,7 +19,7 @@ from pathlib import Path
 import numpy as np
 from scipy import stats
 
-ROOT = Path(__file__).resolve().parent.parent / "results" / "replication"
+DATA = Path(__file__).resolve().parent.parent / "results" / "replication"
 TABLE13 = {  # (r, b, SE_b, beta)
     ("protection", "strength"): (.38, .35, .12, .26), ("status", "tyranny"): (.31, .44, .11, .32),
     ("status", "masculinity"): (.22, .25, .10, .19), ("status", "well_groomed"): (.37, .46, .12, .30),
@@ -47,17 +47,18 @@ def se_beta(beta: float, p: float, df: int) -> float:
 
 def judge(arm: str) -> list[dict]:
     rows = []
-    for c in json.loads((ROOT / arm / "summary.json").read_text())["cells"]:
+    for c in json.loads((DATA / arm / "summary.json").read_text())["cells"]:
         key, n = (c["need"], c["dimension"]), c["n"]
+        df = n - 7  # six needs and an intercept, as in replicate_study5.p_value
         if arm == "a":
             r_p, b, se_b, beta_p = TABLE13[key]
             se_p = se_b * beta_p / b
         else:
             r_p, beta_p, p_p = TABLE3[key]
-            se_p = FALLBACK_SE if p_p is None or abs(beta_p) < .05 else se_beta(beta_p, p_p, n - 7)
+            se_p = FALLBACK_SE if p_p is None or abs(beta_p) < .05 else se_beta(beta_p, p_p, df)
         half_r = 1.96 * np.sqrt(2 / (n - 3))
         r_pi = tuple(np.tanh(np.arctanh(r_p) + s * half_r) for s in (-1, 1))
-        half_b = 1.96 * np.hypot(se_p, se_beta(c["beta"], c["p"], n - 7))
+        half_b = 1.96 * np.hypot(se_p, se_beta(c["beta"], c["p"], df))
         b_pi = (beta_p - half_b, beta_p + half_b)
         rows.append({"cell": f"{key[0]} -> {key[1]}", "r_paper": r_p, "r": c["r"], "r_pi": r_pi,
                      "r_in": r_pi[0] <= c["r"] <= r_pi[1], "beta_paper": beta_p, "beta": c["beta"],
