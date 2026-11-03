@@ -74,6 +74,8 @@ Comparison with Ronay et al. (2023), in-study manipulation checks:
 
 Verdict: fails the pre-set criterion (all four tests must pass). We proceed with these personas anyway.
 
+Follow-up (`dp_check_traits`, `docs/step1-pd-check.md`): the shared bank description diluted the traits. With P and D reduced to their traits, routine, 10 runs: D on dominance 5.59 vs P 1.77 (p < .0001), P on prestige 4.75 vs D 3.92 (p = .0098). Both pass. The threat condition has not been run, and whether `ffni_mediation` switches to traits-only P and D is still open.
+
 ## FFNI experiment 
 The experiment is inspired by Implicit Leadership Theories and the future research raise in Sheng et al. (2026).
 According to the Study 5 of Sheng etal. (2026), FFN can predict people's perspective towards leader in two level.
@@ -187,115 +189,28 @@ Read on the same statistic at both levels (β with the other five needs controll
 
 ### Replication of Study 5 on LLM personas (no meeting)
 
-Before Step 2, we checked whether Sheng et al.'s Study 5 results reproduce on LLM personas at all. `tools/replicate_study5.py`, `gpt-4.1`, temperature 0. Data: `results/replication/`.
-
-**Method**
+Before Step 2, we checked whether Sheng et al.'s Study 5 reproduces on LLM personas. `tools/replicate_study5.py`, `gpt-4.1`, temperature 0. Data: `results/replication/`. Every table, ours beside the paper's: `docs/study5-data.md`. Deck: `docs/study5-criteria.md`.
 
 | Arm | Compares with | N | Measures |
 |---|---|---|---|
-| A | Table 13 (5a) | 261 | FFNI with the paper's generic instruction ("the leaders in your life"), then ILT, 51 items, 1-10 |
-| B | Table 3, Model 2 (5c) | 367 | FFNI with the paper's work instruction ("the leaders in your WORK ORGANIZATION"), then the 57 descriptions, 1-7 |
+| A | Table 13 (5a) | 261 | FFNI, generic instruction; then ILT, 51 items, 1-10 |
+| B | Table 3, Model 2 (5c) | 367 | FFNI, work instruction; then the 57 descriptions, 1-7 |
 
-- The two arms are separate samples, as in the paper. Personas are bank rows that `ffni_mediation` does not use, spread over the 243 OCEAN profiles. They are neutral: no P/D traits.
-- Each instrument is answered on a fresh fork, so no answer is made with another instrument's answers in memory.
-- Analysis is the paper's: each dimension regressed on all six needs. The table reports the standardised β, and p from the ΔR² F test (df 1, n − 7).
-- A cell **replicates** if, where the paper is significant, our β has the same sign at p < .05, and, where the paper is null, our p ≥ .05. No multiple-comparison correction is applied, as in the paper.
-- Differences from the paper: the paper's respondents are people, not LLM personas. Sample E (5c) was Chinese and answered in Chinese; arm B is in English. 5c had a one-week gap between the FFNI and the effectiveness ratings; arm B has two separate sittings with nothing in between.
+Personas are neutral bank rows `ffni_mediation` does not use. Each instrument is answered on a fresh fork. Analysis is the paper's: each outcome regressed on all six needs (standardised β, ΔR² F test). Differences: personas not people; arm B in English (Sample E answered in Chinese); no one-week gap.
 
-**Results: arm A, Table 13** (10/14 cells replicate)
+**Criteria** (per cell, reported separately):
+- A: same sign and same significance status as the paper, p < .05, no correction (the paper's own practice).
+- C: our β inside the paper's 95% prediction interval, paper β ± 1.96 √(SE_paper² + SE_ours²) (Patil, Peng & Leek, 2016). Equivalent to "the difference from the paper is not significant".
 
-| Need → ILT dimension | Paper β | Our β | p | Replicates |
-|---|---|---|---|---|
-| Protection → strength | .26* | .04 | .557 | No |
-| Status → tyranny | .32* | .28 | < .001 | Yes |
-| Status → masculinity | .19* | .07 | .368 | No |
-| Status → well-groomed | .30* | .08 | .272 | No |
-| Vision → sensitivity | .20* | .09 | .025 | Yes |
-| Vision → dedication | .30* | .41 | < .001 | Yes |
-| Vision → charisma | .19* | .22 | .002 | Yes |
-| Vision → creativity | .24* | .18 | .010 | Yes |
-| Expertise → sensitivity | .32* | .12 | .005 | Yes |
-| Expertise → charisma | .22* | .15 | .036 | Yes |
-| Expertise → intelligence | .21* | .27 | .001 | Yes |
-| Fairness → dedication | .25* | .20 | .033 | Yes |
-| Fairness → intelligence | .26* | .11 | .261 | No |
-| Fairness → ethics | .29* | .16 | .032 | Yes |
+| | A | C | Both |
+|---|---|---|---|
+| Arm A (14 cells the paper found significant) | 10 | 11 | 9 |
+| Arm B (13 hypothesis cells) | 8 | 8 | 5 |
 
-\* significant in the paper.
+**Findings**
+1. 5c by the paper's own rule (Model 2, one significant sub-hypothesis per hypothesis): all six hypotheses hold for us, four for the paper. Our misses on C are all too large (e.g. affiliation → benevolence .67 vs .10).
+2. 5a: the prestige side reproduces (9 of 10), the dominance side does not (only status → tyranny). Arm A's misses on C are all too small. The paper's leading need (top relative weight) matches in 2 of 14 cells; affiliation leads 7 ILT dimensions for us and none in the paper. Of the 52 cells null in the paper, 26 are significant for us.
+3. Cause: persona needs are near-proxies of single OCEAN settings (affiliation–agreeableness r = .89; persona needs vs personality mean |r| .29, people .12, supplement S9.1). A need predicts an outcome when both draw on the same trait. Holding OCEAN fixed in Model 2 (saved data, not a re-run) puts 11 of 13 arm B cells inside the interval, and leaves 3 of arm A's 10 prestige cells significant. The dominance-side outcomes depend little on OCEAN and sit at floor or ceiling, so nothing drives them.
+4. Our needs lack the people's common factor: mean inter-need r .22 vs .54 (Table 8, Sample B); status–fairness −.50 vs .21.
 
-**Results: arm B, Table 3 Model 2** (8/13 cells replicate)
-
-| Need → effectiveness of | Paper β | Our β | p | Replicates |
-|---|---|---|---|---|
-| Protection → safety | .05 | .22 | < .001 | No |
-| Protection → authoritarianism | .01 | −.11 | .077 | Yes (null) |
-| Affiliation → benevolence | .10* | .67 | < .001 | Yes |
-| Affiliation → team-building | .36* | .56 | < .001 | Yes |
-| Status → narcissism | .04 | .07 | .240 | Yes (null) |
-| Status → authoritarianism | −.02 | .14 | .038 | No |
-| Status → dominance | .02 | .14 | .038 | No |
-| Vision → vision communication | .18* | .31 | < .001 | Yes |
-| Vision → high-expectation | .10 | .31 | < .001 | No |
-| Expertise → competence | .08 | .16 | .017 | No |
-| Expertise → intellectual stimulation | .13* | .42 | < .001 | Yes |
-| Fairness → moral character | .25* | .17 | .013 | Yes |
-| Fairness → virtue | .08 | .08 | .096 | Yes (null) |
-
-**Reading**
-
-1. **The prestige side reproduces.** Arm A replicates 9 of 10 vision, expertise and fairness cells. Arm B replicates all 5 of the paper's significant cells, 4 of them with larger effects. Point 6 suggests that much of this runs through the persona's OCEAN settings, which weakens it as Step 2's positive control.
-2. **The dominance side does not, and its outcomes sit at the floor or ceiling.** Arm A: strength has a ceiling, M = 7.75 and SD = 0.39 on 1-10, and protection–strength r = .01 even before controls. Arm B: the dominance-side styles sit on the floor, narcissism M = 1.48 (SD 0.21), dominance 1.81 (0.30), authoritarianism 2.11 (0.29), and R² is .04 to .09. The personas nearly agree that a leader is strong, and that domineering leadership is ineffective, so there is little individual variance for any need to predict. Floor and ceiling do not cover every failed cell, though: masculinity has M = 2.96 and SD = 0.89 on 1-10, room to move, and status–masculinity r is still .08. Point 6 offers a reason that covers both.
-3. **Affiliation is the persona's agreeableness.** In arm A, r(affiliation, the persona's agreeableness setting) = .89. Affiliation then carries large unique effects that the paper does not have: sensitivity β = .74, ethics .45, tyranny −.41 (arm A); benevolence .67, virtue .58 (arm B). In the paper, affiliation's ΔR² is .00 to .01 on all eleven ILT dimensions.
-4. **The needs correlate differently, and only on the dominance side.** In arm A they range from −.50 to .70. In the paper's Table 8 they range from .21 to .72 (Sample B). The paper's text says ".60 to .72; see Table 8" (p. 787), which its own table contradicts. The prestige cluster (affiliation, vision, expertise, fairness) keeps its correlations. Protection and status lose theirs: protection is unrelated to status, vision and expertise (about .00), and status turns negative with affiliation, expertise and fairness. Status–fairness is already the paper's lowest pair (.21), and the personas push it to −.50. Sample E's correlations are lower overall (.10 to .39). The paper reports no matrix for Sample B's 261 ILT respondents, so the full 1,035 is the closest comparison.
-
-   Pearson r between the six needs. Paper: Table 8, lower triangle. Ours: each need scored as the mean of its items (`results/replication/a/ffni_generic.json`, `results/replication/b/ffni.json`).
-
-   | Pair | Paper, Sample B (US, generic, N = 1,035) | Arm A (N = 261) | Paper, Sample E T1 (China, work, N = 396) | Arm B (N = 367) |
-   |---|---|---|---|---|
-   | Protection–affiliation | .60 | .33 | .24 | .34 |
-   | Protection–status | .52 | .07 | .33 | −.06 |
-   | Protection–vision | .57 | .00 | .21 | .06 |
-   | Protection–expertise | .52 | −.01 | .20 | .06 |
-   | Protection–fairness | .49 | .29 | .39 | .41 |
-   | Affiliation–status | .38 | −.14 | .20 | −.10 |
-   | Status–vision | .42 | .09 | .19 | .10 |
-   | Status–expertise | .46 | −.07 | .22 | .01 |
-   | Status–fairness | .21 | −.50 | .10 | −.45 |
-   | Affiliation–vision | .72 | .39 | .37 | .37 |
-   | Affiliation–expertise | .67 | .52 | .35 | .47 |
-   | Affiliation–fairness | .69 | .64 | .38 | .64 |
-   | Vision–expertise | .64 | .70 | .34 | .65 |
-   | Vision–fairness | .65 | .46 | .31 | .39 |
-   | Expertise–fairness | .55 | .54 | .29 | .50 |
-   | Range | .21 to .72 | −.50 to .70 | .10 to .39 | −.45 to .65 |
-
-   Need means on the 1-7 scale, M (SD). Fairness sits near the ceiling, which may also hold down its correlations.
-
-   | Arm | Protection | Affiliation | Status | Vision | Expertise | Fairness |
-   |---|---|---|---|---|---|---|
-   | A | 5.67 (0.87) | 5.21 (1.79) | 2.86 (1.07) | 5.69 (1.02) | 5.75 (0.87) | 6.55 (0.87) |
-   | B | 5.55 (0.88) | 5.25 (1.82) | 3.02 (1.06) | 5.82 (0.99) | 5.84 (0.87) | 6.56 (0.86) |
-5. **G1 does not appear here.** Protection reaches the evaluation layer (safety .22) but not the prototype (strength .04), the reverse of the paper. Status reaches both: tyranny .28, and authoritarianism and dominance .14 each. The two status cells are at p = .038 among 13 uncorrected tests, so they are weak evidence.
-6. **Hypothesis: needs and outcomes connect only through the persona's settings, and those settings carry the prestige side but not the dominance side.** This is a proposed explanation that fits the data, not a tested one. Each instrument is answered on a fresh fork, so a need and an outcome can correlate only through what both forks share: the persona's OCEAN levels and description. If one OCEAN trait drives both a need and an outcome (a highly agreeable persona both needs affiliation and rates benevolence effective), they correlate in the paper's direction without any need doing work. If no trait drives both, nothing links them.
-
-   `tools/ocean_confound.py` regresses each need and each outcome on OCEAN (each trait as medium/high dummies) and correlates the two OCEAN-predicted parts. A high r means the need and the outcome draw on the same traits.
-
-   | Paper cell | Side | r | r with OCEAN removed | r of the OCEAN parts | Replicates |
-   |---|---|---|---|---|---|
-   | A: protection → strength | Dominance | .01 | .06 | −.06 | No |
-   | A: status → tyranny | Dominance | .31 | .22 | .48 | Yes |
-   | A: status → masculinity | Dominance | .08 | .08 | .08 | No |
-   | A: status → well-groomed | Dominance | .07 | .01 | .15 | No |
-   | A: 10 vision, expertise and fairness cells | Prestige | .34 to .63 | .05 to .24 | .56 to .97 | 9 of 10 |
-   | B: protection → authoritarianism | Dominance | −.12 | −.17 | .00 | Yes (null) |
-   | B: status → narcissism / authoritarianism / dominance | Dominance | .11 / .12 / .18 | .07 / .07 / .15 | .30 / .36 / .37 | 1 of 3 (null) |
-   | B: 9 other cells | Prestige and other | .32 to .82 | .15 to .33 | .64 to .95 | 6 of 9 |
-
-   Read this way:
-   - On the prestige side, the need and the outcome draw on the same traits (.56 to .97), and most of the raw correlation goes when OCEAN is removed (A: .34 to .63 falls to .05 to .24). The replication there is largely the persona's settings being coherent, in the paper's direction.
-   - On the dominance side, the need and the outcome draw on different traits or none (−.06 to .48), so there is no shared source to produce a correlation. The one dominance cell that replicates in arm A, status → tyranny, is the one with the most overlap (.48).
-   - This would also explain the floor and ceiling in point 2. The dominance-side outcomes depend little on OCEAN (R² .09 to .11 in arm B, .19 to .40 in arm A, against .40 to .83 for the arm A prestige dimensions). What variance is left is the model's own consensus, and that consensus is uniform.
-
-   Limits: 10 OCEAN dummies on n = 261 or 367 inflate R² somewhat. The description text is not modelled, so part of the "OCEAN removed" correlation may come from it. A direct test would hold OCEAN fixed and vary only the description, or add an attribute meant to drive the dominance-side needs, and see whether the dominance cells then appear.
-
-**What this means for Step 2.** Dominance-side results for H4, H5, H5b and H7b cannot be compared directly with the paper, whether they come back null or significant. Floor and ceiling effects limit them in this environment before any situation is manipulated. Prestige-side results can be compared, but if point 6 holds, they mostly show that the persona's settings are coherent, not that a need is doing work. Step 2's need analyses should then control OCEAN, or report r with OCEAN removed beside the raw r. Rewording the dominance items to spread the scores would not help on its own, because the extra variance would still not be tied to any need.
+**What this means for Step 2.** Dominance-side results cannot be compared with the paper, null or not. Prestige-side results mostly show the persona's settings are coherent, so Step 2's need analyses should control OCEAN. Next: calibrate persona needs to S9.1 and validate on Study 5.

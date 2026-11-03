@@ -95,7 +95,7 @@ traits come from, is in the tool's docstring.
 
 | Path | Role |
 |---|---|
-| `run.py` | CLI: `list` / `validate` / `measure-check` / `run` / `report` / `mediate` / `layers` |
+| `run.py` | CLI: `list` / `validate` / `measure-check` / `run` / `report` / `style-check` / `mediate` / `layers` |
 | `src/study.py` | Loads and validates `study.json` |
 | `src/instrument.py` | Loads a rating scale from `instruments/*.json`; subscale scoring |
 | `src/config.py` | `config.ini` → `RunConfig` |
@@ -103,13 +103,18 @@ traits come from, is in the tool's docstring.
 | `src/discussion.py` | One discussion, one vote, one survey administration; retries and quota detection |
 | `src/persona_store.py` | Persona spec → TinyTroupe agent |
 | `src/run_record.py` | One run's output; the only thing that knows the checkpoint JSON shape |
-| `src/stats.py` | Numeric primitives (means, OLS slope, paired t-test, Cronbach's alpha) |
+| `src/stats.py` | Numeric primitives (means, OLS slope, paired t-test, Cronbach's alpha, partial betas, relative weights) |
 | `src/analysis.py` | Run records → summary dicts (`summarize_*`, `need_outcome_links`) |
 | `src/render.py` | Summary dicts → terminal tables, JSON files, charts (`render_*`, `plot_*`) |
 | `src/runtime.py` | TinyTroupe wiring and logging |
 | `tools/build_personas.py` | Builds a study's personas from `personas_output.json` |
+| `tools/make_dp_check_traits.py` | Builds `dp_check_traits` from `dp_check` |
+| `tools/replicate_study5.py` | Sheng et al. Study 5 on personas, no meeting (calls the API; skips saved answers) |
+| `tools/study5_tables.py`, `replication_criteria.py`, `ocean_confound.py` | Study 5 tables, replication criteria, and the OCEAN analysis; read `results/replication/` only |
+| `tools/build_deck.sh` | Builds a `docs/*.md` deck to pptx and renders the slides for checking |
+| `tools/*` (other) | Power simulations, plots and one-off scans; each file's docstring says what it does |
 | `studies/` | One directory per research theme |
-| `docs/` | Design notes, prior results, debugging log |
+| `docs/` | Research write-up (`docs/README.md`), decks, papers, design and debugging logs |
 
 ## Instruments
 
@@ -144,11 +149,25 @@ Agents may answer a turn with `DONE` alone, which counts as silence — speech r
 dependent variable, not an artifact of everyone always talking. `run.py validate` confirms that
 mechanism still works before you spend a full study on it. Invitation order is reshuffled every
 round to remove position bias, and agents are deep-copied per run so no state leaks between runs.
+A vote counts only when the reply names exactly one candidate in whole words (every persona is
+"Participant <k>"); any other reply is stored as a missing ballot with the raw reply kept, never
+assigned to a guessed candidate.
 
 Hypothesis tests are one-sided paired t-tests over per-run values, testing
 `contrast[0] > contrast[1]`. `scipy` supplies the p-value; without it the t statistic still prints.
 
 ## Studies
+
+### Status (2026-11)
+
+1. Step 1, P/D manipulation check: `dp_check` with full personas failed on prestige.
+   `dp_check_traits` (P and D keep only their traits) passed both scales in the routine
+   condition; the threat condition is not yet run (`docs/step1-pd-check.md`).
+2. Study 5 replication on personas (`tools/replicate_study5.py`, no meeting): the prestige
+   side reproduces, largely through the persona's OCEAN settings; the dominance side does not
+   (`docs/README.md`, `docs/study5-data.md`, `docs/study5-criteria.md`).
+3. Step 2, `ffni_mediation`: not yet run. Open decisions: traits-only P and D, and how to
+   make persona needs less driven by OCEAN.
 
 ### `dp_check` — the gate before `ffni_mediation`
 
@@ -160,6 +179,13 @@ peer-rated Dominance and Prestige scales (`dp_peer`, 16 items, one omitted as in
 sanity check. Passes when, in **each** condition, D > P on dominance **and** P > D on
 prestige, paired over runs, two-sided p < .05. d_av is printed beside Ronay et al. (2023)
 Study 3's pre-test (d = 2.15 / 2.06) as a benchmark, not a threshold.
+
+### `dp_check_traits`
+
+`dp_check`'s routine condition with P and D reduced to their traits: no `big_five`, no
+`description`. Same groups, neutrals and sampler seed, so run i is `dp_check`'s run i with only
+the P/D text changed. Built by `tools/make_dp_check_traits.py`, which also copies
+`ffni_mediation`'s `bank_sample.json` as the personas' provenance.
 
 ### `ffni_mediation`
 
