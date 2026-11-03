@@ -289,7 +289,7 @@ Before Step 2, we checked whether Sheng et al.'s Study 5 results reproduce on LL
    | A: 10 vision, expertise and fairness cells | Prestige | .34 to .63 | .05 to .24 | .56 to .97 | 9 of 10 |
    | B: protection → authoritarianism | Dominance | −.12 | −.17 | .00 | Yes (null) |
    | B: status → narcissism / authoritarianism / dominance | Dominance | .11 / .12 / .18 | .07 / .07 / .15 | .30 / .36 / .37 | 1 of 3 (null) |
-   | B: 9 other cells | Prestige and other | .32 to .82 | .15 to .32 | .64 to .95 | 6 of 9 |
+   | B: 9 other cells | Prestige and other | .32 to .82 | .15 to .33 | .64 to .95 | 6 of 9 |
 
    Read this way:
    - On the prestige side, the need and the outcome draw on the same traits (.56 to .97), and most of the raw correlation goes when OCEAN is removed (A: .34 to .63 falls to .05 to .24). The replication there is largely the persona's settings being coherent, in the paper's direction.

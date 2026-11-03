@@ -4,12 +4,11 @@
 
 # Conclusion
 
-- **Half replicates:** prestige side yes, dominance side no
-    - Prestige: 9/10 (arm A), 5/5 significant cells (arm B)
-    - Dominance: 1/4 (arm A), none of the paper's effects (arm B)
-- **Prestige success is partly OCEAN:** removing it drops r from .34-.63 to .05-.24
-- **Dominance fails on model consensus:** domineering = ineffective for every persona
-- **Step 2:** prestige testable with OCEAN controlled; dominance exploratory
+- **Half replicates:** prestige 9/10 (A), 5/5 (B); dominance 1/4 (A), 0 (B)
+- **Prestige success is partly OCEAN:** removing it drops r .34-.63 → .05-.24
+- **Personality drives needs ~2× more than in people:** mean |r| .29 vs .12
+- **Dominance fails on model consensus:** domineering = ineffective for all
+- **Step 2:** prestige with OCEAN controlled; dominance exploratory
 
 ::: notes
 
@@ -19,6 +18,8 @@
 - Dominance 側（protection、status 預測支配型領導）沒有複製出來。B 組 dominance 側成功的兩格，都是「論文不顯著、我們也不顯著」，不算預測到東西。
 
 **但 prestige 側的成功要打折扣。** 每份量表都由 persona 的新分身填，分身之間只共用 OCEAN 和描述文字。需求和結果會相關，主要是因為兩者都跟著 OCEAN 走；扣掉 OCEAN 之後相關幾乎消失。這是假設，還沒直接驗證。
+
+**而且 persona 的需求被人格決定得太強。** 論文補充資料 S9 有真人的人格和需求相關，平均 |r| 只有 .12，我們是 .29，大約 2 倍；最極端的親和性 → affiliation 是 .17 vs .89。詳見最後兩頁。
 
 **Dominance 側失敗**，是因為 gpt-4.1 的所有 persona 都一致認為霸道、自戀的領導沒有效（narcissism 平均 1.48/7，SD 0.21），分數沒有個體差異，需求就沒有東西可以預測。
 
@@ -171,7 +172,7 @@ affiliation 的效果特別大（benevolence β = .67，論文只有 .10），�
 | A: status → masculinity | Dominance | .08 | .08 | .08 | No |
 | A: status → well-groomed | Dominance | .07 | .01 | .15 | No |
 | A: 10 prestige cells | Prestige | .34 to .63 | .05 to .24 | .56 to .97 | 9/10 |
-| B: 9 prestige and other cells | Prestige | .32 to .82 | .15 to .32 | .64 to .95 | 6/9 |
+| B: 9 prestige and other cells | Prestige | .32 to .82 | .15 to .33 | .64 to .95 | 6/9 |
 
 
 ::: notes
@@ -182,5 +183,65 @@ affiliation 的效果特別大（benevolence β = .67，論文只有 .10），�
 - **Dominance 側**：需求和結果被不同的特質推動，或沒有特質推動（−.06 到 .48），沒有共同來源，就連不起來。唯一成功的 status → tyranny，正好是共用 OCEAN 最多的一格（.48）。
 
 **限制**：描述文字沒有建模，所以「扣掉 OCEAN 後」剩下的相關可能有一部分來自描述文字。直接的驗證方法是固定 OCEAN、只改描述，需要另外花 API。
+
+:::
+
+# Personas tie needs to personality far more than people do
+
+| Personality → need | People (Sheng S9, HEXACO, N = 260) | Personas (arm A, OCEAN levels) |
+|-----------------------------------|------------------------------------|--------------------------------|
+| Agreeableness → affiliation | .17 | **.89** |
+| Agreeableness → fairness | .06 | **.56** |
+| Openness → expertise | .24 | **.52** |
+| Extraversion → status | −.05 | **.54** |
+| Openness → protection | .03 | **−.42** |
+| Strongest cell | .27 | .89 |
+| Mean \|r\|, O, C, X, A × 6 needs | .12 | .29 |
+
+::: notes
+
+**資料來源**：Sheng et al. (2026) 補充資料 S9（Table S9.1）。S 代表 Supplemental，是論文另外附的補充資料第 9 節。Sample B 有 260 位真人同時填了 FFNI 和 HEXACO 人格量表。正文只用一句話帶過，所以之前沒注意到。
+
+**怎麼比**：只比兩種人格模型都有的四個特質（開放性、盡責性、外向性、親和性）× 六種需求，取相關的絕對值平均。
+
+- 真人平均 |r| = .12，我們 .29，**大約 2 倍**；最強的一格 .27 vs .89，約 3.3 倍。
+- 但不是整體等比例放大：
+  - 親和性 → affiliation 約 5 倍。
+  - 外向性 → status、開放性 → protection：真人幾乎沒有關係，我們卻很強，是**憑空多出來的關係**。
+- 用解釋變異量（r²）看差距更大：r = .17 只解釋約 3%，r = .89 解釋約 79%。
+
+**限制**：
+- 真人用 HEXACO，我們用 Big Five，親和性的定義不完全相同。
+- 我們的 OCEAN 只有低、中、高三級，分級越粗相關通常越低，所以我們的數字可能還被低估。
+
+**意義**：prestige 側「複製成功、而且效果比論文大」，部分原因就是 persona 的需求被人格決定得太強。
+
+:::
+
+# Candidate attributes: calibrate to S9, validate on Study 5
+
+| Attribute | Evidence | Linked to | In our personas? |
+|--------------------------------|---------------------------------------------|----------------------------------|------------------|
+| Honesty-Humility (HEXACO) | Sheng S9: r −.26 / +.27 | Status (−), fairness (+) | No |
+| Prospective uncertainty anxiety | Sheng S9: r .22 | Protection | No |
+| Age | Sheng S9: r −.19 | Status | Not used |
+| Gender (male = 1) | Sheng S9: r .11 / −.09 | Status (+), protection (−) | Not used |
+| Lack of personal control | Kakkar & Sivanathan (2017), 69 countries | Preference for dominant leaders | No |
+| Perceived conflict, conservatism | Laustsen & Petersen | Preference for dominant leaders | No |
+
+::: notes
+
+**這些屬性都有文獻依據**，前四個直接來自論文自己的真人數據（S9），後兩個來自支配型領導偏好的研究。
+
+- **誠實謙遜（Honesty-Humility）**：HEXACO 的第六個面向，Big Five 沒有。真人裡它和 status 需求負相關（−.26）、和 fairness 正相關（.27），是 dominance 側目前缺的來源。
+- **前瞻性不確定焦慮**：想預防未來的不確定，和 protection 需求相關 .22。
+- **年齡、性別**：bank 有 demographic 資料，但沒用在 persona。
+- **控制感、衝突感**：Kakkar & Sivanathan (2017) 發現經濟不確定使人失去控制感，因而支持支配型領導；Laustsen & Petersen 發現感受到群體衝突、偏保守的人偏好支配型領導。
+
+**做法**：以 S9 的相關大小為校準目標，先只施測 FFNI，確認需求和人格的相關落在真人範圍（|r| 約 .3 以下）；再用 Study 5 的 27 格做獨立驗證，避免對著答案調參數。
+
+**難題**：LLM 會把明確寫出的特質表現得太強，加屬性的同時要讓表達變弱，這一點目前沒有文獻能直接回答。
+
+**為什麼不用 Park et al. (2024) 的訪談式 agent**：訪談原文不公開；每人約 6,500 字，很燒 token；而且他們自己的結果顯示，在人格預測上「一段 persona 描述」（0.75）已經接近訪談式（0.80）。
 
 :::

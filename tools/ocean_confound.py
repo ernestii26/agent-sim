@@ -5,29 +5,39 @@ an outcome can only correlate through what both forks share: the persona's OCEAN
 and description. This prints, per arm, the R2 of each need and each outcome on OCEAN
 (each trait as medium/high dummies, low as reference), and for each paper cell: r, r
 after OCEAN is regressed out of both sides, and r between the two OCEAN-predicted parts
-(whether the need and the outcome draw on the same traits). The description text is not
+(whether the need and the outcome draw on the same traits), and the Model 2 beta of the
+need with the OCEAN dummies added as controls. The description text is not
 modelled.
 
     python tools/ocean_confound.py
 """
 import json
+import sys
 from pathlib import Path
 
 import numpy as np
+from scipy import stats
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+from instrument import load_instrument  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent / "results" / "replication"
 OCEAN = ["openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism"]
 LEVEL = {"low": 0, "medium": 1, "high": 2}
 NEEDS = ["protection", "affiliation", "status", "vision", "expertise", "fairness"]
+# Only effectiveness_styles has reverse-keyed items (moral_character_1, _3); FFNI and ILT have none.
+STYLES = load_instrument(Path(__file__).resolve().parent.parent / "studies" / "ffni_mediation"
+                         / "instruments" / "effectiveness_styles.json")
 ARMS = {
     "a": ("ffni_generic.json", "ilt.json"),
     "b": ("ffni.json", "effectiveness_styles.json"),
 }
 
 
-def scores(answers: dict, names: list[str], ids: list[str]) -> np.ndarray:
-    """Mean of each subscale's items; item keys are '<subscale>_<n>'."""
-    return np.array([[np.mean([v for k, v in answers[i].items()
+def scores(answers: dict, names: list[str], ids: list[str], instrument=None) -> np.ndarray:
+    """Mean of each subscale's items, reverse-keyed items flipped; item keys are '<subscale>_<n>'."""
+    score = instrument.scored if instrument else (lambda k, v: v)
+    return np.array([[np.mean([score(k, v) for k, v in answers[i].items()
                                if k.rsplit("_", 1)[0] == n and isinstance(v, (int, float))])
                       for n in names] for i in ids])
 
@@ -40,6 +50,16 @@ def fit(x: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray, np.ndarray]:
     return 1 - resid.var() / y.var(), resid, fitted
 
 
+def beta_given(z_needs: np.ndarray, z_y: np.ndarray, controls: np.ndarray, j: int) -> tuple[float, float]:
+    """Standardised beta and p of need j in Model 2 with the controls added."""
+    x = np.column_stack([np.ones(len(z_y)), z_needs, controls])
+    coef = np.linalg.lstsq(x, z_y, rcond=None)[0]
+    resid = z_y - x @ coef
+    df = len(z_y) - np.linalg.matrix_rank(x)
+    se = np.sqrt(resid @ resid / df * np.linalg.pinv(x.T @ x)[1 + j, 1 + j])
+    return coef[1 + j], 2 * stats.t.sf(abs(coef[1 + j] / se), df)
+
+
 def arm(key: str) -> None:
     ffni_file, out_file = ARMS[key]
     ffni = json.loads((ROOT / key / ffni_file).read_text())
@@ -49,7 +69,7 @@ def arm(key: str) -> None:
                               ["persona"]["personality"]["big_five"][t]] for t in OCEAN] for i in ids])
     dummies = np.column_stack([(levels[:, j] == v).astype(float) for j in range(5) for v in (1, 2)])
     dims = sorted({k.rsplit("_", 1)[0] for v in out.values() for k in v if not k.startswith("_")})
-    needs, outcomes = scores(ffni, NEEDS, ids), scores(out, dims, ids)
+    needs, outcomes = scores(ffni, NEEDS, ids), scores(out, dims, ids, STYLES if key == "b" else None)
 
     print(f"== arm {key.upper()}, n = {len(ids)}")
     for i, n in enumerate(NEEDS):
@@ -62,9 +82,12 @@ def arm(key: str) -> None:
         r_raw = np.corrcoef(x, y)[0, 1]
         _, rx, fx = fit(dummies, x)
         _, ry, fy = fit(dummies, y)
+        z = lambda a: (a - a.mean(axis=0)) / a.std(axis=0)
+        b, p = beta_given(z(needs), z(y), dummies, NEEDS.index(c["need"]))
         # r of the OCEAN-predicted parts: do the need and the outcome draw on the same traits?
         print(f"  {c['need']} -> {c['dimension']:24s} r {r_raw:+.2f}  r|OCEAN {np.corrcoef(rx, ry)[0, 1]:+.2f}"
-              f"  r(OCEAN parts) {np.corrcoef(fx, fy)[0, 1]:+.2f}  replicated {c['replicated']}")
+              f"  r(OCEAN parts) {np.corrcoef(fx, fy)[0, 1]:+.2f}  beta {c['beta']:+.2f}"
+              f"  beta|OCEAN {b:+.2f} (p {p:.3f})  replicated {c['replicated']}")
 
 
 if __name__ == "__main__":
