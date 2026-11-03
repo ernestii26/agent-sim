@@ -27,7 +27,7 @@ from discussion import (  # noqa: E402
     APIQuotaExhausted, AgentTransport, _administer, _clone_agent, rated_by,
 )
 from instrument import (  # noqa: E402
-    ABOUT_SELF, Instrument, load_instrument, subscale_scores,
+    ABOUT_SELF, Instrument, subscale_scores,
 )
 from persona_store import Participant  # noqa: E402
 from pipeline import BalancedSampler  # noqa: E402

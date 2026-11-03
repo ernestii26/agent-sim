@@ -182,10 +182,10 @@ def run_condition(
         try:
             # Baseline goes to a throwaway fork: the agents who actually discuss must never
             # have seen the items, or the battery primes the very needs we then measure.
-            measures: dict[str, dict[str, Any]] = {"baseline": {}, "post": {}}
+            measures: dict[str, dict[str, Any]] = {BASELINE: {}, POST: {}}
             for inst in study.instruments_at(BASELINE):
                 progress(f"  baseline {inst.key}")
-                measures["baseline"][inst.key] = run_survey(
+                measures[BASELINE][inst.key] = run_survey(
                     participants=clone_participants(cast),
                     instrument=inst,
                     model=config.survey,
@@ -206,7 +206,7 @@ def run_condition(
             # them primes another, yet all of them reflect the discussion that happened.
             for inst in study.instruments_at(POST):
                 progress(f"  post {inst.key}")
-                measures["post"][inst.key] = run_survey(
+                measures[POST][inst.key] = run_survey(
                     participants=clone_participants(cast),
                     instrument=inst,
                     model=config.survey,

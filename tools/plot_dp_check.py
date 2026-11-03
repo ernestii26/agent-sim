@@ -27,9 +27,8 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
-from analysis import subscale_scores  # noqa: E402
+from analysis import subscales_by_target  # noqa: E402
 from config import RunConfig  # noqa: E402
-from instrument import POST  # noqa: E402
 from pipeline import load_records  # noqa: E402
 from stats import mean  # noqa: E402
 from study import load_study  # noqa: E402
@@ -60,11 +59,7 @@ def run_units(name: str = "dp_check") -> dict[str, list[dict]]:
     for key in study.conditions:
         units = []
         for record in load_records(Path(config.output_dir) / study.name / key):
-            by_target: dict[str, dict[str, list[float]]] = {}
-            for by_rated in record.responses(POST, rating).values():
-                for target, answers in by_rated.items():
-                    for name, value in subscale_scores(answers, rating).items():
-                        by_target.setdefault(target, {}).setdefault(name, []).append(value)
+            by_target = subscales_by_target(record, rating)
             unit = {g: {n: mean(v) for n, v in by_target[pid].items()}
                     for g in ("P", "D") for pid in record.members(g) if pid in by_target}
             unit["Did"] = record.members("D")[0]

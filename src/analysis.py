@@ -20,6 +20,14 @@ from study import Condition, Study
 SILENCE_THRESHOLD = 0.80  # a persona below this stayed quiet at least sometimes
 
 
+def _ci95(draws: list[float], minimum: int) -> list[float]:
+    """Percentile 95% interval of bootstrap draws; NaN with fewer than `minimum` of them."""
+    if len(draws) < minimum:
+        return [float("nan"), float("nan")]
+    draws = sorted(draws)
+    return [draws[int(0.025 * len(draws))], draws[int(0.975 * len(draws)) - 1]]
+
+
 # --------------------------------------------------------------------------- #
 # Discussion metrics                                                           #
 # --------------------------------------------------------------------------- #
@@ -183,6 +191,16 @@ def expected_contrast(
             "passed": bool(results) and all(r["passed"] for r in results.values())}
 
 
+def subscales_by_target(record: RunRecord, instrument: Instrument) -> dict[str, dict[str, list[float]]]:
+    """{target: {subscale: [one score per rater]}} for an about=each_candidate instrument."""
+    by_target: dict[str, dict[str, list[float]]] = {}
+    for by_rated in record.responses(POST, instrument).values():
+        for target, answers in by_rated.items():
+            for name, value in subscale_scores(answers, instrument).items():
+                by_target.setdefault(target, {}).setdefault(name, []).append(value)
+    return by_target
+
+
 def summarize_style_check(
     study: Study, by_condition: dict[str, list[RunRecord]], instrument: Instrument
 ) -> dict[str, Any]:
@@ -196,11 +214,7 @@ def summarize_style_check(
     for key, records in by_condition.items():
         units, cells = [], {name: [] for name in instrument.expects}
         for record in records:
-            by_target: dict[str, dict[str, list[float]]] = {}
-            for by_rated in record.responses(POST, instrument).values():
-                for target, answers in by_rated.items():
-                    for name, value in subscale_scores(answers, instrument).items():
-                        by_target.setdefault(target, {}).setdefault(name, []).append(value)
+            by_target = subscales_by_target(record, instrument)
             unit = {}
             for group in {g for pair in instrument.expects.values() for g in pair}:
                 for pid in record.members(group):
@@ -500,9 +514,7 @@ def style_link_by_condition(
         d = draw[high] - draw[low]
         if not math.isnan(d):
             diffs.append(d)
-    diffs.sort()
-    ci = ([diffs[int(0.025 * len(diffs))], diffs[int(0.975 * len(diffs)) - 1]]
-          if len(diffs) >= 20 else [float("nan"), float("nan")])
+    ci = _ci95(diffs, 20)
     return {"need": need, "style": style, "timing": timing, "beta": point,
             "difference": point[high] - point[low], "ci95": ci,
             "conditions": {"low": low, "high": high}, "bootstrap_draws": len(diffs)}
@@ -704,12 +716,7 @@ def summarize_mediation(
             _, _, product = estimate(resampled)
             if not math.isnan(product):
                 draws.append(product)
-    draws.sort()
-    ci = (
-        (draws[int(0.025 * len(draws))], draws[int(0.975 * len(draws)) - 1])
-        if len(draws) >= 100
-        else (float("nan"), float("nan"))
-    )
+    ci = _ci95(draws, 100)
 
     return {
         "need": need,
@@ -720,7 +727,7 @@ def summarize_mediation(
         "path_a": a_path,
         "path_b": b_path,
         "indirect": indirect,
-        "ci95": list(ci),
+        "ci95": ci,
         "bootstrap_draws": len(draws),
         # A CI excluding zero is the evidence for mediation; with 20 runs treat it as
         # suggestive, not confirmatory. Stated as exclusion rather than as "both bounds
@@ -966,10 +973,7 @@ def summarize_layer_moderation(
                 node = node[step]
             if isinstance(node, float) and not math.isnan(node):
                 values.append(node)
-        if len(values) < 20:
-            return [float("nan"), float("nan")]
-        values.sort()
-        return [values[int(0.025 * len(values))], values[int(0.975 * len(values)) - 1]]
+        return _ci95(values, 20)
 
     for name in names:
         entry = point["needs"][name]

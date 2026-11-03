@@ -315,10 +315,10 @@ def cmd_layers(args: argparse.Namespace) -> None:
     )
     render_layer_moderation(study, out)
 
+    pooled = [r for records in by_condition.values() for r in records]
     # The same layer in the source paper's own shape: one regression per dimension,
     # which is what shows a need reaching one of its mapped dimensions and not another.
     if study.prototype is not None:
-        pooled = [r for records in by_condition.values() for r in records]
         by_dim = prototype_by_dimension(pooled, needs, study.prototype)
         render_prototype_by_dimension(study, by_dim)
         out["prototype_by_dimension"] = by_dim
@@ -328,7 +328,6 @@ def cmd_layers(args: argparse.Namespace) -> None:
     # paper's words, protection -> authoritarianism under threat against routine.
     styles = study.descriptions
     if styles is not None:
-        pooled = [r for records in by_condition.values() for r in records]
         by_style = {BASELINE: prototype_by_dimension(pooled, needs, styles)}
         render_prototype_by_dimension(study, by_style[BASELINE], heading=(
             "EVALUATION LAYER, PAPER'S STIMULUS — Sheng et al. Table 3, Model 2 (baseline, pooled)"))
