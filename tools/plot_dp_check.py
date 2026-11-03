@@ -69,10 +69,12 @@ def run_units(name: str = "dp_check") -> dict[str, list[dict]]:
 
 
 def d_av(a: np.ndarray, b: np.ndarray) -> float:
+    """Paired Cohen's d_av: mean difference over the average of the two SDs."""
     return (a.mean() - b.mean()) / ((a.std(ddof=1) + b.std(ddof=1)) / 2)
 
 
 def bootstrap_ci(a: np.ndarray, b: np.ndarray, reps: int = 10000) -> tuple[float, float]:
+    """95% percentile interval of d_av, resampling pairs; draws with no variance are skipped."""
     rng = np.random.default_rng(0)
     idx = rng.integers(0, len(a), (reps, len(a)))
     draws = [d_av(a[i], b[i]) for i in idx if a[i].std() + b[i].std() > 0]

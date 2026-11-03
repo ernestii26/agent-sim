@@ -121,6 +121,7 @@ class Study:
         return self._about(ABOUT_EACH_CANDIDATE)
 
     def group_of(self, persona_id: str) -> str:
+        """The group key that lists this persona, or "?" if none does."""
         for group in self.groups.values():
             if persona_id in group.ids:
                 return group.key

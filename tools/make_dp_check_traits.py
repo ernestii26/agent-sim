@@ -11,6 +11,7 @@ cast and task as dp_check's run i and the two can be compared run by run.
     python3 run.py run dp_check_traits collaborative --runs 10
 """
 import json
+import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -37,6 +38,8 @@ def main() -> None:
         if not link.exists():
             link.symlink_to(Path("..") / "dp_check" / name)
     (TARGET / "study.json").write_text(json.dumps(spec, indent=2, ensure_ascii=False) + "\n")
+    # The personas are ffni_mediation's, so its bank sample is their provenance too.
+    shutil.copy(PERSONAS.parent / "bank_sample.json", TARGET / "bank_sample.json")
 
     changed = 0
     for path in PERSONAS.glob("*.agent.json"):

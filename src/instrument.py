@@ -71,15 +71,18 @@ class Instrument:
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
     def scored(self, item_id: str, value: float) -> float:
+        """The rating with reverse-keyed items flipped onto the scale."""
         low, high = self.scale
         return low + high - value if item_id in self.reverse else value
 
     def is_valid_rating(self, value: object) -> bool:
+        """A number on the scale; bools are excluded because Python counts True as 1."""
         low, high = self.scale
         return isinstance(value, (int, float)) and not isinstance(value, bool) and low <= value <= high
 
 
 def load_instrument(path: Path) -> Instrument:
+    """Parse an instrument JSON, exiting with a message on any malformed field."""
     if not path.exists():
         raise SystemExit(f"Instrument not found: {path}")
     spec = json.loads(path.read_text(encoding="utf-8"))

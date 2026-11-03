@@ -140,7 +140,7 @@ The 50 descriptions in 5c were adapted from paternalistic leadership (Cheng et a
 
 <details>
 
-<summary>**Gaps the paper names**</summart>
+<summary>**Gaps the paper names**</summary>
 
 **G1. Needs shape the prototype but not the evaluation.**
 

@@ -34,6 +34,7 @@ class BalancedSampler:
         self._rng = random.Random(seed)
 
     def take(self, n: int) -> list[int]:
+        """n pool indices, cycling through a fresh shuffle of the whole pool before any repeats."""
         drawn: list[int] = []
         while len(drawn) < n:
             if not self._queue:

@@ -58,6 +58,8 @@ class AgentTransport:
         self.measurement = measurement
 
     def actions(self, agent: Any, prompt: str) -> list[dict[str, Any]]:
+        """The agent's actions for this prompt; API errors are retried with backoff, then
+        read as silence (an empty list) rather than raised."""
         errors = _api_error_types()
         for attempt in range(1, self.retries + 1):
             try:
@@ -276,9 +278,8 @@ def run_discussion(
 
             if on_progress:
                 status = f"✓  {word_count:>3}w" if did_speak else "·"
-                first = participant.name.split()[0]
                 on_progress(
-                    f"    {first:<14} {participant.persona_id:<4} {participant.group:<3} {status}"
+                    f"    {participant.name:<16} {participant.persona_id:<4} {participant.group:<3} {status}"
                 )
 
             if did_speak and text:
@@ -304,7 +305,8 @@ def run_vote(
     """Ask each agent the study's vote question about the others.
 
     Returns a list of vote records:
-        voter_id, voter_group, voted_for_name, voted_for_id, voted_for_group, reason
+        voter_id, voter_group, voted_for_name, voted_for_id, voted_for_group, raw_choice, reason
+    The voted_for_* fields are None when the reply names no single candidate.
     """
     configure_tinytroupe_runtime(model)
 
@@ -336,17 +338,19 @@ def run_vote(
         choice = str(parsed.get("choice") or parsed.get("leader") or "").strip()
         reason = str(parsed.get("reason", "")).strip() or "No reason provided."
 
-        if choice not in candidates:
-            choice = _fuzzy_match_name(choice, candidates)
-        chosen = by_name[choice]
+        # Every persona is "Participant <k>", so only a whole-name match is a vote: an
+        # unmatched or ambiguous reply is a missing ballot, never a guess.
+        matched = _resolve_option(choice, candidates)
+        chosen = by_name[matched] if matched else None
 
         votes.append(
             {
                 "voter_id": participant.persona_id,
                 "voter_group": participant.group,
-                "voted_for_name": chosen.name,
-                "voted_for_id": chosen.persona_id,
-                "voted_for_group": chosen.group,
+                "voted_for_name": chosen.name if chosen else None,
+                "voted_for_id": chosen.persona_id if chosen else None,
+                "voted_for_group": chosen.group if chosen else None,
+                "raw_choice": choice,
                 "reason": reason,
             }
         )
@@ -568,13 +572,11 @@ def _administer(
 def _resolve_option(reply: str, options: list[str]) -> str | None:
     """Which option the reply names, or None when it names none of them.
 
-    Deliberately NOT _fuzzy_match_name, which matches on a candidate's first word and
-    falls back to random.choice. Eighteen of the fifty-three drawn tasks have options
-    sharing a first word -- "Hospital A/B/C", "Site A/B/C", "Candidate A/B/C" -- so that
-    helper would post every near-miss to whichever option happens to be listed first,
-    and invent an answer outright when nothing matched. Both failures land straight in
-    the accuracy figure, which is the one number the hidden-profile tasks were adopted
-    to provide.
+    Matching is on whole words. Personas are "Participant 1", "Participant 12", ..., and
+    eighteen of the fifty-three drawn tasks have options sharing a first word ("Hospital
+    A/B/C", "Site A/B/C"), so a substring or first-word match would post a near-miss to
+    the wrong name or option. Both the vote (the H1/H2 measure) and the hidden-profile
+    accuracy figure land straight on this.
 
     An unmatchable reply is missing data and is recorded as such, the same rule the
     rating scales already follow: never imputed, so a parse failure reads as missing
@@ -590,14 +592,6 @@ def _resolve_option(reply: str, options: list[str]) -> str | None:
     hits = []
     for option in options:
         target = re.sub(r"[^a-z0-9]+", " ", option.lower()).strip()
-        if target and (target in squashed or squashed in target):
+        if target and (f" {target} " in f" {squashed} " or f" {squashed} " in f" {target} "):
             hits.append(option)
     return hits[0] if len(hits) == 1 else None
-
-
-def _fuzzy_match_name(raw: str, candidates: list[str]) -> str:
-    raw_lower = raw.lower()
-    for candidate in candidates:
-        if candidate.split()[0].lower() in raw_lower:
-            return candidate
-    return random.choice(candidates)

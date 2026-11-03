@@ -263,6 +263,7 @@ def straight_lining(record: RunRecord, timing: str, instrument: Instrument) -> f
 def straight_lining_over(
     records: list[RunRecord], timing: str, instrument: Instrument
 ) -> float:
+    """Mean straight-lining rate across runs, skipping runs with no answers to judge."""
     rates = [straight_lining(r, timing, instrument) for r in records]
     return mean([r for r in rates if not math.isnan(r)])
 

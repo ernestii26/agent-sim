@@ -1297,10 +1297,9 @@ def test_measurement_calls_switch_off_the_repetition_guard_and_put_it_back() -> 
 def test_an_unmatchable_task_answer_is_missing_data_not_a_guess() -> None:
     """Eighteen of the fifty-three drawn tasks have options sharing a first word.
 
-    The vote's _fuzzy_match_name matches on a candidate's first word and falls back to
-    random.choice, so on "Hospital A / Hospital B / Hospital C" it would post every
-    near-miss to Hospital A and invent an answer when nothing matched -- straight into
-    the accuracy figure the tasks were adopted to provide.
+    A first-word match with a random fallback would post every near-miss on "Hospital
+    A / Hospital B / Hospital C" to Hospital A and invent an answer when nothing
+    matched -- straight into the accuracy figure the tasks were adopted to provide.
     """
     from discussion import _resolve_option
 
@@ -1316,6 +1315,19 @@ def test_an_unmatchable_task_answer_is_missing_data_not_a_guess() -> None:
 
     # Two options in one reply is ambiguity, not a reason to take the first.
     assert _resolve_option("Hospital A or Hospital B", options) is None
+
+
+def test_vote_names_match_whole_words() -> None:
+    """Every persona is "Participant <k>": the vote used to match on the first word, so
+    any inexact reply went to whoever was listed first. Prefixes must not match either."""
+    from discussion import _resolve_option
+
+    names = ["Participant 1", "Participant 12", "Participant 122"]
+    assert _resolve_option("participant 12.", names) == "Participant 12"
+    assert _resolve_option("I vote for Participant 1 because", names) == "Participant 1"
+    assert _resolve_option("Participant 122", names) == "Participant 122"
+    assert _resolve_option("Participant", names) is None
+    assert _resolve_option("nobody stood out", names) is None
 
 
 def test_accuracy_excludes_unanswered_rather_than_scoring_them_wrong() -> None:

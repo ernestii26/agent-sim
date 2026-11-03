@@ -47,6 +47,7 @@ Answer with one word, YES or NO."""
 
 
 def judge(client, model: str, fact: str, transcript: str) -> bool:
+    """Ask the model whether the transcript states this fact; a reply starting with Y is yes."""
     reply = client.chat.completions.create(
         model=model,
         temperature=0,

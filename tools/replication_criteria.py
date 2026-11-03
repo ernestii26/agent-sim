@@ -42,10 +42,12 @@ FALLBACK_SE = .054
 
 
 def se_beta(beta: float, p: float, df: int) -> float:
+    """SE of a coefficient recovered from its two-sided p: |beta| / t(p/2, df)."""
     return abs(beta) / stats.t.isf(p / 2, df)
 
 
 def judge(arm: str) -> list[dict]:
+    """Per cell of one arm: the paper's and our r and beta, their prediction intervals, and criterion A."""
     rows = []
     for c in json.loads((DATA / arm / "summary.json").read_text())["cells"]:
         key, n = (c["need"], c["dimension"]), c["n"]

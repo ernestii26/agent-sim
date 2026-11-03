@@ -84,6 +84,7 @@ def make_run(run_no: int, condition: str, rng: random.Random, *, lift: float,
 
 
 def one_rep(study, rng: random.Random, runs: int, draws: int, **kw) -> dict[str, bool]:
+    """Simulate one study (threat vs a no-shift collaborative arm) and report which of H3-H6 clear zero."""
     flat = dict(kw, lift=0.0)          # the collaborative arm is the no-shift baseline
     by_condition = {
         "collaborative": [make_run(i, "collaborative", rng, **flat)

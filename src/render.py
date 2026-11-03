@@ -54,6 +54,7 @@ def render_validation(study: Study, summary: dict[str, Any]) -> None:
 
 
 def render_contrast(study: Study, condition: Condition, summary: dict[str, Any]) -> None:
+    """Print one condition's contrast: per-metric means, the paired test, and per-run votes."""
     a, b = summary["contrast"]
     label_a, label_b = study.label_of(a), study.label_of(b)
 
@@ -416,6 +417,7 @@ def save_summary(
 def plot_contrast(
     study: Study, condition: Condition, summary: dict[str, Any], output_dir: Path
 ) -> Path | None:
+    """Save a bar chart of the contrast to a timestamped PNG; None if matplotlib is missing."""
     try:
         import matplotlib.pyplot as plt
     except ImportError:

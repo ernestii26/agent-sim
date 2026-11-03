@@ -1,3 +1,4 @@
+"""TinyTroupe plumbing: lazy import, per-run model settings, file logging, and action text."""
 from __future__ import annotations
 
 import json
@@ -29,7 +30,7 @@ def setup_file_logging(log_dir: str | Path) -> None:
 def _apply_file_logging() -> None:
     """Attach file handlers to the root logger (called after TinyTroupe import).
 
-    Creates two files per session:
+    Creates one file per session:
       info_<ts>.log     — INFO+, clean aligned columns, easy to tail
 
     There used to be a second warnings_<ts>.log at WARNING+. It carried nothing the
@@ -66,6 +67,8 @@ def _apply_file_logging() -> None:
 
 
 def ensure_tinytroupe_imports() -> tuple[Any, Any, Any, Any]:
+    """TinyTroupe's config_manager, TinyPerson, TinyWorld, TinyPersonFactory, imported lazily so
+    offline analysis never needs the package."""
     try:
         from tinytroupe import config_manager
         from tinytroupe.agent import TinyPerson
@@ -102,6 +105,7 @@ def configure_tinytroupe_runtime(settings: "ModelSettings") -> None:
 
 
 def actions_to_text(actions: list[dict[str, Any]] | None) -> str:
+    """What an agent said: its TALK contents, else its other actions tagged by type, else the raw JSON."""
     if not actions:
         return ""
 

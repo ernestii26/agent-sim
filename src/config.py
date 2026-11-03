@@ -57,6 +57,7 @@ class RunConfig:
 
     @staticmethod
     def from_ini(path: Path) -> "RunConfig":
+        """Read config.ini; only [OpenAI] API_KEY is required, every [Simulation] key has a default."""
         if not path.exists():
             raise SystemExit(
                 f"config.ini not found at {path}. Copy config.ini.example and set API_KEY."
