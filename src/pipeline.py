@@ -7,7 +7,9 @@ and reporting happens afterwards in analysis.py from the saved run records.
 from __future__ import annotations
 
 import json
+import os
 import random
+import socket
 from dataclasses import replace
 from pathlib import Path
 from typing import Any, Callable
@@ -120,7 +122,6 @@ def run_condition(
     """
     # Imported here, not at module scope: openai/tinytroupe are only needed to actually
     # run a simulation, so tools and tests can import this module without them installed.
-    from discussion import APIQuotaExhausted
     from persona_store import load_personas
 
     def progress(msg: str) -> None:
@@ -155,51 +156,137 @@ def run_condition(
         task = condition.pool[task_sampler.take(1)[0]] if task_sampler else None
         ckpt = ckpt_dir / f"run_{run_no:03d}.json"
         if ckpt.exists():
-            progress(f"\nRun {run_no}/{runs}  [checkpoint]")
-            replayed = RunRecord.from_dict(json.loads(ckpt.read_text(encoding="utf-8")))
-            _reject_foreign_scenario(replayed, condition, ckpt)
-            records.append(replayed)
+            records.append(_replay(ckpt, condition, run_no, runs, progress))
             continue
-
-        members: dict[str, list[str]] = {}
-        for participant in cast:
-            members.setdefault(participant.group, []).append(participant.persona_id)
-        progress(f"\nRun {run_no}/{runs}  ({members})")
-
-        scenario, shares = _deal_task(study, condition, run_no, task, cast, progress)
+        # Several processes may work one condition (run.py run --parallel). Each draws
+        # every cast in order, so run i's cast never depends on who executes it; the lock
+        # decides who does. Re-checked after claiming: a peer may have finished the run
+        # and released its lock between the check above and the claim.
+        lock = _claim(ckpt)
+        if lock is None:
+            progress(f"\nRun {run_no}/{runs}  [taken by another worker]")
+            continue
         try:
-            measures, transcript, votes, answers = _simulate_run(
-                study, condition, config, cast, scenario, shares, task,
+            if ckpt.exists():
+                records.append(_replay(ckpt, condition, run_no, runs, progress))
+                continue
+            record = _execute_run(
+                study, condition, config, cast, task, run_no, runs,
                 rounds=rounds, with_votes=with_votes, progress=progress,
             )
-        except APIQuotaExhausted as exc:
-            progress(f"\n[FATAL] {exc}")
-            progress(
-                f"  Stopping after {len(records)} completed runs. "
-                "Checkpoints are saved — resume with the same command when quota is restored."
-            )
-            break
-
-        record = RunRecord(
-            run_no=run_no,
-            condition=condition.key,
-            members_by_group=members,
-            transcript=transcript,
-            votes=votes,
-            measures=measures,
-            # The exact wording each battery was answered against. Item ids are
-            # positional, so two versions of a scale can share them while asking
-            # different questions; this is what lets a later report refuse to mix them.
-            instruments={i.key: i.fingerprint for i in study.instruments},
-            task=_task_summary(task, shares),
-            answers=answers,
-        )
-        records.append(record)
-        ckpt.write_text(
-            json.dumps(record.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+            if record is None:
+                progress(
+                    f"  Stopping after {len(records)} completed runs. "
+                    "Checkpoints are saved — resume with the same command when quota is restored."
+                )
+                break
+            records.append(record)
+            _write_atomic(ckpt, json.dumps(record.to_dict(), ensure_ascii=False, indent=2))
+        finally:
+            lock.unlink(missing_ok=True)
 
     return records
+
+
+def _replay(
+    ckpt: Path, condition: Condition, run_no: int, runs: int, progress: Callable[[str], None]
+) -> RunRecord:
+    """A finished run read back from its checkpoint."""
+    progress(f"\nRun {run_no}/{runs}  [checkpoint]")
+    replayed = RunRecord.from_dict(json.loads(ckpt.read_text(encoding="utf-8")))
+    _reject_foreign_scenario(replayed, condition, ckpt)
+    return replayed
+
+
+def _execute_run(
+    study: Study,
+    condition: Condition,
+    config: RunConfig,
+    cast: list[Participant],
+    task: Task | None,
+    run_no: int,
+    runs: int,
+    *,
+    rounds: int,
+    with_votes: bool,
+    progress: Callable[[str], None],
+) -> RunRecord | None:
+    """Simulate one run and return its record, or None if the API quota ran out."""
+    from discussion import APIQuotaExhausted
+
+    members: dict[str, list[str]] = {}
+    for participant in cast:
+        members.setdefault(participant.group, []).append(participant.persona_id)
+    progress(f"\nRun {run_no}/{runs}  ({members})")
+
+    scenario, shares = _deal_task(study, condition, run_no, task, cast, progress)
+    try:
+        measures, transcript, votes, answers = _simulate_run(
+            study, condition, config, cast, scenario, shares, task,
+            rounds=rounds, with_votes=with_votes, progress=progress,
+        )
+    except APIQuotaExhausted as exc:
+        progress(f"\n[FATAL] {exc}")
+        return None
+
+    return RunRecord(
+        run_no=run_no,
+        condition=condition.key,
+        members_by_group=members,
+        transcript=transcript,
+        votes=votes,
+        measures=measures,
+        # The exact wording each battery was answered against. Item ids are
+        # positional, so two versions of a scale can share them while asking
+        # different questions; this is what lets a later report refuse to mix them.
+        instruments={i.key: i.fingerprint for i in study.instruments},
+        task=_task_summary(task, shares),
+        answers=answers,
+    )
+
+
+def _claim(ckpt: Path) -> Path | None:
+    """Take the run's lock file, or None if another process holds it.
+
+    O_CREAT | O_EXCL is atomic, so when several workers reach the same run at once
+    exactly one creates the file. It records host and pid so a stale lock can be told
+    from a live one (clear_stale_locks).
+    """
+    lock = ckpt.with_suffix(".lock")
+    try:
+        fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError:
+        return None
+    with os.fdopen(fd, "w") as f:
+        f.write(f"{socket.gethostname()} {os.getpid()}\n")
+    return lock
+
+
+def clear_stale_locks(ckpt_dir: Path) -> list[Path]:
+    """Remove run locks left by processes on this host that no longer exist.
+
+    Call only before any worker starts: a worker clearing locks while its peers claim
+    them could read a stale lock, lose the race to a peer's fresh one, and delete it.
+    """
+    removed = []
+    for lock in ckpt_dir.glob("run_*.lock"):
+        try:
+            host, pid = lock.read_text(encoding="utf-8").split()
+            os.kill(int(pid), 0)
+        except ProcessLookupError:
+            if host == socket.gethostname():
+                lock.unlink(missing_ok=True)
+                removed.append(lock)
+        except (OSError, ValueError):
+            continue  # unreadable, or alive but not ours to signal: leave it
+    return removed
+
+
+def _write_atomic(path: Path, text: str) -> None:
+    """Write via a temporary file and rename, so a reader never sees half a checkpoint."""
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
 
 
 def _deal_task(

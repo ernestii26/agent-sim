@@ -1440,6 +1440,86 @@ def test_a_borrowing_study_seats_the_same_casts_as_its_lender() -> None:
         assert study.sampler_seed == lender.sampler_seed, name
 
 
+def _claim_every(paths: list[str]) -> list[str]:
+    """Worker for the lock test: try to claim every run, return the ones won."""
+    from pipeline import _claim
+    return [p for p in paths if _claim(Path(p))]
+
+
+def test_run_locks_are_exclusive_across_processes() -> None:
+    """Six processes racing for the same thirty runs: each run goes to exactly one."""
+    import multiprocessing
+
+    with tempfile.TemporaryDirectory() as d:
+        paths = [str(Path(d) / f"run_{i:03d}.json") for i in range(1, 31)]
+        with multiprocessing.get_context("fork").Pool(6) as pool:
+            won = pool.map(_claim_every, [paths] * 6)
+        claimed = [p for batch in won for p in batch]
+        assert sorted(claimed) == paths, f"{len(claimed)} claims for {len(paths)} runs"
+
+
+def test_stale_locks_are_cleared_and_live_ones_kept() -> None:
+    import os
+    import socket
+    import subprocess as sp
+
+    from pipeline import clear_stale_locks
+
+    dead = sp.Popen([sys.executable, "-c", "pass"])
+    dead.wait()
+    with tempfile.TemporaryDirectory() as d:
+        stale, live = Path(d) / "run_001.lock", Path(d) / "run_002.lock"
+        stale.write_text(f"{socket.gethostname()} {dead.pid}\n")
+        live.write_text(f"{socket.gethostname()} {os.getpid()}\n")
+        assert clear_stale_locks(Path(d)) == [stale]
+        assert live.exists() and not stale.exists()
+
+
+def test_parallel_workers_run_each_run_once_with_the_sequential_casts() -> None:
+    """Four concurrent run_condition calls on one directory: every run is executed once,
+    and run i gets the same cast it gets when one process runs them all in order."""
+    import time
+
+    import persona_store
+    import pipeline
+
+    study = load_study("ffni_mediation")
+    condition = study.condition("collaborative")
+    executed: list[int] = []
+    guard = threading.Lock()
+
+    def fake_personas(_dir, groups):
+        return {pid: Participant(agent=None, persona_id=pid, name=f"Participant {pid}", group=g)
+                for pid, g in groups.items()}
+
+    def fake_simulate(study, condition, config, cast, scenario, shares, task, **_):
+        with guard:
+            executed.append(len(executed))
+        time.sleep(0.01)
+        return {"baseline": {}, "post": {}}, [], [], []
+
+    saved = persona_store.load_personas, pipeline._simulate_run
+    persona_store.load_personas, pipeline._simulate_run = fake_personas, fake_simulate
+    try:
+        with tempfile.TemporaryDirectory() as seq, tempfile.TemporaryDirectory() as par:
+            kw = dict(runs=12, rounds=1, with_votes=False, on_progress=None)
+            expected = {r.run_no: r.members_by_group for r in
+                        pipeline.run_condition(study, condition, None, output_dir=Path(seq), **kw)}
+            workers = [threading.Thread(target=pipeline.run_condition, args=(study, condition, None),
+                                        kwargs=dict(output_dir=Path(par), **kw)) for _ in range(4)]
+            for w in workers:
+                w.start()
+            for w in workers:
+                w.join()
+            got = {r.run_no: r.members_by_group for r in pipeline.load_records(Path(par))}
+            assert got == expected, "a worker drew a different cast for some run"
+            assert len(executed) == 24, f"{len(executed) - 12} parallel executions for 12 runs"
+            assert not list((Path(par) / "checkpoints").glob("*.lock")), "locks left behind"
+            assert not list((Path(par) / "checkpoints").glob("*.tmp")), "partial writes left"
+    finally:
+        persona_store.load_personas, pipeline._simulate_run = saved
+
+
 if __name__ == "__main__":
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for test in tests:

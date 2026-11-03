@@ -39,6 +39,8 @@ the Status section of `README.md` (update it when a stage finishes). Research wr
   definitions, `personas_output.json`, paper PDFs. Archives under `results/archive_*` stay.
 - Regenerable and gitignored: `studies/dp_check_traits/personas/`, `results/replication/*/personas/`.
 - Every run checkpoints to `results/<study>/<condition>/checkpoints/`; re-running resumes.
+- Parallel runs are processes (`run.py run --parallel N`), never threads: TinyTroupe state is
+  global. Workers coordinate only through per-run lock files and atomic checkpoint writes.
 
 ## Code
 

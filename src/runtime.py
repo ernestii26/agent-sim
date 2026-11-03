@@ -51,7 +51,7 @@ def _apply_file_logging() -> None:
         fmt="%(asctime)s  %(levelname)-7s  %(name)-16s  %(message)s",
         datefmt="%H:%M:%S",
     )
-    info_fh = logging.FileHandler(_pending_log_dir / f"info_{ts}.log", encoding="utf-8")
+    info_fh = logging.FileHandler(_pending_log_dir / f"info_{ts}_{os.getpid()}.log", encoding="utf-8")
     info_fh.setLevel(logging.INFO)
     info_fh.setFormatter(info_fmt)
 
@@ -63,7 +63,7 @@ def _apply_file_logging() -> None:
     _warnings_module.filterwarnings("always")
     logging.captureWarnings(True)
 
-    print(f"  Logs → {_pending_log_dir}/info_{ts}.log")
+    print(f"  Logs → {_pending_log_dir}/info_{ts}_{os.getpid()}.log")
 
 
 def ensure_tinytroupe_imports() -> tuple[Any, Any, Any, Any]:

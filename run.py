@@ -4,7 +4,7 @@
     python3 run.py list
     python3 run.py validate      <study>
     python3 run.py measure-check <study>
-    python3 run.py run      <study> <condition> [--runs N] [--rounds N]
+    python3 run.py run      <study> <condition> [--runs N] [--rounds N] [--parallel N]
     python3 run.py report   <study> <condition>
     python3 run.py mediate  <study>            H6
     python3 run.py layers   <study>            H3, H4, H5, H7
@@ -16,7 +16,9 @@ from __future__ import annotations
 
 import argparse
 import os
+import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -34,7 +36,7 @@ from analysis import (  # noqa: E402
 )
 from config import RunConfig  # noqa: E402
 from instrument import BASELINE, POST, Instrument  # noqa: E402
-from pipeline import load_records, run_condition, run_measure_check  # noqa: E402
+from pipeline import clear_stale_locks, load_records, run_condition, run_measure_check  # noqa: E402
 from render import (  # noqa: E402
     plot_contrast, render_contrast, render_layer_moderation, render_layers,
     render_mediation, render_measure_check, render_needs, render_prototype_by_dimension,
@@ -127,11 +129,61 @@ def cmd_run(args: argparse.Namespace) -> None:
     print(f"  Discussion: {config.discussion_model}   Vote: {config.vote_model}")
     print(f"  Runs: {runs}   Rounds: {rounds}   Personas: {study.personas_dir}\n")
 
-    records = run_condition(
-        study, condition, config, runs=runs, rounds=rounds, with_votes=study.votes,
-        output_dir=out, on_progress=print,
-    )
+    if args.worker:
+        # One of --parallel's processes: run what it can claim; the parent reports.
+        run_condition(study, condition, config, runs=runs, rounds=rounds,
+                      with_votes=study.votes, output_dir=out, on_progress=print)
+        return
+    # Only the coordinating process clears locks, and before any worker starts.
+    for lock in clear_stale_locks(out / "checkpoints"):
+        print(f"  removed stale lock {lock.name}")
+    if args.parallel > 1:
+        _run_workers(args, runs, rounds, out)
+        records = load_records(out)
+    else:
+        records = run_condition(
+            study, condition, config, runs=runs, rounds=rounds, with_votes=study.votes,
+            output_dir=out, on_progress=print,
+        )
     _report(study, condition, records, out, _provenance(config, study))
+
+
+def _run_workers(args: argparse.Namespace, runs: int, rounds: int, out: Path) -> None:
+    """Start `--parallel` copies of this command as workers and wait for all of them.
+
+    Processes, not threads: TinyTroupe keeps the model settings, the agent registry and
+    the world registry in globals, so two runs in one process would overwrite each
+    other's temperature and agents. Workers share only the checkpoint directory, where
+    each run is claimed by a lock file and written atomically (pipeline.run_condition).
+    Each worker's output goes to logs/worker_<k>.out; the console shows progress.
+    """
+    (out / "logs").mkdir(parents=True, exist_ok=True)
+    ckpt_dir = out / "checkpoints"
+    ckpt_dir.mkdir(parents=True, exist_ok=True)
+    command = [sys.executable, str(Path(__file__).resolve()), "run", args.study, args.condition,
+               "--runs", str(runs), "--rounds", str(rounds), "--worker"]
+    print(f"  {args.parallel} workers; output in {out / 'logs'}/worker_<k>.out")
+    logs = [open(out / "logs" / f"worker_{k}.out", "w", encoding="utf-8")
+            for k in range(1, args.parallel + 1)]
+    procs = [subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT) for log in logs]
+    try:
+        while any(p.poll() is None for p in procs):
+            time.sleep(30)
+            done = sum(1 for n in range(1, runs + 1) if (ckpt_dir / f"run_{n:03d}.json").exists())
+            print(f"  {done}/{runs} runs checkpointed")
+    except KeyboardInterrupt:
+        for p in procs:
+            p.terminate()
+        for p in procs:
+            p.wait()
+        raise SystemExit("Interrupted; finished runs are checkpointed. Re-run to resume.")
+    finally:
+        for log in logs:
+            log.close()
+    failed = [k for k, p in enumerate(procs, start=1) if p.returncode != 0]
+    if failed:
+        raise SystemExit(f"Worker(s) {failed} failed; see their worker_<k>.out. "
+                         "Finished runs are checkpointed; re-run to resume.")
 
 
 def cmd_report(args: argparse.Namespace) -> None:
@@ -399,6 +451,10 @@ def main() -> None:
         p.add_argument("--runs", type=int, default=None, help="override number of runs")
         if name != "report":
             p.add_argument("--rounds", type=int, default=None, help="override rounds per run")
+        if name == "run":
+            p.add_argument("--parallel", type=int, default=1,
+                           help="worker processes sharing the condition (default: 1)")
+            p.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
         p.set_defaults(func=func)
 
     args = parser.parse_args()

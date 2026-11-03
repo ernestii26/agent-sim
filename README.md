@@ -28,6 +28,7 @@ python3 run.py style-check   dp_check                      # gate (b): must pass
 python3 run.py measure-check ffni_mediation                # is the rating scale usable at all?
 python3 run.py run           ffni_mediation collaborative
 python3 run.py run           ffni_mediation threat --runs 20 --rounds 3
+python3 run.py run           ffni_mediation threat --runs 20 --parallel 12   # 12 worker processes
 python3 run.py report        ffni_mediation threat         # re-report, no API calls
 python3 run.py mediate       ffni_mediation --need protection --group D   # H6
 python3 run.py layers        ffni_mediation                              # H3, H4, H5, H7
@@ -42,6 +43,14 @@ Run `measure-check` before paying for a study that uses instruments. It administ
 self-report scale twice per persona (no discussion, no votes) and fails loudly if the agents
 straight-line the scale, answer it differently every time, or give subscales that do not
 differentiate. That costs a couple of dollars; discovering it 40 runs in does not.
+
+`--parallel N` starts N worker processes on one condition and reports once they all finish.
+Each worker draws every run's cast in order, so run i gets the same cast however many workers
+there are; a lock file (`run_NNN.lock`, created atomically) decides who executes it, and
+checkpoints are written via a temporary file and a rename. Processes rather than threads,
+because TinyTroupe keeps model settings and its agent and world registries in globals. The
+limit is the account's TPM: each call counts as its input plus `max_completion_tokens`
+(about 10k tokens here), so 2M TPM supports about 18 workers.
 
 Every run is checkpointed to `results/<study>/<condition>/checkpoints/run_NNN.json`. Re-running the
 same command reuses them, so an interrupted study — or one stopped by an exhausted API quota —
