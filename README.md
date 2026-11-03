@@ -177,6 +177,10 @@ Hypothesis tests are one-sided paired t-tests over per-run values, testing
    (`docs/README.md`, `docs/study5-data.md`, `docs/study5-criteria.md`).
 3. Step 2, `ffni_mediation`: not yet run. Open decisions: traits-only P and D, and how to
    make persona needs less driven by OCEAN.
+4. Planned, not started (`docs/plan-persona-pilot.md`): a persona pilot answering only the
+   generic FFNI — personas with no personality (temperature 0 and 1.0), Big Five levels drawn
+   from people's trait intercorrelations, and HEXACO levels — compared with supplement S9.1
+   and Table 8. About 590 gpt-4.1 calls; waits for the go-ahead.
 
 ### `dp_check` — the gate before `ffni_mediation`
 
