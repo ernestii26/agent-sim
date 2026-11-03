@@ -173,7 +173,7 @@ def _report(study: Study, condition, records: list, out: Path,
         summary["needs"] = need_summary
 
         links = need_outcome_links(
-            study, records, needs,
+            records, needs,
             ideals=study.prototype,
             effectiveness=study.candidate_rating,
             contrast=condition.contrast,
@@ -274,7 +274,7 @@ def cmd_mediate(args: argparse.Namespace) -> None:
         print(f"  {key}: {len(records)} runs")
 
     med = summarize_mediation(
-        study, by_condition, needs, need=args.need, outcome_group=args.group,
+        by_condition, needs, need=args.need, outcome_group=args.group,
     )
     render_mediation(study, med)
     save_summary(med, Path(config.output_dir) / study.name, f"mediation_{args.need}",
@@ -309,7 +309,7 @@ def cmd_layers(args: argparse.Namespace) -> None:
         raise SystemExit(f"--group {args.group} is not one of the contrasted groups {pair}")
     contrast = (args.group, *(g for g in pair if g != args.group))
     out = summarize_layer_moderation(
-        study, by_condition, needs,
+        by_condition, needs,
         ideals=study.prototype, effectiveness=study.candidate_rating,
         contrast=contrast, need=args.need, outcome_group=args.group,
     )
@@ -320,7 +320,7 @@ def cmd_layers(args: argparse.Namespace) -> None:
     # which is what shows a need reaching one of its mapped dimensions and not another.
     if study.prototype is not None:
         by_dim = prototype_by_dimension(pooled, needs, study.prototype)
-        render_prototype_by_dimension(study, by_dim)
+        render_prototype_by_dimension(by_dim)
         out["prototype_by_dimension"] = by_dim
 
     # The paper's own effectiveness stimulus (Table 3, Model 2). Baseline, pooled: the
@@ -329,11 +329,11 @@ def cmd_layers(args: argparse.Namespace) -> None:
     styles = study.descriptions
     if styles is not None:
         by_style = {BASELINE: prototype_by_dimension(pooled, needs, styles)}
-        render_prototype_by_dimension(study, by_style[BASELINE], heading=(
+        render_prototype_by_dimension(by_style[BASELINE], heading=(
             "EVALUATION LAYER, PAPER'S STIMULUS — Sheng et al. Table 3, Model 2 (baseline, pooled)"))
         for key, records in by_condition.items():
             by_style[key] = prototype_by_dimension(records, needs, styles, timing=POST)
-            render_prototype_by_dimension(study, by_style[key], heading=(
+            render_prototype_by_dimension(by_style[key], heading=(
                 f"EVALUATION LAYER, PAPER'S STIMULUS — post, {key} only (H7b)"))
         out["styles_by_dimension"] = by_style
         h7b = style_link_by_condition(by_condition, needs, styles, need=args.need)

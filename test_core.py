@@ -412,7 +412,7 @@ def test_mediation_finds_the_indirect_path_when_it_is_there() -> None:
         "threat": runs([(2, 2), (2, 3), (3, 3), (3, 4)]),
     }
     med = summarize_mediation(
-        study, by_condition, ffni, need="protection", outcome_group="D", bootstrap=300,
+        by_condition, ffni, need="protection", outcome_group="D", bootstrap=300,
     )
     assert med["path_a"] > 0, med["path_a"]       # threat induces more protection
     assert med["path_b"] > 0, med["path_b"]       # within condition, more change -> more D
@@ -437,7 +437,7 @@ def test_mediation_is_not_fooled_by_a_condition_difference_alone() -> None:
         "threat": runs([(2, 3), (2, 3), (3, 3), (3, 3)]),          # flat at 3/4
     }
     med = summarize_mediation(
-        study, by_condition, ffni, need="protection", outcome_group="D", bootstrap=300,
+        by_condition, ffni, need="protection", outcome_group="D", bootstrap=300,
     )
     assert med["path_a"] > 0, med["path_a"]        # the condition really did shift the need
     assert abs(med["path_b"]) < 1e-9, med["path_b"]  # but nothing within condition
@@ -468,7 +468,7 @@ def test_need_outcome_links_separates_cognition_from_evaluation() -> None:
         records.append(record)
 
     links = need_outcome_links(
-        study, records, ffni, ideals=ideals, effectiveness=effectiveness, contrast=("D", "P")
+        records, ffni, ideals=ideals, effectiveness=effectiveness, contrast=("D", "P")
     )
     protection = links["needs"]["protection"]
     assert protection["cognition"]["r"] > 0.95        # need tracks the prototype
@@ -935,7 +935,7 @@ def test_layer_moderation_separates_the_two_layers_and_the_two_conditions() -> N
         "threat": [_layer_run(i, "threat", rng, lift=1.5) for i in range(1, 21)],
     }
     out = summarize_layer_moderation(
-        study, by_condition, study.self_report,
+        by_condition, study.self_report,
         ideals=study.prototype, effectiveness=study.candidate_rating,
         contrast=("D", "P"), bootstrap=200, seed=3,
     )
@@ -1010,7 +1010,7 @@ def test_a_degenerate_path_is_reported_as_unestimable_not_as_a_null() -> None:
                                  baseline_protection=3, d_voters=0) for i in (1, 2, 3)],
     }
     med = summarize_mediation(
-        study, by_condition, ffni, need="protection", outcome_group="D", bootstrap=100,
+        by_condition, ffni, need="protection", outcome_group="D", bootstrap=100,
     )
     assert med["path_a"] > 0                      # the condition did shift the need
     assert math.isnan(med["path_b"])              # but nobody ever endorsed D
@@ -1127,7 +1127,7 @@ def test_per_dimension_h4_sees_what_a_composite_hides() -> None:
     assert b_up > 0.8 and b_down < -0.8, (b_up, b_down)
 
     # The composite averages them away.
-    links = need_outcome_links(study, records, needs, ideals=ideals)
+    links = need_outcome_links(records, needs, ideals=ideals)
     assert abs(links["needs"]["status"]["cognition"]["beta"]) < 0.3
 
     # Relative weights sum to the model R2, which delta R2 does not.

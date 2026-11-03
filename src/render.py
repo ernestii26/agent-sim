@@ -180,7 +180,7 @@ def render_layers(study: Study, links: dict[str, Any]) -> None:
     print("=" * 88)
 
 
-def render_prototype_by_dimension(study: Study, out: dict[str, Any], heading: str | None = None) -> None:
+def render_prototype_by_dimension(out: dict[str, Any], heading: str | None = None) -> None:
     """H4 laid out the way the source paper reports it — one row per dimension per need.
 
     Also used for the style descriptions (H5b, H7b), whose `predicts` is Table 3's pairs.

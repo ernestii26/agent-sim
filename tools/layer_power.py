@@ -91,12 +91,12 @@ def one_rep(study, rng: random.Random, runs: int, draws: int, **kw) -> dict[str,
         "threat": [make_run(i, "threat", rng, **kw) for i in range(1, runs + 1)],
     }
     layers = summarize_layer_moderation(
-        study, by_condition, study.self_report, ideals=study.prototype,
+        by_condition, study.self_report, ideals=study.prototype,
         effectiveness=study.candidate_rating, contrast=("D", "P"),
         bootstrap=draws, seed=rng.randrange(10**6),
     )
     med = summarize_mediation(
-        study, by_condition, study.self_report, need="protection", outcome_group="D",
+        by_condition, study.self_report, need="protection", outcome_group="D",
         bootstrap=draws, seed=rng.randrange(10**6),
     )
     p = layers["needs"]["protection"]

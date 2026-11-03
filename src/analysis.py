@@ -521,7 +521,6 @@ def style_link_by_condition(
 
 
 def need_outcome_links(
-    study: Study,
     records: list[RunRecord],
     needs: Instrument,
     *,
@@ -630,7 +629,6 @@ def need_outcome_links(
 
 
 def summarize_mediation(
-    study: Study,
     by_condition: dict[str, list[RunRecord]],
     needs: Instrument,
     *,
@@ -803,7 +801,6 @@ def _centre(values: list[float]) -> list[float]:
 
 
 def summarize_layer_moderation(
-    study: Study,
     by_condition: dict[str, list[RunRecord]],
     needs: Instrument,
     *,
